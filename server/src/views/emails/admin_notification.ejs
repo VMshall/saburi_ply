@@ -1,0 +1,21 @@
+<h2 class="thank-you-title">New <%= type.charAt(0).toUpperCase() + type.slice(1) %> Submission Received</h2>
+<p class="thank-you-subtitle">Here are the details from the <%= type %> form:</p>
+
+<table class="data-table">
+    <% for (let [key, value] of Object.entries(data)) { %>
+        <% if (value && typeof value !=='object' ) { %>
+            <tr>
+                <th>
+                    <%= key.replace(/_/g, ' ' ).charAt(0).toUpperCase() + key.replace(/_/g, ' ' ).slice(1) %>
+                </th>
+                <td>
+                    <%= value %>
+                </td>
+            </tr>
+            <% } %>
+                <% } %>
+</table>
+
+<div class="message-box" style="margin-top: 30px;">
+    <p>Please follow up with this lead as soon as possible.</p>
+</div>

@@ -1,0 +1,23 @@
+<%
+    // Extract first name from full name
+    const firstName = data.name ? data.name.split(' ')[0] : 'there';
+    // Capitalize the type for display
+    const typeDisplay = type.charAt(0).toUpperCase() + type.slice(1);
+%>
+<h2 class="thank-you-title">Thank You <%= firstName %> for Your <%= typeDisplay %>!</h2>
+<p class="thank-you-subtitle">We've received your form submission and appreciate your interest in Saburi Ply. Our team is reviewing your details and will get back to you shortly.</p>
+
+<div class="message-box">
+    <p>Your enquiry is important to us. We typically respond within 24-48 business hours during normal working days.</p>
+</div>
+
+<!-- Next Steps -->
+<div class="next-steps">
+    <p class="next-steps-title">What Happens Next</p>
+    <ul class="next-steps-list">
+        <li><img src="cid:check_icon" alt="✓" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;" /> Our sales team will review your enquiry</li>
+        <li><img src="cid:check_icon" alt="✓" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;" /> We'll prepare a customized response for your needs</li>
+        <li><img src="cid:check_icon" alt="✓" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;" /> You'll receive a follow-up email with pricing and options</li>
+        <li><img src="cid:check_icon" alt="✓" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;" /> Contact us directly if you have any urgent questions</li>
+    </ul>
+</div>

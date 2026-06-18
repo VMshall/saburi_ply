@@ -1,0 +1,25 @@
+<p>You have received a new <strong>Quote Request</strong>.</p>
+<p><span class="label">Name:</span>
+    <%= data.name %>
+</p>
+<p><span class="label">Company:</span>
+    <%= data.company_name || 'N/A' %>
+</p>
+<p><span class="label">Email:</span>
+    <%= data.email %>
+</p>
+<p><span class="label">Phone:</span>
+    <%= data.phone_number %>
+</p>
+<p><span class="label">Inquiry Type:</span>
+    <%= data.inquiry_type %>
+</p>
+<p><span class="label">Product:</span>
+    <%= data.product_type || 'N/A' %>
+</p>
+<p><span class="label">Qty:</span>
+    <%= data.estimated_qty || 'N/A' %>
+</p>
+<p><span class="label">Requirements:</span><br />
+    <%= data.additional_requirements || 'N/A' %>
+</p>
