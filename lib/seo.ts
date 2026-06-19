@@ -46,3 +46,13 @@ export function buildProductMetadata(product: Product): Metadata {
 export function buildLocationMetadata(location: Location): Metadata {
   return buildMetadata(location.seo);
 }
+
+/** For the static content pages (about/gallery/contact/thank-you). `noindex` → robots
+ * `noindex, follow` (used by /thank-you). */
+export function buildPageMetadata(seo: Seo, opts?: { noindex?: boolean }): Metadata {
+  const meta = buildMetadata(seo);
+  if (opts?.noindex) {
+    meta.robots = { index: false, follow: true };
+  }
+  return meta;
+}

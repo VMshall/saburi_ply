@@ -80,5 +80,6 @@ export const LOCAL_BUSINESS = {
     "Saburi Ply is a trusted name and best plywood manufacturer and supplier in India, known for superior quality, innovation, and sustainable craftsmanship.",
   priceRange: "¥¥",
   openingHours: "Mo-Sa 10:00-18:00",
-  aggregateRating: { ratingValue: "4.8", reviewCount: "152" },
+  // aggregateRating intentionally removed — hardcoded ratings without real Review markup
+  // violate Google's structured-data policy. Re-add only when backed by genuine on-site reviews.
 } as const;

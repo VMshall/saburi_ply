@@ -1,4 +1,5 @@
 import type { Location } from "./types";
+import { LOCATION_BANNERS } from "./banners";
 
 /**
  * The 5 state/city location landing pages (§8). Body content (name/heading/pageHeaderTitle/
@@ -22,11 +23,6 @@ export const locations: Location[] = [
     pageHeaderTitle: "Best Plywood Andhra Pradesh",
     state: "Andhra Pradesh",
     areaServed: ["Andhra Pradesh", "Visakhapatnam"],
-    bannerImage: {
-      desktop: "/images/kerela-product-breadcrumb/desk-kerela-bread.webp",
-      tablet: "/images/kerela-product-breadcrumb/tab-kerela-bread.webp",
-      mobile: "/images/kerela-product-breadcrumb/mob-kerela-bread.webp",
-    },
     seo: {
       title: "Best Plywood Manufacturer and Supplier in Andhra Pradesh | Saburi Ply",
       description:
@@ -115,9 +111,12 @@ export const locations: Location[] = [
 
 const bySlug = new Map<string, Location>(locations.map((l) => [l.slug, l]));
 
-/** Accessor — single CMS-swap point (§8). Returns undefined for an unknown slug. */
+/** Accessor — single CMS-swap point (§8). Returns undefined for an unknown slug. Merges the
+ * PageHeader banner (data/banners.ts) unless the entry already sets its own. */
 export function getLocation(slug: string): Location | undefined {
-  return bySlug.get(slug);
+  const l = bySlug.get(slug);
+  if (!l) return undefined;
+  return l.bannerImage ? l : { ...l, bannerImage: LOCATION_BANNERS[slug] };
 }
 
 /** Ordered location slugs (drives generateStaticParams/sitemap in later phases). */

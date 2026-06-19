@@ -7,7 +7,7 @@ import { buildProductMetadata } from "@/lib/seo";
 // Thin SSG route over the shared ProductTemplate (§3/§4).
 export const dynamic = "force-static";
 
-const product = getProduct("marine-plywood-india");
+const product = getProduct("block-board-india");
 export const metadata: Metadata = product ? buildProductMetadata(product) : {};
 
 export default function Page() {

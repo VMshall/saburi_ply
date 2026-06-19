@@ -7,7 +7,7 @@ import { buildLocationMetadata } from "@/lib/seo";
 // Thin SSG route over the shared LocationTemplate (§3/§4).
 export const dynamic = "force-static";
 
-const location = getLocation("best-plywood-andhra-pradesh");
+const location = getLocation("plywood-dealers-bangalore");
 export const metadata: Metadata = location ? buildLocationMetadata(location) : {};
 
 export default function Page() {

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TopProgress } from "@/components/islands/TopProgress";
 
 /**
  * Client provider boundary (§3). Mirrors the old App.jsx provider stack MINUS:
@@ -16,6 +17,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <TooltipProvider>
+      <TopProgress />
       {children}
       <Toaster />
       <Sonner />

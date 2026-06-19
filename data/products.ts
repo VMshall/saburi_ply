@@ -1,4 +1,5 @@
 import type { Product } from "./types";
+import { PRODUCT_BANNERS } from "./banners";
 
 /**
  * The 22 product entries (§8). Content extracted verbatim from the legacy
@@ -26,11 +27,6 @@ export const products: Product[] = [
         "Saburi Ply is the best marine plywood manufacturer and supplier in India, offering high-quality, water-resistant plywood for durable and long-lasting performance.",
       keywords: "marine plywood india, waterproof plywood, marine grade plywood, boat plywood, coastal plywood",
       canonical: "/products/marine-plywood-india",
-    },
-    bannerImage: {
-      desktop: "/images/plywood-breadcrumb/desk-ply-bread4.webp",
-      tablet: "/images/plywood-breadcrumb/tab-ply-bread4.webp",
-      mobile: "/images/plywood-breadcrumb/mob-ply-bread4.webp",
     },
     gradePills: [
       { label: "IS: 710", iconKey: "award" },
@@ -1177,9 +1173,12 @@ export const products: Product[] = [
 
 const bySlug = new Map<string, Product>(products.map((p) => [p.slug, p]));
 
-/** Accessor — single CMS-swap point (§8). Returns undefined for an unknown slug. */
+/** Accessor — single CMS-swap point (§8). Returns undefined for an unknown slug. Merges the
+ * PageHeader banner (data/banners.ts) unless the entry already sets its own. */
 export function getProduct(slug: string): Product | undefined {
-  return bySlug.get(slug);
+  const p = bySlug.get(slug);
+  if (!p) return undefined;
+  return p.bannerImage ? p : { ...p, bannerImage: PRODUCT_BANNERS[slug] };
 }
 
 /** Ordered product slugs (drives generateStaticParams/sitemap in later phases). */

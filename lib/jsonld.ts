@@ -173,11 +173,9 @@ export function localBusinessSchema(opts?: {
     sameAs: LOCALBUSINESS_SAME_AS,
     priceRange: LOCAL_BUSINESS.priceRange,
     openingHours: LOCAL_BUSINESS.openingHours,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: LOCAL_BUSINESS.aggregateRating.ratingValue,
-      reviewCount: LOCAL_BUSINESS.aggregateRating.reviewCount,
-    },
+    // NOTE: NO aggregateRating. A hardcoded rating without real on-site Review markup violates
+    // Google's structured-data policy (manual-action risk). The legacy PageMeta LocalBusiness
+    // had none; the index.html one did — that hardcoded rating is intentionally dropped.
   };
   if (areaServed?.length) {
     schema.areaServed = areaServed.map((a) => ({ "@type": "Place", name: a }));
