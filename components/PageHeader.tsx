@@ -9,6 +9,18 @@ import type { ResponsiveImage } from "@/data/types";
 export function PageHeader({ bannerImage }: { bannerImage?: ResponsiveImage }) {
   return (
     <div className="relative isolate flex items-center h-[220px] sm:h-[280px] md:h-[340px] lg:h-[420px] 2xl:h-[450px]">
+      {/* P6 LCP: preload the banner per breakpoint so it isn't discovered late. These media
+          queries mirror the md/lg display breakpoints of the art-directed <img> variants below,
+          so exactly the one that will render is preloaded. Server-rendered per page, so each
+          route preloads its own banner. (The banner stays an art-directed <picture>-style set —
+          next/image can't art-direct, and it's the LCP, so manual preload is the right lever.) */}
+      {bannerImage && (
+        <>
+          <link rel="preload" as="image" href={bannerImage.mobile} media="(max-width: 767px)" fetchPriority="high" />
+          <link rel="preload" as="image" href={bannerImage.tablet} media="(min-width: 768px) and (max-width: 1023px)" fetchPriority="high" />
+          <link rel="preload" as="image" href={bannerImage.desktop} media="(min-width: 1024px)" fetchPriority="high" />
+        </>
+      )}
       <div className="absolute inset-0 -z-10 overflow-hidden rounded-none">
         {bannerImage ? (
           <>

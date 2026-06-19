@@ -1,4 +1,5 @@
 import { CheckCircle } from "lucide-react";
+import { SmartImage } from "@/components/SmartImage";
 
 type MissionVisionProps = {
   title?: string;
@@ -41,7 +42,7 @@ export function Mission({
             </ul>
           </div>
           <div className="relative rounded-2xl overflow-hidden shadow-lg max-w-lg">
-            <img src={imageSrc} alt={imageAlt} className="w-full h-full object-cover" />
+            <SmartImage src={imageSrc} alt={imageAlt} fill objectFit="cover" sizes="(max-width: 1024px) 100vw, 50vw" className="h-full w-full" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
         </div>
@@ -68,7 +69,7 @@ export function Vision({
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 items-center gap-10">
           <div className="relative rounded-2xl overflow-hidden shadow-lg max-w-lg">
-            <img src={imageSrc} alt={imageAlt} className="w-full h-full object-cover" />
+            <SmartImage src={imageSrc} alt={imageAlt} fill objectFit="cover" sizes="(max-width: 1024px) 100vw, 50vw" className="h-full w-full" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
           <div>

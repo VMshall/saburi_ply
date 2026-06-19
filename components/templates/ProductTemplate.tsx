@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Product } from "@/data/types";
 import { PageHeader } from "@/components/PageHeader";
 import { Icon } from "@/components/Icon";
+import { SmartImage } from "@/components/SmartImage";
 import { JsonLd } from "@/components/JsonLd";
 import { ReadMore } from "@/components/islands/ReadMore";
 import { SpecsTabs } from "@/components/islands/SpecsTabs";
@@ -68,12 +69,15 @@ export function ProductTemplate({ product }: { product: Product }) {
             {/* Left: product image */}
             <div className="bg-white rounded-xl shadow-[0_10px_30px_rgba(2,6,23,0.06)] ring-1 ring-gray-100 p-4 sticky top-24 self-start max-w-2xl mx-auto lg:mx-0">
               <div className="relative rounded-lg overflow-hidden">
-                <div className="aspect-[3/4] bg-gray-50 overflow-hidden rounded-lg flex items-center justify-center">
+                <div className="aspect-[3/4] bg-gray-50 overflow-hidden rounded-lg">
                   {images[0] && (
-                    <img
+                    <SmartImage
                       src={images[0].src}
                       alt={images[0].alt}
-                      className="w-full h-full object-contain"
+                      fill
+                      objectFit="contain"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="h-full w-full bg-gray-50"
                     />
                   )}
                 </div>

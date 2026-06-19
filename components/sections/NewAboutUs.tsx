@@ -1,4 +1,5 @@
 import { Factory, Users, Globe, CheckCircle, UserCheck } from "lucide-react";
+import { SmartImage } from "@/components/SmartImage";
 
 export function NewAboutUs() {
     const achievements = [
@@ -61,14 +62,13 @@ export function NewAboutUs() {
                         {/* Manufacturing Facility Image */}
                         <div className="relative">
                             <div className="aspect-video rounded-lg overflow-hidden">
-                                <img
+                                <SmartImage
                                     src="/images/aboutUs/About-Saburi.webp"
-                                    srcSet="/images/aboutUs/About-Saburi-800.webp 800w, /images/aboutUs/About-Saburi-1600.webp 1600w, /images/aboutUs/About-Saburi.webp 3333w"
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
                                     alt="Saburiply Premium Plywood Stacks"
-                                    loading="lazy"
-                                    decoding="async"
-                                    className="w-full h-full object-cover"
+                                    fill
+                                    objectFit="cover"
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
+                                    className="h-full w-full"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                                 <div className="absolute bottom-4 left-4 text-white">

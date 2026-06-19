@@ -1,8 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { PlywoodTypes } from "@/components/sections/PlywoodTypes";
-import { QuoteModal } from "@/components/dialogs/QuoteModal";
+
+// The quote modal has no above-the-fold/SEO content and only renders once a card is clicked, so
+// load it client-only (ssr:false) — keeps it out of the home's First-Load JS (§6).
+const QuoteModal = dynamic(
+  () => import("@/components/dialogs/QuoteModal").then((m) => ({ default: m.QuoteModal })),
+  { ssr: false },
+);
 
 /**
  * Couples the home PlywoodTypes grid with the page-level QuoteModal (the state lift that lived

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
+import { SmartImage } from "@/components/SmartImage";
 import { STATIC_BANNERS } from "@/data/banners";
 import { buildPageMetadata } from "@/lib/seo";
 import { MapPin, Building2, Users, TrendingUp, ArrowRight } from "lucide-react";
@@ -106,12 +107,13 @@ export default function NationalPresence() {
 
           {/* National Presence Map */}
           <div className="flex justify-center">
-            <img
+            <SmartImage
               src="/images/national-presence.webp"
               alt="Saburi Ply National Presence Map"
-              loading="lazy"
-              decoding="async"
-              className={cn("w-full max-w-[1080px] h-auto", "object-cover")}
+              aspectRatio="1/1"
+              objectFit="cover"
+              sizes="(max-width: 1080px) 100vw, 1080px"
+              className={cn("w-full max-w-[1080px]")}
             />
           </div>
 

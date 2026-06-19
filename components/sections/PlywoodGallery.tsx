@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight, ZoomIn } from "lucide-react";
+import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
 
 export function PlywoodGallery() {
@@ -90,12 +91,13 @@ export function PlywoodGallery() {
             <div className="aspect-square relative">
               {/* Image wrapper with overlay and text */}
               <div key={selectedImage} className="relative w-full h-full animate-in fade-in duration-1000">
-                <img
+                <SmartImage
                   src={galleryImages[selectedImage].src}
                   alt={galleryImages[selectedImage].title}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full group-hover:scale-105 transition-transform duration-500 object-cover"
+                  fill
+                  objectFit="cover"
+                  sizes="(max-width: 768px) 100vw, 450px"
+                  className="w-full h-full group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
@@ -151,12 +153,13 @@ export function PlywoodGallery() {
                   }`}
               >
                 <div className="aspect-square relative p-2">
-                  <img
+                  <SmartImage
                     src={image.src}
                     alt={image.title}
-                    loading="lazy"
-                    decoding="async"
-                    className={cn("w-full h-full", "object-contain")}
+                    fill
+                    objectFit="contain"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                    className={cn("w-full h-full")}
                   />
                   <div
                     className={`absolute inset-0 transition-all duration-300 ${selectedImage === index

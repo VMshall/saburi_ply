@@ -1,4 +1,5 @@
 import { Leaf, Recycle, ShieldCheck } from "lucide-react";
+import { SmartImage } from "@/components/SmartImage";
 
 export function GoGreen() {
   return (
@@ -44,11 +45,13 @@ export function GoGreen() {
             <div className="relative">
               <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-tr from-green-200/60 via-emerald-100 to-lime-200/60 blur-2xl" />
               <div className="aspect-[4/3] overflow-hidden rounded-3xl ring-1 ring-black/5 shadow-xl">
-                <img
+                <SmartImage
                   src="/images/Go green with Plywood.webp"
                   alt="Go Green with Plywood"
-                  className="h-full w-full object-cover"
-                  loading="lazy"
+                  fill
+                  objectFit="cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="h-full w-full"
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-black/10" />
               </div>

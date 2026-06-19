@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { SmartImage } from "@/components/SmartImage";
 import { DoorOpen, Frame, CheckCircle, ArrowRight } from "lucide-react";
 import { GiWoodBeam } from "react-icons/gi";
 import { SiHiveBlockchain } from "react-icons/si";
@@ -21,17 +22,17 @@ export function PlywoodTypes({
   const sectionRef = useRef<HTMLElement>(null);
 
   const categories = [
-    { id: 0, name: "Plywood", icon: GiWoodBeam, image: "images/plywoodRange/Plywood.webp", description: "Stack of premium plywood sheets with rich natural grains and an inset of elegant interiors. Durable, termite-proof, and fire-resistant plywood engineered through QuadPro technology for strength and smooth finish.", features: ["Durable ", "Eco-Safe", "Fire-Resistant", "Termite-Proof"], applications: ["Furniture ", "Wall Panels", "Flooring", "Partition"], thickness: "4mm–25mm", sizes: "10x4 ft., 8x4 ft., 7x4 ft., etc", highlight: "Most Popular", brochure: "/brochure/plywood.pdf" },
+    { id: 0, name: "Plywood", icon: GiWoodBeam, image: "/images/plywoodRange/Plywood.webp", description: "Stack of premium plywood sheets with rich natural grains and an inset of elegant interiors. Durable, termite-proof, and fire-resistant plywood engineered through QuadPro technology for strength and smooth finish.", features: ["Durable ", "Eco-Safe", "Fire-Resistant", "Termite-Proof"], applications: ["Furniture ", "Wall Panels", "Flooring", "Partition"], thickness: "4mm–25mm", sizes: "10x4 ft., 8x4 ft., 7x4 ft., etc", highlight: "Most Popular", brochure: "/brochure/plywood.pdf" },
 
-    { id: 1, name: "Blockboard", icon: SiHiveBlockchain, image: "images/plywoodRange/Blockboard.webp", description: "High-density blockboard used for wardrobes and cabinets. Dimensional stability with high screw-holding strength and anti-warp treatment.", features: ["Stable ", "Strong", "Seasoned ", "Long-Lasting"], applications: ["Cabinets", "Shelves", "Doors", "Interiors"], thickness: "19mm, 25mm", sizes: "10x4 ft., 8x4 ft., 7x4 ft., etc", highlight: "Best Value", brochure: "/brochure/blockboard.pdf" },
+    { id: 1, name: "Blockboard", icon: SiHiveBlockchain, image: "/images/plywoodRange/Blockboard.webp", description: "High-density blockboard used for wardrobes and cabinets. Dimensional stability with high screw-holding strength and anti-warp treatment.", features: ["Stable ", "Strong", "Seasoned ", "Long-Lasting"], applications: ["Cabinets", "Shelves", "Doors", "Interiors"], thickness: "19mm, 25mm", sizes: "10x4 ft., 8x4 ft., 7x4 ft., etc", highlight: "Best Value", brochure: "/brochure/blockboard.pdf" },
 
-    { id: 2, name: "Flush Door", icon: DoorOpen, image: "images/plywoodRange/Flush-Door.webp", description: "Modern flush door at a stylish DoorOpen entry. BWP grade doors offering superior strength, smooth finish, and termite resistance.", features: ["BWP ", "Termite-Proof", "Sturdy", "Elegant"], applications: ["Main Door", "Bedrooms", "Offices", "Hotels"], thickness: "25mm–40mm", sizes: "Upto 10 Ft.", highlight: "Smooth Finish", brochure: "/brochure/flushdoor.pdf" },
+    { id: 2, name: "Flush Door", icon: DoorOpen, image: "/images/plywoodRange/Flush-Door.webp", description: "Modern flush door at a stylish DoorOpen entry. BWP grade doors offering superior strength, smooth finish, and termite resistance.", features: ["BWP ", "Termite-Proof", "Sturdy", "Elegant"], applications: ["Main Door", "Bedrooms", "Offices", "Hotels"], thickness: "25mm–40mm", sizes: "Upto 10 Ft.", highlight: "Smooth Finish", brochure: "/brochure/flushdoor.pdf" },
 
-    { id: 3, name: "Shuttering Ply", icon: Frame, image: "images/plywoodRange/Shuttering-Ply.webp", description: "Construction site scene with shuttering ply used for concrete framework. High-density ply with mirror-finish surface for repeated concrete use.", features: ["Reusable", "Heavy-Duty", "Smooth", "Weather-Resistant"], applications: ["Beams", "Columns", "Slabs", "Framework"], thickness: "9mm–25mm", mass: "30–51kg variants", sizes: "8x4 ft.", highlight: "Weather-Resistant", brochure: "/brochure/shuttering.pdf" },
+    { id: 3, name: "Shuttering Ply", icon: Frame, image: "/images/plywoodRange/Shuttering-Ply.webp", description: "Construction site scene with shuttering ply used for concrete framework. High-density ply with mirror-finish surface for repeated concrete use.", features: ["Reusable", "Heavy-Duty", "Smooth", "Weather-Resistant"], applications: ["Beams", "Columns", "Slabs", "Framework"], thickness: "9mm–25mm", mass: "30–51kg variants", sizes: "8x4 ft.", highlight: "Weather-Resistant", brochure: "/brochure/shuttering.pdf" },
 
-    { id: 4, name: "Chipboard", icon: TfiBlackboard, image: "images/plywoodRange/Chipboard.webp", description: "Close-up of chipboard texture with modern furniture made from it. High-density, smooth surface boards with uniform core and excellent machinability", features: ["Dense", "Smooth", "Durable", "Versatile"], applications: ["Cabinets", "Tables", "Shelves", "Partitions"], thickness: "9mm–25mm", sizes: "8x6 ft., 9x6 ft.", highlight: "Versatile", brochure: "/brochure/chipboard.pdf" },
+    { id: 4, name: "Chipboard", icon: TfiBlackboard, image: "/images/plywoodRange/Chipboard.webp", description: "Close-up of chipboard texture with modern furniture made from it. High-density, smooth surface boards with uniform core and excellent machinability", features: ["Dense", "Smooth", "Durable", "Versatile"], applications: ["Cabinets", "Tables", "Shelves", "Partitions"], thickness: "9mm–25mm", sizes: "8x6 ft., 9x6 ft.", highlight: "Versatile", brochure: "/brochure/chipboard.pdf" },
 
-    { id: 5, name: "WPC / PVC Boards", icon: PiChalkboardFill, image: "images/plywoodRange/WPC-doors.webp", description: "Waterproof boards shown in kitchen and bathroom contexts. 100% waterproof, termite-proof, eco-friendly panels with lifetime warranty.", features: ["Waterproof", "Termite-Proof", "Recyclable", "Paintable"], applications: ["Kitchen", "Bathroom", "Ceiling", "Furniture"], thickness: "6mm–18mm", sizes: "8 x 4 ft.", highlight: "Lifetime Warranty", brochure: "/brochure/wpc-pvc.pdf" },
+    { id: 5, name: "WPC / PVC Boards", icon: PiChalkboardFill, image: "/images/plywoodRange/WPC-doors.webp", description: "Waterproof boards shown in kitchen and bathroom contexts. 100% waterproof, termite-proof, eco-friendly panels with lifetime warranty.", features: ["Waterproof", "Termite-Proof", "Recyclable", "Paintable"], applications: ["Kitchen", "Bathroom", "Ceiling", "Furniture"], thickness: "6mm–18mm", sizes: "8 x 4 ft.", highlight: "Lifetime Warranty", brochure: "/brochure/wpc-pvc.pdf" },
   ];
 
   useEffect(() => {
@@ -89,7 +90,7 @@ export function PlywoodTypes({
           <div className="lg:col-span-8 order-1 lg:order-2" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
             <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-500">
               <div className="aspect-video relative overflow-hidden">
-                <img key={activeProduct.id} src={activeProduct.image} alt={activeProduct.name} loading="lazy" decoding="async" className={cn("w-full h-full transition-all duration-500 ease-in-out", "object-cover")} />
+                <SmartImage key={activeProduct.id} src={activeProduct.image} alt={activeProduct.name} fill objectFit="cover" sizes="(max-width: 1024px) 100vw, 66vw" className="h-full w-full" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">
                   <div className="flex items-center space-x-2 mb-2"><ActiveIcon className="h-6 w-6" /><span className="bg-primary px-2 py-1 rounded text-xs font-medium">{activeProduct.highlight}</span></div>

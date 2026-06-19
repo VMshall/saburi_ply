@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
 
 /**
@@ -33,16 +34,13 @@ function GalleryImage({
 }) {
   return (
     <div className="w-full h-56 cursor-pointer overflow-hidden" onClick={onClick}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <SmartImage
         src={src}
         alt={alt}
-        loading="lazy"
-        decoding="async"
-        className={cn(
-          "w-full h-full hover:scale-105 transition-transform duration-500",
-          "object-cover",
-        )}
+        fill
+        objectFit="cover"
+        sizes="(max-width: 768px) 50vw, 25vw"
+        className={cn("w-full h-full hover:scale-105 transition-transform duration-500")}
       />
     </div>
   );

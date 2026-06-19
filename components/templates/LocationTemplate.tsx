@@ -1,5 +1,6 @@
 import type { Location } from "@/data/types";
 import { PageHeader } from "@/components/PageHeader";
+import { SmartImage } from "@/components/SmartImage";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbSchema, localBusinessSchema } from "@/lib/jsonld";
 
@@ -40,10 +41,13 @@ export function LocationTemplate({ location }: { location: Location }) {
               <div className="relative rounded-lg overflow-hidden">
                 <div className="aspect-[3/4] bg-gray-50 overflow-hidden rounded-lg flex items-center justify-center">
                   {images[0] && (
-                    <img
+                    <SmartImage
                       src={images[0].src}
                       alt={images[0].alt}
-                      className="w-full h-full object-contain"
+                      fill
+                      objectFit="contain"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="h-full w-full bg-gray-50"
                     />
                   )}
                 </div>
