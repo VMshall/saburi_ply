@@ -2,7 +2,7 @@
 
 **What this is:** a self-contained prompt that instructs an AI architect to produce a full
 implementation plan for migrating this repo (Saburi Ply marketing site) from Vite + React
-Router 6 (SPA + react-snap) to **Next.js (App Router) on Vercel with hybrid SSG/ISR + SSR**.
+Router 6 (SPA + react-snap) to **Next.js (App Router) on Vercel — pure SSG (static) for in-app pages; the blog stays on external WordPress**.
 
 **How to run it (recommended multi-session flow):**
 1. Open a **fresh** Claude Code session in this repo.
@@ -27,19 +27,35 @@ from assumptions. You do not invent APIs or hand-wave the hard parts.
 # OBJECTIVE
 Produce a complete, staged IMPLEMENTATION PLAN to migrate the "Saburi Ply" marketing
 website from its current Vite + React Router 6 SPA (with react-snap pre-rendering) to
-Next.js {{NEXT_VERSION = latest stable, App Router}}, deployed on Vercel using a hybrid
-SSG/ISR + SSR rendering model. The deliverable is a PLAN, not implementation code. Short
+Next.js {{NEXT_VERSION = latest stable, App Router}}, deployed on Vercel using a static-first
+(pure SSG) rendering model for all in-app pages (the blog remains on external WordPress; ISR/CMS deferred). The deliverable is a PLAN, not implementation code. Short
 illustrative config/pseudocode snippets are welcome where they clarify a step; do not write
 the full migration.
 
 # LOCKED DECISIONS (do not re-litigate these — design within them)
 - Framework: Next.js {{NEXT_VERSION}}, App Router.
 - Host: Vercel (Node runtime; per-PR preview deployments; instant rollback via deployments).
-- Rendering: hybrid SSG/ISR for content + SSR where genuinely dynamic. Static export
-  (`output: 'export'`) is REJECTED. Therefore `next.config` redirects()/rewrites,
-  middleware, ISR (time-based + on-demand revalidation), and `next/image` optimization are
-  all AVAILABLE — use them deliberately.
+- Rendering: PURE SSG (static) for all in-app pages, built from local typed data modules — no
+  ISR/CMS machinery now (ISR documented only as a future option; no SSR needed — there are no
+  dynamic in-app routes). Static export (`output: 'export'`) is still REJECTED (we keep Vercel's
+  Node runtime), so `next.config` redirects()/rewrites, middleware, and `next/image` optimization
+  remain AVAILABLE — use them. The blog is NOT in-app: it stays on external WordPress (see
+  Pre-Resolved Decisions).
 - Backend stays external and untouched (see current state).
+
+# PRE-RESOLVED DECISIONS (answered with the stakeholder during scoping — treat as SETTLED; do NOT re-ask. These SUPERSEDE any conflicting framing elsewhere in this prompt.)
+
+**Q1 — Which is the real blog?** The repo shows three conflicting pictures: (a) 5 posts hardcoded in `Blog.jsx`/`BlogDetails.jsx`, (b) ~35 blog URLs in `public/sitemap.xml`, (c) an nginx proxy `/blogs/` → a Node service on `127.0.0.1:9000`.
+→ DECISION: The real blog is a live **external WordPress** site serving ALL of `/blog/*` (the index + the ~35 real posts in sitemap.xml) — verified in production (HTML carries `generator: WordPress`; slugs absent from the React code return real WP articles). The `:9000` service IS that WordPress backend; `/blogs/` (plural) is a legacy alias that 301s into `/blog/`. The 5 hardcoded React posts (+ the in-app `/blog` routes + `/blog/1..5` redirects) are DEAD CODE, never served in production. → Keep the blog on WordPress, preserve all ~35 `/blog/<slug>/` URLs + meta, and DELETE the React blog. (Routing mechanism in Q3.)
+
+**Q2 — Content-management direction: pure SSG vs ISR + CMS?** All in-app page content (the ~22 product pages + 5 location/landing pages) is currently hardcoded in components.
+→ DECISION: **Pure SSG, no ISR/CMS in this migration.** Pre-render the product + location pages statically from local **typed TS data modules** (move content out of inline JSX into typed data). No ISR, no revalidation machinery, no CMS — document ISR/CMS only as a *future* option, and structure the data layer so a CMS could slot in later without re-architecting. Rationale: SSG and ISR are identical to Googlebot, this content rarely changes, and the content-velocity surface (the blog) is already WordPress — so ISR/CMS would add complexity and delay launch with zero SEO gain. (Applies to in-app pages only; the blog is WordPress, not local SSG data.)
+
+**Q3 — DNS cutover: two paths live only on the VPS nginx and would break when DNS points at Vercel** — `/blogs/*` (the `:9000` WordPress service) and `/saburi-panel-admin/*` (a separate admin React app).
+→ DECISION: Split by path — do NOT subdomain the blog.
+  • `/blog/*` (+ legacy `/blogs/*` → 301 to `/blog/*`): KEEP on the apex as a subdirectory, served via a **Vercel rewrite to the WordPress origin** (give WP a stable origin host on the VPS; Vercel rewrites `/blog/:path*` → that origin). Preserves all ~35 ranking URLs unchanged — subdirectory beats subdomain, and avoids re-301'ing aged pages. WP must emit canonicals as `https://www.saburiply.com/blog/...` when reached via the origin host (set WP_HOME/WP_SITEURL; honor X-Forwarded-Host).
+  • `/saburi-panel-admin/*` (internal admin React app — noindex, zero SEO value): move to subdomain **`admin.saburiply.com`** + 301 the old path; add that origin to the `apiv2` CORS allowlist.
+  • Fallback if the Vercel→WP rewrite proves impractical: keep nginx as the edge for `/blog/*` and `/saburi-panel-admin/*` only and proxy everything else to Vercel (preserves URLs but keeps a two-system edge — acceptable stopgap, not the target).
 
 # PRIMARY SUCCESS CRITERION (read first — this is the top constraint)
 This is an SEO- and performance-driven marketing site. The business goal is to RANK #1 in the
@@ -93,6 +109,16 @@ merely easiest to build.
   save-data submissions. The API's CORS already allows saburiply.com, www, dev, and
   localhost:8080/3000/5173 — handle the new Vercel preview/prod origins via a Next Route Handler
   proxy (preferred) rather than widening that allowlist.
+- BLOG (VERIFIED LIVE IN PRODUCTION 2026-06-19 — the repo is misleading here): the real blog is
+  a SEPARATE WordPress site serving ALL of `/blog/*` — the `/blog/` index AND the ~35 real posts
+  listed in `public/sitemap.xml` (production HTML carries `generator: WordPress`). Production
+  nginx routes `/blog/*` (plus the legacy `/blogs/` alias → `127.0.0.1:9000`) to WordPress
+  BEFORE the SPA is reached. The 5 posts hardcoded in `client/pages/Blog.jsx` + `BlogDetails.jsx`
+  (and the `/blog` + `/blog/:slug` routes in App.jsx, and the `/blog/1..5` redirects) are DEAD
+  CODE — never served in prod; they only render on the local dev server. Do NOT treat the React
+  blog as the blog. The ~35 `/blog/<slug>/` URLs + their content/meta are real, ranking SEO
+  assets that MUST be preserved. (The repo's root `saburiply.com` nginx file is STALE and does
+  not show the `/blog/`→WordPress routing.)
 - Build/deploy: `vite.config.ts` → base "/", dev port 8080, build to `dist/spa` with manual
   vendor chunk splitting; `build:client` then `react-snap` as postbuild. Deployed two ways
   today: an nginx VPS serving `/var/www/saburiply_client/dist/spa` (canonical; this is where
@@ -116,15 +142,14 @@ merely easiest to build.
 1. App Router structure — confirm the App Router layout (route groups, shared layouts,
    loading.tsx/error.tsx) and how the current lazy + Suspense + useTransition loader UX maps
    onto it (default Next streaming + loading.tsx).
-2. Rendering strategy PER ROUTE GROUP — classify every route as SSG / ISR / SSR / client.
-   (Marketing + product + state/city landing pages → SSG or ISR; blog index & posts →
-   ISR; form pages → static shell + client islands.) Output as a table. Default to SSG;
-   choose ISR only where content can change.
-3. ISR & runtime details — for every ISR route, specify a revalidation window AND whether
-   on-demand revalidation (revalidatePath/Tag) is warranted; choose node vs edge runtime per
-   dynamic segment; and decide where the legacy `.php` 301s live (next.config `redirects()`
-   — now available — vs a thin proxy). Justify revalidation windows against how often that
-   content actually changes (raise as an OPEN QUESTION if unknown).
+2. Rendering per route group — per Pre-Resolved Decision Q2, ALL in-app routes are PURE SSG
+   (static, from typed data modules); NO ISR. Form pages = static SSG shell + client islands.
+   The blog is NOT in-app (external WordPress via rewrite — see Q1/Q3). Still produce the full
+   route table (every route → Next path → SSG → notes) so coverage is explicit.
+3. Runtime details — ISR is DEFERRED (pure SSG now, per Q2): document where ISR / on-demand
+   revalidation WOULD apply if a CMS is adopted later, but build none of it. Still decide:
+   node vs edge runtime for the form Route Handler proxy, and where the legacy `.php` 301s live
+   (next.config `redirects()`).
 4. SEO/meta + STRUCTURED DATA migration —
    (a) Meta: react-helmet-async + PageMeta + metaConfig.js → Next Metadata API /
        `generateMetadata` for title/description/canonical/OG/Twitter per route, losing none of
@@ -161,14 +186,24 @@ merely easiest to build.
     splitting); ESLint/Prettier; env strategy (`NEXT_PUBLIC_*` for the API base URL); Vercel
     project setup (env vars per environment, domains, preview deploys, optional
     @vercel/analytics + Speed Insights).
+11. BLOG handling (RESOLVED — see Pre-Resolved Decisions Q1 & Q3) — leave WordPress in place;
+    serve `/blog/*` on the apex via a Vercel rewrite to the WP origin; preserve every
+    `/blog/<slug>/` URL + meta; DELETE the dead React blog (`Blog.jsx`/`BlogDetails.jsx` + the
+    in-app `/blog` routes) so it can't shadow WP. Detail the rewrite, the WP canonical/origin-host
+    config (WP_HOME/WP_SITEURL + X-Forwarded-Host), and the `/blogs/*`→`/blog/*` 301. (Headless-WP
+    and MDX migration are explicitly deferred as future options — NOT part of this migration.)
 
 # HIGHEST-RISK AREAS (address each explicitly in the plan)
 - Redirect/SEO parity (the `.php` 301 map + in-app Navigate redirects) — the single biggest risk.
 - Per-page meta correctness across ~43 pages (helmet → Metadata API).
-- ISR correctness — stale content / wrong revalidation window; on-demand revalidation gaps.
+- WordPress-origin correctness — canonicals/links must resolve to `www.saburiply.com/blog/...`
+  when WP is reached via the rewrite origin host (else duplicate content / wrong canonical).
 - Form submissions to the external API + CORS/origin under Vercel (allowlist vs proxy).
 - `next/image` vs existing markup → layout shift / CLS regressions.
 - Domain & redirect CUTOVER to Vercel (DNS, www canonicalization, no redirect loops).
+- Blog (`/blog/*`) is live external WordPress with ~35 ranking posts — mishandling it (serving
+  the dead React stubs, dropping URLs, or breaking the proxy/rewrite to WP) would tank a large
+  block of indexed pages.
 
 # WORKING METHOD
 - First, verify the ground truth against the actual repo. Read at least: `client/App.jsx`,
@@ -176,12 +211,14 @@ merely easiest to build.
   `vite.config.ts`, `package.json` (`reactSnap.include`), the root `saburiply.com` nginx file,
   one product page, one form component, `Blog.jsx` + `BlogDetails.jsx`, and
   `public/{sitemap.xml,robots.txt}`. Note any drift from the facts above.
-- Determine whether blog/product content is hardcoded in components or fetched — this decides
-  SSG vs ISR and whether a CMS is a real future need. Raise as an OPEN QUESTION if unclear.
+- The BLOG is external WordPress (Q1) — do NOT plan it from the React stubs. Product + location
+  page content is hardcoded/static → PURE SSG (Q2); no ISR. Move that content into typed TS data
+  modules as part of the migration.
 - Build a COMPLETE route + redirect inventory from App.jsx and the nginx file before planning.
 - State assumptions explicitly; cite evidence as `file:path` (with line numbers where useful).
-- Where a decision needs business/ops input (ISR revalidation windows, whether the blog needs
-  a CMS, Vercel plan/limits), raise it as an OPEN QUESTION rather than guessing.
+- Where a decision genuinely needs business/ops input (Vercel plan/limits, the WordPress origin-
+  host setup), raise it as an OPEN QUESTION — but do NOT re-ask anything already settled in
+  Pre-Resolved Decisions.
 - Do not invent Next.js or Vercel APIs; rely on documented stable features for {{NEXT_VERSION}}.
 
 # REQUIRED DELIVERABLE STRUCTURE
@@ -219,13 +256,15 @@ merely easiest to build.
 - [ ] Structured data (JSON-LD) specified per template (Product / LocalBusiness / Article /
       BreadcrumbList / FAQ / Organization) as an active ranking lever, not merely preserved.
 - [ ] Core Web Vitals targets set (LCP/CLS/INP); next/image used on all significant imagery.
-- [ ] Rendering mode per route is justified; ISR windows tied to real content-change frequency.
+- [ ] All in-app routes are SSG (per Q2); ISR/CMS not built (only documented as future).
 - [ ] Backend untouched; forms still submit to the same external API (direct or proxied).
+- [ ] `/blog/*` handled as live external WordPress (all ~35 URLs + meta preserved); the dead
+      React blog (`Blog.jsx`/`BlogDetails.jsx` + in-app `/blog` routes) is removed, not rebuilt.
 - [ ] Plan is phased, each phase shippable and reversible via Vercel previews.
 - [ ] Assumptions and open questions are explicit; claims cite files.
 
 # PARAMETERS (set these before running; defaults in brackets)
 - {{NEXT_VERSION}}     = [latest stable Next.js, App Router]
-- {{DEPLOY_TARGET}}    = Vercel — hybrid SSG/ISR + SSR (LOCKED; not static export)
+- {{DEPLOY_TARGET}}    = Vercel, Node runtime — PURE SSG for in-app pages (NOT static export; ISR/CMS deferred); blog stays on external WordPress via rewrite
 - {{TS_STRICTNESS}}    = [migrate to TypeScript strict incrementally]
 - {{TIMELINE_OR_TEAM}} = [unspecified — give a generic effort estimate]

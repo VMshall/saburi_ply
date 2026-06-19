@@ -2,7 +2,16 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./client/**/*.{ts,tsx,js,jsx}"],
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx,js,jsx}",
+    "./hooks/**/*.{ts,tsx,js,jsx}",
+    "./lib/**/*.{ts,tsx,js,jsx}",
+    "./data/**/*.{ts,tsx}",
+    // Legacy SPA still scanned during the phased migration (no live classes lost as
+    // pages are ported); remove once client/ is fully migrated.
+    "./client/**/*.{ts,tsx,js,jsx}",
+  ],
   prefix: "",
   theme: {
     container: {
