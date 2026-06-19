@@ -22,6 +22,11 @@ export const locations: Location[] = [
     pageHeaderTitle: "Best Plywood Andhra Pradesh",
     state: "Andhra Pradesh",
     areaServed: ["Andhra Pradesh", "Visakhapatnam"],
+    bannerImage: {
+      desktop: "/images/kerela-product-breadcrumb/desk-kerela-bread.webp",
+      tablet: "/images/kerela-product-breadcrumb/tab-kerela-bread.webp",
+      mobile: "/images/kerela-product-breadcrumb/mob-kerela-bread.webp",
+    },
     seo: {
       title: "Best Plywood Manufacturer and Supplier in Andhra Pradesh | Saburi Ply",
       description:

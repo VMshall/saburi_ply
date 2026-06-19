@@ -5,6 +5,8 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { JsonLd } from "@/components/JsonLd";
+import { organizationSchema, websiteSchema } from "@/lib/jsonld";
 
 /**
  * Root layout — owns <html>/<body>, sitewide <head> (Metadata API), the provider
@@ -76,49 +78,8 @@ export const metadata: Metadata = {
   },
 };
 
-// Sitewide LocalBusiness structured data, preserved verbatim from index.html so there is
-// zero JSON-LD regression at the foundation stage. P3 introduces the reusable server
-// <JsonLd> component (Organization + WebSite sitewide) and reconciles this block.
-const localBusinessJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  name: "Saburi Ply",
-  image: "https://www.saburiply.com/images/saburiLogo-200.webp",
-  "@id": "https://www.saburiply.com/",
-  url: "https://www.saburiply.com/",
-  description:
-    "Saburi Ply is a trusted name and best plywood manufacturer and supplier in India, known for superior quality, innovation, and sustainable craftsmanship.",
-  telephone: "+91-1800-313-666000",
-  email: "info@saburiply.com",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress:
-      "New Town Square, Unit 3A, Atghora Rajarhat, Chinar Park Crossing",
-    addressLocality: "Kolkata",
-    postalCode: "700136",
-    addressRegion: "West Bengal",
-    addressCountry: "IN",
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: 22.623955681376508,
-    longitude: 88.44261142024031,
-  },
-  sameAs: [
-    "https://maps.app.goo.gl/mAXnSeaHcvxy8Enr6",
-    "https://www.facebook.com/saburiply",
-    "https://www.instagram.com/saburiply/",
-    "https://www.youtube.com/@saburiplywood",
-    "https://www.linkedin.com/in/saburi-ply-347865308/",
-  ],
-  priceRange: "¥¥",
-  openingHours: "Mo-Sa 10:00-18:00",
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "4.8",
-    reviewCount: "152",
-  },
-};
+// Sitewide structured data is built by lib/jsonld.ts (Organization + WebSite, §6). The former
+// inlined LocalBusiness moves to page level — home / contact / location pages.
 
 export default function RootLayout({
   children,
@@ -144,13 +105,9 @@ export default function RootLayout({
           <Footer />
         </Providers>
 
-        {/* Sitewide structured data (preserved from index.html) */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(localBusinessJsonLd),
-          }}
-        />
+        {/* Sitewide structured data (§6): Organization + WebSite. LocalBusiness now lives on
+            home / contact / location pages. */}
+        <JsonLd data={[organizationSchema(), websiteSchema()]} />
 
         {/*
           Analytics / tag managers — ported from index.html via next/script.

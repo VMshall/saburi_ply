@@ -57,6 +57,13 @@ export interface ProductImage {
   alt: string;
 }
 
+/** Responsive background image for the PageHeader banner (desktop/tablet/mobile sources). */
+export interface ResponsiveImage {
+  desktop: string;
+  tablet: string;
+  mobile: string;
+}
+
 export interface Product {
   slug: string;
   /** H2 brand block, e.g. "Saburi Gold (IS: 710)". */
@@ -65,6 +72,9 @@ export interface Product {
   heading: string;
   category: ProductCategory;
   seo: Seo;
+  /** PageHeader banner background (from the legacy title→image map). Optional: P3 populates
+   * the demo entries; P4 backfills the rest. Absent → PageHeader falls back to a gradient. */
+  bannerImage?: ResponsiveImage;
   /** Grade pills under the H1 (omit/empty when the source page has none). */
   gradePills: GradePill[];
   /** Intro prose (the "ReadMore"/premium block); may contain inline HTML (<strong>). */
@@ -93,6 +103,8 @@ export interface Location {
   city?: string;
   /** Cities/regions served — drives `areaServed` on the LocalBusiness JSON-LD (§6). */
   areaServed: string[];
+  /** PageHeader banner background (P3 populates the demo entry; P4 backfills the rest). */
+  bannerImage?: ResponsiveImage;
   seo: Seo;
   /** Rendered intro prose block (HTML: paragraphs, partner heading, bullet list). */
   introHtml: string;

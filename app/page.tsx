@@ -1,4 +1,6 @@
 import { Hero } from "@/components/Hero";
+import { JsonLd } from "@/components/JsonLd";
+import { localBusinessSchema } from "@/lib/jsonld";
 
 // Pure SSG (§3). No metadata here — the home/default title, description, OG, canonical (/)
 // are inherited from app/layout.tsx.
@@ -42,6 +44,9 @@ export default function HomePage() {
           </a>
         </div>
       </section>
+
+      {/* Home LocalBusiness signal (§6) — preserved from the former sitewide index.html block. */}
+      <JsonLd data={localBusinessSchema()} />
     </div>
   );
 }

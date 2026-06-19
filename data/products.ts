@@ -27,6 +27,11 @@ export const products: Product[] = [
       keywords: "marine plywood india, waterproof plywood, marine grade plywood, boat plywood, coastal plywood",
       canonical: "/products/marine-plywood-india",
     },
+    bannerImage: {
+      desktop: "/images/plywood-breadcrumb/desk-ply-bread4.webp",
+      tablet: "/images/plywood-breadcrumb/tab-ply-bread4.webp",
+      mobile: "/images/plywood-breadcrumb/mob-ply-bread4.webp",
+    },
     gradePills: [
       { label: "IS: 710", iconKey: "award" },
       { label: "Marine GRADE", iconKey: "droplets" },
