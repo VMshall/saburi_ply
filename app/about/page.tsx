@@ -7,7 +7,7 @@ import { ProcessQuality } from "@/components/sections/ProcessQuality";
 import { PlywoodGallery } from "@/components/sections/PlywoodGallery";
 import { GoGreen } from "@/components/sections/GoGreen";
 import { Mission, Vision } from "@/components/sections/MissionVision";
-import Link from "next/link";
+import { BecomeOurPartner } from "@/components/sections/BecomeOurPartner";
 
 export const dynamic = "force-static";
 export const metadata: Metadata = buildPageMetadata({
@@ -27,14 +27,7 @@ export default function AboutPage() {
       <GoGreen />
       <Mission />
       <Vision />
-      {/* P5: restore <BecomeOurPartner/> lead form (deferred — heavy form, moves to the forms phase) */}
-      <section className="py-12 sm:py-16 bg-gray-50 text-center">
-        <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-2xl sm:text-3xl font-bold text-primary tracking-wide">Partner with Saburi Ply</h2>
-          <p className="mt-3 text-gray-600">Become a dealer, architect or interior-design partner — our team will get you started.</p>
-          <Link href="/contact" className="mt-6 inline-flex items-center justify-center h-12 rounded-full px-8 bg-primary text-white hover:bg-primary/90 transition-colors font-medium">Get in Touch</Link>
-        </div>
-      </section>
+      <BecomeOurPartner />
     </div>
   );
 }

@@ -35,8 +35,8 @@ export function ContactForm() {
     };
 
     try {
-      // P5: route via same-origin /api/forms/contact proxy
-      const response = await fetch("https://apiv2.saburiply.com/api/web/v1/contact-us", {
+      // Same-origin proxy (§8) → forwarded to apiv2 server-side.
+      const response = await fetch("/api/forms/contact-us", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

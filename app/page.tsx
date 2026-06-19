@@ -1,6 +1,7 @@
 import { Hero } from "@/components/Hero";
 import { JsonLd } from "@/components/JsonLd";
 import { localBusinessSchema } from "@/lib/jsonld";
+import { EnquiryModal } from "@/components/dialogs/EnquiryModal";
 
 // Pure SSG (§3). No metadata here — the home/default title, description, OG, canonical (/)
 // are inherited from app/layout.tsx.
@@ -47,6 +48,9 @@ export default function HomePage() {
 
       {/* Home LocalBusiness signal (§6) — preserved from the former sitewide index.html block. */}
       <JsonLd data={localBusinessSchema()} />
+
+      {/* Lead-capture enquiry modal (auto-shows on scroll/delay), restored in P5 → proxy. */}
+      <EnquiryModal />
     </div>
   );
 }

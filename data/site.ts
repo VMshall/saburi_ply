@@ -4,7 +4,7 @@
  * LocalBusiness on /contact + location pages).
  *
  * Ported verbatim from client/components/PageMeta.jsx (Organization, contactPoint, address)
- * and index.html (LocalBusiness: geo, aggregateRating, openingHours, social profiles).
+ * and index.html (LocalBusiness: geo, openingHours, social profiles).
  */
 
 export const SITE_URL = "https://www.saburiply.com";
@@ -80,6 +80,4 @@ export const LOCAL_BUSINESS = {
     "Saburi Ply is a trusted name and best plywood manufacturer and supplier in India, known for superior quality, innovation, and sustainable craftsmanship.",
   priceRange: "¥¥",
   openingHours: "Mo-Sa 10:00-18:00",
-  // aggregateRating intentionally removed — hardcoded ratings without real Review markup
-  // violate Google's structured-data policy. Re-add only when backed by genuine on-site reviews.
 } as const;

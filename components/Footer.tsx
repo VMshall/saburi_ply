@@ -27,6 +27,24 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FaWhatsapp } from "react-icons/fa";
+import dynamic from "next/dynamic";
+
+// Lazy-load the lead dialogs (restored P5) so they don't bloat the sitewide Footer bundle —
+// each becomes its own chunk, fetched when the Footer mounts (matches the legacy React.lazy).
+const DealershipDialog = dynamic(() =>
+  import("@/components/dialogs/DealershipDialog").then((m) => ({ default: m.DealershipDialog })),
+);
+const MobileQuoteForm = dynamic(() =>
+  import("@/components/dialogs/MobileQuoteForm").then((m) => ({ default: m.MobileQuoteForm })),
+);
+const InteriorDesignerDialog = dynamic(() =>
+  import("@/components/dialogs/InteriorDesignerDialog").then((m) => ({
+    default: m.InteriorDesignerDialog,
+  })),
+);
+const ArchitectDialog = dynamic(() =>
+  import("@/components/dialogs/ArchitectDialog").then((m) => ({ default: m.ArchitectDialog })),
+);
 
 /**
  * Footer client island (P1). Ported from client/components/Footer.jsx with react-router-dom
@@ -39,9 +57,9 @@ import { FaWhatsapp } from "react-icons/fa";
  * when forms move onto the /api/forms/* proxy.
  */
 
-// P5: route through the same-origin proxy (/api/forms/subscribers). For now the newsletter
-// posts directly to the external admin API (unchanged endpoint/payload), exactly as today.
-const SUBSCRIBE_URL = "https://apiv2.saburiply.com/api/admin/subscribers";
+// Same-origin proxy (§8) → forwarded to the external admin API server-side (unchanged
+// endpoint/payload). The apiv2 origin never reaches the browser.
+const SUBSCRIBE_URL = "/api/forms/subscribers";
 
 type SitemapEntry = {
   full: string;
@@ -74,6 +92,12 @@ export function Footer() {
   const [sitemapUrls, setSitemapUrls] = useState<SitemapEntry[]>([]);
   const [currentSitemapUrl, setCurrentSitemapUrl] = useState("");
   const [isSitemapDialogOpen, setIsSitemapDialogOpen] = useState(false);
+
+  // Lead dialogs (restored P5 → /api/forms/* proxy).
+  const [isDealerDialogOpen, setIsDealerDialogOpen] = useState(false);
+  const [isInteriorDesignerOpen, setIsInteriorDesignerOpen] = useState(false);
+  const [isArchitectOpen, setIsArchitectOpen] = useState(false);
+  const [isMobileQuoteOpen, setIsMobileQuoteOpen] = useState(false);
 
   // P5: lead-form modals are deferred — their triggers route to /contact for now.
   const goToContact = () => router.push("/contact");
@@ -214,8 +238,8 @@ export function Footer() {
   ];
   const businessLinks: FooterLink[] = [
     { name: "Become a Dealer", href: "#contact" },
-    { name: "Interior Designer", onClick: goToContact },
-    { name: "Architect", onClick: goToContact },
+    { name: "Interior Designer", onClick: () => setIsInteriorDesignerOpen(true) },
+    { name: "Architect", onClick: () => setIsArchitectOpen(true) },
     { name: "Technical Support", href: "/contact" },
     { name: "Quality Assurance", href: "/about/accreditation" },
   ];
@@ -375,7 +399,7 @@ export function Footer() {
                   <li key={index}>
                     {link.name === "Become a Dealer" ? (
                       <button
-                        onClick={goToContact}
+                        onClick={() => setIsDealerDialogOpen(true)}
                         className="text-gray-300 hover:text-primary transition-colors text-sm text-left"
                       >
                         {link.name}
@@ -488,11 +512,11 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Floating Quote Button - Mobile Only (P5: restore MobileQuoteForm modal) */}
+      {/* Floating Quote Button - Mobile Only → MobileQuoteForm (restored P5) */}
       <div className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-[60] lg:hidden">
         <button
           type="button"
-          onClick={goToContact}
+          onClick={() => setIsMobileQuoteOpen(true)}
           className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-[#F44336] text-white shadow-lg hover:bg-[#d32f2f] transition-colors flex items-center justify-center"
           aria-label="Get a quote"
         >
@@ -624,6 +648,12 @@ export function Footer() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Lead-capture dialogs (restored P5 → /api/forms/* proxy) */}
+      <DealershipDialog open={isDealerDialogOpen} onOpenChange={setIsDealerDialogOpen} />
+      <InteriorDesignerDialog open={isInteriorDesignerOpen} onOpenChange={setIsInteriorDesignerOpen} />
+      <ArchitectDialog open={isArchitectOpen} onOpenChange={setIsArchitectOpen} />
+      <MobileQuoteForm isOpen={isMobileQuoteOpen} onClose={() => setIsMobileQuoteOpen(false)} />
     </footer>
   );
 }
