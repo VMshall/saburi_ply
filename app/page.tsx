@@ -1,56 +1,62 @@
+import type { CSSProperties } from "react";
 import { Hero } from "@/components/Hero";
+import { AboutUs } from "@/components/sections/AboutUs";
+import { WhyChooseUs } from "@/components/sections/WhyChooseUs";
+import { HomeProducts } from "@/components/islands/HomeProducts";
+import { PlywoodGallery } from "@/components/sections/PlywoodGallery";
+import { Testimonials } from "@/components/sections/Testimonials";
+import { BecomeOurPartner } from "@/components/sections/BecomeOurPartner";
+import { ContactForm } from "@/components/sections/HomeContactForm";
+import { EnquiryModal } from "@/components/dialogs/EnquiryModal";
 import { JsonLd } from "@/components/JsonLd";
 import { localBusinessSchema } from "@/lib/jsonld";
-import { EnquiryModal } from "@/components/dialogs/EnquiryModal";
 
-// Pure SSG (§3). No metadata here — the home/default title, description, OG, canonical (/)
-// are inherited from app/layout.tsx.
+// Pure SSG (§3). No metadata export — the home/default title, description, OG, canonical (/)
+// are inherited from app/layout.tsx; Organization + WebSite JSON-LD are sitewide there.
 export const dynamic = "force-static";
 
 /**
- * Home page body. Navbar + Footer are provided by app/layout.tsx.
- *
- * P1 renders the Hero island + the primary H1/value-prop so the route has real, crawlable
- * content. The rich interactive sections from the legacy client/pages/Index.jsx — AboutUs,
- * WhyChooseUs, PlywoodTypes, PlywoodGallery, Testimonials, BecomeOurPartner, the #contact
- * ContactForm, and the EnquiryModal/QuoteModal islands — are migrated in P3/P4 as
- * server-shell + client-island compositions.
+ * Home page (§3) — full composition ported from client/pages/Index.jsx, same section order.
+ * Server shell + minimal client islands (§9): AboutUs is server; WhyChooseUs / PlywoodTypes
+ * (via HomeProducts, which also owns the QuoteModal) / PlywoodGallery / Testimonials /
+ * BecomeOurPartner / the #contact ContactForm / EnquiryModal are client islands (SSR'd).
+ * The content-visibility wrappers (from the legacy page) defer off-screen layout/paint.
+ * Navbar + Footer come from app/layout.tsx.
  */
+const cv = (size: string): CSSProperties => ({ contentVisibility: "auto", containIntrinsicSize: size });
+
 export default function HomePage() {
   return (
     <div className="min-h-screen">
       <Hero />
 
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
-          Best Plywood Manufacturer and Supplier in India
-        </h1>
-        <p className="mt-6 text-base sm:text-lg leading-relaxed text-muted-foreground">
-          Saburi Ply is the best plywood manufacturer and supplier in India, offering premium
-          plywood, block boards, and decorative panels for homes and commercial use. Built on
-          superior quality, innovation, and sustainable craftsmanship.
-        </p>
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <a
-            href="/contact"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/90"
-          >
-            Get a Quote
-          </a>
-          <a
-            href="/about"
-            className="inline-flex items-center justify-center rounded-md border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
-          >
-            About Saburi Ply
-          </a>
-        </div>
-      </section>
+      <div style={cv("600px")}>
+        <AboutUs />
+      </div>
+      <div style={cv("800px")}>
+        <WhyChooseUs />
+      </div>
+      <div style={cv("800px")}>
+        <HomeProducts />
+      </div>
+      <div style={cv("600px")}>
+        <PlywoodGallery />
+      </div>
+      <div style={cv("400px")}>
+        <Testimonials />
+      </div>
+      <div style={cv("500px")}>
+        <BecomeOurPartner />
+      </div>
+      <div style={cv("600px")}>
+        <ContactForm />
+      </div>
+
+      {/* Lead-capture enquiry modal (auto-shows on scroll/delay). */}
+      <EnquiryModal />
 
       {/* Home LocalBusiness signal (§6) — preserved from the former sitewide index.html block. */}
       <JsonLd data={localBusinessSchema()} />
-
-      {/* Lead-capture enquiry modal (auto-shows on scroll/delay), restored in P5 → proxy. */}
-      <EnquiryModal />
     </div>
   );
 }
