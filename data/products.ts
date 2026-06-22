@@ -439,8 +439,8 @@ export const products: Product[] = [
       { question: "Can it withstand the rough handling and weather conditions of a construction site?", answerHtml: "Absolutely. The edges are sealed with waterproof acrylic paint, and the board itself is highly impact-resistant. It easily withstands heavy loads, dropped tools, and continuous exposure to rain and sun on busy job sites. Saburi Ply, a leading <strong>Shuttering Plywood Manufacturer in India</strong>, maintains this build quality consistently across its entire shuttering plywood range." },
     ],
     images: [
-      { src: "/images/shuttering-product/Shine-Platinum.webp", alt: "Saburi Perennial board full view" },
-      { src: "/images/shuttering-product/Shuttering 2.webp", alt: "Saburi Perennial – details and markings" },
+      { src: "/images/shuttering-product/Shine-Platinum.webp", alt: "Saburi Shine Platinum shuttering plywood (IS: 4990)" },
+      { src: "/images/shuttering-product/Shuttering 2.webp", alt: "Saburi Shine Platinum shuttering plywood – surface detail" },
     ],
     certification: "IS: 4990",
   },
@@ -548,7 +548,7 @@ export const products: Product[] = [
       { question: "Does it offer good screw-holding capacity for heavy door hinges?", answerHtml: "Yes. The solid, gap-free wooden core ensures a tight, secure grip for screws, nails, and heavy-duty hardware, making it highly reliable for cabinetry that sees constant daily use." },
       { question: "Is this blockboard safe from wood-destroying insects?", answerHtml: "Absolutely. Every blockboard undergoes a stringent chemical preservation process that makes it highly resistant to termites, borers, and fungal attacks, ensuring a long-lasting structural framework. Saburi Ply, recognised as the <strong>Best Blockboard Company in India</strong>, applies this treatment consistently across its entire blockboard range." },
     ],
-    images: [{ src: "/images/blockboard-product/Perennial.webp", alt: "Saburi Perennial board full view" }],
+    images: [{ src: "/images/blockboard-product/Perennial.webp", alt: "Saburi Perennial Block Board (IS: 1659)" }],
     certification: "IS: 1659",
   },
   {
@@ -596,7 +596,7 @@ export const products: Product[] = [
       { question: "Is Saburi FR Blockboard weaker than regular blockboard due to the chemicals?", answerHtml: "Not at all. The chemical impregnation is carefully balanced to ensure that the board retains 100% of its structural integrity, load-bearing capacity, and screw-holding strength." },
       { question: "Can I apply standard laminates or veneers to the Saburi FR surface?", answerHtml: "Yes. The board is perfectly calibrated and sanded to a smooth finish, allowing you to easily apply any decorative laminate, veneer, or paint without compromising its fire-retardant capabilities." },
     ],
-    images: [{ src: "/images/blockboard-product/FR.webp", alt: "Saburi Perennial board full view" }],
+    images: [{ src: "/images/blockboard-product/FR.webp", alt: "Saburi FR Block Board (IS: 1659) – fire retardant" }],
     certification: "IS: 1659",
   },
   {
@@ -647,7 +647,7 @@ export const products: Product[] = [
       { question: "What kind of finish can I expect when cutting or routing this board?", answerHtml: "Because of the premium face veneers and solid core, carpenters will experience smooth, clean cuts with zero splintering. This makes it ideal for highly detailed, custom woodwork and flawless edge-banding." },
       { question: "What kind of pest protection does Club H+ offer?", answerHtml: "It undergoes a multi-stage, deep-penetration chemical treatment that renders it completely immune to termites and wood borers, ensuring your premium furniture investments are protected for decades." },
     ],
-    images: [{ src: "/images/blockboard-product/Club H+.webp", alt: "Saburi Perennial board full view" }],
+    images: [{ src: "/images/blockboard-product/Club H+.webp", alt: "Saburi Club H+ Block Board (IS: 1659)" }],
     certification: "IS: 1659",
   },
   {
@@ -796,8 +796,8 @@ export const products: Product[] = [
     ],
     faqs: [],
     images: [
-      { src: "/images/flushdoor-product/SCOUT Flush Door.webp", alt: "Saburi Perennial board full view" },
-      { src: "/images/flushdoor-product/SCOUT Flush Door 2.webp", alt: "Saburi Perennial – details and markings" },
+      { src: "/images/flushdoor-product/SCOUT Flush Door.webp", alt: "Saburi Flush Door Scout (IS: 2202)" },
+      { src: "/images/flushdoor-product/SCOUT Flush Door 2.webp", alt: "Saburi Flush Door Scout (IS: 2202) – surface detail" },
     ],
     certification: "IS: 2202",
   },
@@ -851,8 +851,8 @@ export const products: Product[] = [
       { question: "Does Saburi Modwud Pre-Lam Chipboard have good screw holding strength?", answerHtml: "Yes. Saburi Modwud Pre-Lam Chipboard is manufactured using high-density wood particles and advanced pressing technology, which provides excellent screw holding strength. This ensures strong fittings, stable hardware installation, and long-lasting durability for furniture, cabinets, and interior applications." },
     ],
     images: [
-      { src: "/images/chipboard-product/Saburi-Modwud-Pre-Laminated-.webp", alt: "Saburi Perennial board full view" },
-      { src: "/images/chipboard-product/Saburi-Modwud-Pre-Lam 2.webp", alt: "Saburi Perennial – details and markings" },
+      { src: "/images/chipboard-product/Saburi-Modwud-Pre-Laminated-.webp", alt: "Saburi Modwud Pre-Lam pre-laminated MDF (IS: 12823)" },
+      { src: "/images/chipboard-product/Saburi-Modwud-Pre-Lam 2.webp", alt: "Saburi Modwud Pre-Lam pre-laminated MDF – surface detail" },
     ],
     certification: "IS: 12823",
   },
@@ -906,8 +906,8 @@ export const products: Product[] = [
       { question: "Can I paint or apply laminates directly onto Saburi Modwud Plain?", answerHtml: "Yes, Saburi Modwud Plain can be painted and finished with various surface materials. As it is a porous wood composite, proper surface preparation and a good-quality wood primer are recommended before applying enamel or PU paints for the best results. It is also suitable for lamination, veneers, melamine, lacquer films, PVC/PET films, and acrylic films, offering great flexibility in finishing." },
     ],
     images: [
-      { src: "/images/chipboard-product/Saburi-Modwud-Plain.webp", alt: "Saburi Perennial board full view" },
-      { src: "/images/chipboard-product/Saburi-Modwud-Plain 2.webp", alt: "Saburi Perennial – details and markings" },
+      { src: "/images/chipboard-product/Saburi-Modwud-Plain.webp", alt: "Saburi Modwud Plain MDF board (IS: 3087)" },
+      { src: "/images/chipboard-product/Saburi-Modwud-Plain 2.webp", alt: "Saburi Modwud Plain MDF board – surface detail" },
     ],
     certification: "IS: 3087",
   },
@@ -955,9 +955,9 @@ export const products: Product[] = [
     ],
     faqs: [],
     images: [
-      { src: "/images/wpcpvc-product/pvc/ACE.webp", alt: "Saburi Perennial board full view" },
-      { src: "/images/wpcpvc-product/pvc/ECO.webp", alt: "Saburi Perennial – details and markings" },
-      { src: "/images/wpcpvc-product/pvc/SABURI-HD+-SMART-PANELS-SABURI-HD+-SMART-PANELS-Saburi-hd-+-Smart-Panels.webp", alt: "Saburi Perennial – details and markings" },
+      { src: "/images/wpcpvc-product/pvc/ACE.webp", alt: "Saburi Ace PVC board panel" },
+      { src: "/images/wpcpvc-product/pvc/ECO.webp", alt: "Saburi Eco Smart PVC board panel" },
+      { src: "/images/wpcpvc-product/pvc/SABURI-HD+-SMART-PANELS-SABURI-HD+-SMART-PANELS-Saburi-hd-+-Smart-Panels.webp", alt: "Saburi HD+ Smart PVC board panel" },
     ],
   },
   {
@@ -1008,7 +1008,7 @@ export const products: Product[] = [
       { question: "Can I apply paint, laminates, or veneers directly to the WPC surface?", answerHtml: "Yes. The boards come with a perfectly smooth, calibrated surface that is ready to use. You can easily apply high-gloss acrylics, PVC laminates, natural wood veneers, or premium PU paints to match any interior design scheme." },
       { question: "Do carpenters need special tools to work with Saburi WPC boards?", answerHtml: "No special equipment is required. Saburi Smart Panels can be cut, drilled, routed, and nailed using standard commercial woodworking tools. The high-density core also ensures excellent screw-holding capacity for hinges and cabinet hardware." },
     ],
-    images: [{ src: "/images/wpcpvc-product/wpc-door/Endura.webp", alt: "Saburi Perennial board full view" }],
+    images: [{ src: "/images/wpcpvc-product/wpc-door/Endura.webp", alt: "Saburi Smart Panel WPC board (Endura)" }],
   },
   {
     slug: "saburi-smart-wpc-door-frame",
@@ -1055,8 +1055,8 @@ export const products: Product[] = [
       { question: "Can the frames be finished to match the look of a wooden door?", answerHtml: "Absolutely. While they come in a <strong>ready-to-use premium finish</strong>, Saburi WPC Door Frames can be easily painted, polished, or wrapped with PVC decorative foils to perfectly match the color and texture of your doors and existing interior decor." },
     ],
     images: [
-      { src: "/images/wpcpvc-product/wpc-door/WPC-Doors.webp", alt: "Saburi Perennial – details and markings" },
-      { src: "/images/wpcpvc-product/wpc-door/aburi-Smart-WPC-Door-Frames.webp", alt: "Saburi Perennial board full view" },
+      { src: "/images/wpcpvc-product/wpc-door/WPC-Doors.webp", alt: "Saburi Smart WPC door frame – surface detail" },
+      { src: "/images/wpcpvc-product/wpc-door/aburi-Smart-WPC-Door-Frames.webp", alt: "Saburi Smart WPC Door Frame" },
     ],
   },
   {
@@ -1164,9 +1164,9 @@ export const products: Product[] = [
       { question: "What are the main advantages of using Saburi Lam in furniture?", answerHtml: "Saburi Lam improves furniture aesthetics, offers uniform texture, supports easy lamination, provides multiple design choices, and ensures a durable surface finish suitable for modular and residential furniture applications." },
     ],
     images: [
-      { src: "/images/lamination-product/6.webp", alt: "Saburi Perennial board full view" },
-      { src: "/images/lamination-product/7.webp", alt: "Saburi Perennial – details and markings" },
-      { src: "/images/lamination-product/8.webp", alt: "Saburi Perennial – details and markings" },
+      { src: "/images/lamination-product/6.webp", alt: "Saburi Lam designer laminate" },
+      { src: "/images/lamination-product/7.webp", alt: "Saburi Lam designer laminate – pattern detail" },
+      { src: "/images/lamination-product/8.webp", alt: "Saburi Lam designer laminate – pattern detail" },
     ],
   },
 ];

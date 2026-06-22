@@ -222,7 +222,7 @@ export function Footer() {
     { name: "About Us", href: "/about" },
     { name: "Gallery", href: "/gallery" },
     { name: "Contact", href: "/contact" },
-    { name: "Blog", href: "https://www.saburiply.com/blog/", external: true },
+    { name: "Blog", href: "/blog" },
     { name: "Sitemap", onClick: handleSitemapClick },
   ];
   const productLinks: FooterLink[] = [
@@ -244,13 +244,13 @@ export function Footer() {
     { name: "Quality Assurance", href: "/about/accreditation" },
   ];
 
-  const locations = [
+  const locations: { city: string; state: string; href?: string }[] = [
     { city: "Kolkata", state: "West Bengal" },
     { city: "Mumbai", state: "Maharashtra" },
     { city: "Delhi", state: "NCR" },
-    { city: "Chennai", state: "Tamil Nadu" },
-    { city: "Bangalore", state: "Karnataka" },
-    { city: "Hyderabad", state: "Telangana" },
+    { city: "Chennai", state: "Tamil Nadu", href: "/best-plywood-tamilnadu" },
+    { city: "Bangalore", state: "Karnataka", href: "/plywood-dealers-bangalore" },
+    { city: "Hyderabad", state: "Telangana", href: "/best-plywood-telangana" },
   ];
 
   return (
@@ -430,7 +430,15 @@ export function Footer() {
                 <div className="grid grid-cols-2 gap-1 text-xs text-gray-400">
                   {locations.map((location, index) => (
                     <div key={index}>
-                      {location.city}, {location.state}
+                      {location.href ? (
+                        <Link href={location.href} className="hover:text-primary transition-colors">
+                          {location.city}, {location.state}
+                        </Link>
+                      ) : (
+                        <>
+                          {location.city}, {location.state}
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
