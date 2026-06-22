@@ -5,16 +5,15 @@
  * - redirects(): full legacy 301 map — in-app <Navigate> (App.jsx) + nginx .php/slug
  *   (root `saburiply.com`). §5. All emit statusCode 301 to byte-match the historical
  *   301s for crawlers/SEO tools (Next's `permanent:true` would emit 308).
- * - rewrites(): /blog and /blog/* are an external WordPress passthrough — NOT a Next
- *   route. §7. Requires WP_ORIGIN_HOST (server-only env); guarded so local/Phase-1
- *   builds without it still succeed.
- * - skipTrailingSlashRedirect: Next's automatic slash redirect is DISABLED so it can
- *   never strip the WP blog's canonical trailing slash. App-route slash policy is owned
- *   by middleware.ts (strips slashes, excludes /blog). §0.1 — prevents the blog redirect
- *   loop on ~35 ranking URLs.
+ * - NO rewrites(): the blog is now in-app (P8 — WordPress retired); /blog and /blog/<slug>
+ *   are SSG App Router routes, not a passthrough.
+ * - skipTrailingSlashRedirect: Next's automatic slash redirect stays DISABLED; middleware.ts
+ *   owns the slash policy for ALL app routes (now including /blog — its matcher no longer
+ *   excludes it), strip-redirecting any trailing slash to the canonical slash-less form. The
+ *   aged /blog/<slug>/ URLs thus 308 → /blog/<slug> (§0.1 loop risk is gone with WP).
  *
- * NOTE (later phases): next/image config → P6; ESLint adoption (eslint-config-next) →
- * tooling. ESLint is ignored during builds for now so Phase-1 type/build gating is clean.
+ * NOTE: ESLint adoption (eslint-config-next) is a later tooling step; ESLint is ignored during
+ * builds for now so type/build gating stays clean.
  */
 
 // 22 product flat-slug → /products/<slug> (identity slug). App.jsx:151-172
@@ -66,17 +65,15 @@ const PHP_REDIRECTS = [
   ["/saburi-board", "/products/saburi-gold-blockboard"],
 ];
 
-// /blog/N → WP slug, WITH trailing slash to match WP's canonical (avoids a 301→301
-// double-hop). §0.2. App.jsx:175-179
+// /blog/N → post slug. Slash-LESS targets: the blog is now an in-app SSG route (P8 — WordPress
+// retired), and all app routes are slash-less, so this points straight at the canonical in-app URL
+// (no 301→308 double-hop through the slash-strip). App.jsx:175-179
 const BLOG_NUM_REDIRECTS = [
-  ["/blog/1", "/blog/top-7-stylish-panel-door-for-your-home-interiors/"],
-  ["/blog/2", "/blog/top-5-isi-certified-termite-proof-plywood-brands-in-india/"],
-  ["/blog/3", "/blog/advantages-of-best-boiling-water-proof-bwp-plywood-brand-in-india/"],
-  ["/blog/4", "/blog/top-7-trends-of-plywood-brand-in-india/"],
-  [
-    "/blog/5",
-    "/blog/top-10-plywood-manufacturers-in-india-leading-the-industry-with-quality-and-innovation/",
-  ],
+  ["/blog/1", "/blog/top-7-stylish-panel-door-for-your-home-interiors"],
+  ["/blog/2", "/blog/top-5-isi-certified-termite-proof-plywood-brands-in-india"],
+  ["/blog/3", "/blog/advantages-of-best-boiling-water-proof-bwp-plywood-brand-in-india"],
+  ["/blog/4", "/blog/top-7-trends-of-plywood-brand-in-india"],
+  ["/blog/5", "/blog/top-10-plywood-manufacturers-in-india-leading-the-industry-with-quality-and-innovation"],
 ];
 
 const r301 = (source, destination) => ({ source, destination, statusCode: 301 });
@@ -117,18 +114,8 @@ const nextConfig = {
     ];
   },
 
-  async rewrites() {
-    // §7 — /blog/* is external WordPress. WP_ORIGIN_HOST is server-only (e.g.
-    // https://wp.saburiply.com). Guarded: without it (local / Phase 1) the build still
-    // succeeds and /blog* simply isn't served here. The §0.1 validation gate runs on a
-    // Vercel preview WITH WP_ORIGIN_HOST set.
-    const WP = process.env.WP_ORIGIN_HOST;
-    if (!WP) return [];
-    return [
-      { source: "/blog", destination: `${WP}/blog` },
-      { source: "/blog/:path*", destination: `${WP}/blog/:path*` },
-    ];
-  },
+  // No rewrites(): /blog and /blog/* are now in-app SSG routes (P8 — WordPress retired). The former
+  // WP passthrough (and WP_ORIGIN_HOST) is gone.
 };
 
 export default nextConfig;

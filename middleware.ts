@@ -4,12 +4,11 @@ import type { NextRequest } from "next/server";
 /**
  * App-route trailing-slash policy — NEXTJS_MIGRATION_PLAN.md §0.1.
  *
- * `skipTrailingSlashRedirect: true` (next.config.mjs) turns OFF Next's automatic slash
- * redirect so it can never strip the WordPress blog's canonical trailing slash. This
- * middleware re-implements slash-stripping for APP routes only (they are slash-less:
- * /about, /products/x — matching the current sitemap), and the matcher EXCLUDES /blog so
- * blog slashes pass straight through to the §7 rewrite. Net effect: /about/ → 308 → /about
- * (single hop), while /blog/<slug>/ is left untouched → no redirect loop.
+ * `skipTrailingSlashRedirect: true` (next.config.mjs) turns OFF Next's automatic slash redirect;
+ * this middleware owns the policy for ALL app routes (slash-less: /about, /products/x, /blog,
+ * /blog/<slug> — matching the sitemap). P8 update: the blog is now in-app, so the matcher no
+ * longer excludes /blog — the aged /blog/<slug>/ URLs now 308 → /blog/<slug> (single hop) like
+ * every other route. (The §0.1 WordPress redirect-loop risk is moot now that WP is retired.)
  */
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -25,6 +24,6 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Excludes /blog (WP, keeps its slash), /api, /_next, and any file with an extension.
-  matcher: ["/((?!blog|api|_next/|.*\\..*).*)"],
+  // Excludes /api, /_next, and any file with an extension. (/blog is no longer excluded — P8.)
+  matcher: ["/((?!api|_next/|.*\\..*).*)"],
 };

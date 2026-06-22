@@ -5,10 +5,8 @@ import { SITE_URL } from "@/data/site";
  * Generated robots (§6) — replaces the static public/robots.txt (deleted). Mirrors the legacy
  * allow-all + admin/system disallows, with absolute www host + sitemap.
  *
- * OPS FOLLOW-UP: the WordPress blog has its own sitemap served under /blog (e.g.
- * https://www.saburiply.com/blog/wp-sitemap.xml for WP core, or /blog/sitemap_index.xml for
- * Yoast). Add the confirmed URL to the `sitemap` array below so crawlers discover the blog
- * URLs too — left out here to avoid advertising an unverified path.
+ * P8: the blog is now in-app and its URLs are in app/sitemap.ts, so the single /sitemap.xml below
+ * covers everything. (The former external-WordPress-sitemap follow-up is gone — WP is retired.)
  */
 export const dynamic = "force-static";
 

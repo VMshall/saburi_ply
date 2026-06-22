@@ -55,6 +55,19 @@ export const config = { matcher: ['/((?!blog|api|_next/|.*\\..*).*)'] } // exclu
 - **Pre-existing data bug:** `metaConfig.js:157` (`shuttering-plywood-india`) has `keywords` set to a copy of the description — fix when authoring `data/products.ts`; do not carry it forward.
 - **Undocumented coupling:** `Footer.jsx:74-117` *fetches & parses `/sitemap.xml` at runtime* for a UI feature. The generated `app/sitemap.ts` serves valid XML at the same `/sitemap.xml`, so it should keep working — but verify the Footer sitemap UI post-migration (it's a runtime consumer, not just an SEO artifact).
 
+### 0.3 🔴 Blog moved IN-APP — WordPress retired (P8) — SUPERSEDES §7 + §0.1's blog handling + Pre-Resolved Q1/Q3
+
+**Decision (post-plan, authoritative):** the blog is **no longer a WordPress passthrough**. All **38** `/blog/<slug>` posts + the index were scraped from the live WP site into static in-app content (`content/blog/<slug>.mdx` = gray-matter frontmatter + cleaned article HTML; images in `public/images/blog/<slug>/`) and render as **pure SSG** App Router routes (`app/blog/page.tsx`, `app/blog/[slug]/page.tsx`). **Zero runtime dependency on WordPress.**
+
+This **supersedes**: §7 (the `/blog` rewrite to `WP_ORIGIN`), §0.1's blog-specific trailing-slash design, and Pre-Resolved Q1 (blog = external WP) / Q3 (keep `/blog` on the apex via rewrite). What changed in the build:
+- `next.config.mjs`: **removed** the `/blog` rewrite + `WP_ORIGIN_HOST`. `/blog/1..5` retargeted to the **slash-less** in-app post slugs. `/blogs[/*]` → `/blog[/*]` 301 kept.
+- `middleware.ts`: matcher **no longer excludes `/blog`** — the blog follows the ordinary slash-less app-route policy (`/blog/<slug>/` → **308** → `/blog/<slug>`). The §0.1 WP redirect-loop risk is therefore moot.
+- **Trailing slash:** blog canonicalized to **slash-less** `/blog/<slug>` for app consistency; the aged `/blog/<slug>/` URLs 308-strip (permanent, equity-passing).
+- `app/sitemap.ts`: **added** the blog index + 38 posts (74 URLs total); `app/robots.ts`: dropped the external-WP-sitemap reference. JSON-LD: **BlogPosting** + BreadcrumbList per post via `lib/jsonld.ts`.
+- Deps: `gray-matter` (loader), `cheerio` (dev-only scraper `scripts/scrape-blog.mjs`). `@tailwindcss/typography` enabled for the `prose` body.
+- **Validation/cutover:** the former gate **G1 (§0.1 blog/slash WP matrix) and Stage-0.1 WP-origin setup are MOOT** (no WP origin). The blog is verified locally by `scripts/blog-check.mjs` (integrity + live parity) + the redirect/seo checks. **WordPress decommission is a POST-cutover step** (see `CUTOVER_RUNBOOK.md` §7).
+- **Flagged content gap:** the new post `top-25-upcoming-housing-projects-in-kolkata-…` referenced 25 in-body images on an unreachable staging host (`saburiblog.wigtest.site`) — broken on live WP too — so they were dropped (text preserved). Re-upload to prod media if wanted.
+
 ---
 
 ## 1. Executive Summary

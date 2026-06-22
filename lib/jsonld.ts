@@ -182,3 +182,43 @@ export function localBusinessSchema(opts?: {
   }
   return schema;
 }
+
+/** BlogPosting for an in-app blog post (§7/P8). Mirrors the Article graph WordPress/Yoast emitted
+ * (headline, dates, image, Organization author/publisher). Publisher links the sitewide Organization. */
+export function articleSchema(post: {
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+  modified?: string;
+  author?: string;
+  image?: string;
+}): Schema {
+  const url = absUrl(`/blog/${post.slug}`);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    image: post.image ? absImg(post.image) : LOGO,
+    datePublished: post.date,
+    dateModified: post.modified || post.date,
+    author: { "@type": "Organization", name: post.author || SITE_NAME, url: SITE_URL },
+    publisher: { "@id": ORG_ID },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url,
+  };
+}
+
+/** Blog-post breadcrumb (Home › Blog › <title>) — cleaner than the slug-humanized path-derived one. */
+export function blogBreadcrumbSchema(title: string, slug: string): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
+      { "@type": "ListItem", position: 3, name: title, item: `${SITE_URL}/blog/${slug}` },
+    ],
+  };
+}

@@ -35,6 +35,8 @@ const PAGES = [
   { path: "/contact", types: ["Organization", "WebSite", "LocalBusiness"] },
   { path: "/about", types: ["Organization", "WebSite"] },
   { path: "/gallery", types: ["Organization", "WebSite"] },
+  { path: "/blog", types: ["Organization", "WebSite", "BreadcrumbList"] },
+  { path: "/blog/top-7-trends-of-plywood-brand-in-india", types: ["Organization", "WebSite", "BreadcrumbList", "BlogPosting"] },
   { path: "/thank-you", types: ["Organization", "WebSite"], noindex: true },
 ];
 
