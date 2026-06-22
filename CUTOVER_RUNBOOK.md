@@ -142,6 +142,15 @@ fetches `/sitemap.xml`, now served by `app/sitemap.ts`).
    node scripts/seo-check.mjs      https://www.saburiply.com
    # + spot-check several /blog/<slug> (200, slash-less canonical, local images, BlogPosting JSON-LD)
    #   and the aged /blog/<slug>/ (→ 308 → /blog/<slug>).
+
+   # A2 — AI-bot edge access: confirm Vercel isn't 403/401-ing AI crawlers on the custom domain.
+   # (Verified GREEN on the *.vercel.app dummy 2026-06-22 — GPTBot/ClaudeBot/Perplexity/OAI-SearchBot
+   #  all got 200 + full content; this just re-confirms the same on www.)
+   for ua in GPTBot ClaudeBot PerplexityBot OAI-SearchBot Googlebot; do
+     curl -s -o /dev/null -w "$ua %{http_code}\n" -A "$ua/1.0 (+bot)" \
+       https://www.saburiply.com/products/marine-plywood-india
+   done   # want: all 200 (NOT 403/401). If any is blocked → Vercel → Settings → Firewall: stop
+          # challenging that UA. (No Cloudflare in front, so that's the only edge to check.)
    ```
 6. **Search Console:** submit `https://www.saburiply.com/sitemap.xml` (now includes the blog);
    monitor Coverage, the redirect report, and CWV. Watch the 38 `/blog/<slug>/` → `/blog/<slug>`
