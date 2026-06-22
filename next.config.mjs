@@ -76,6 +76,29 @@ const BLOG_NUM_REDIRECTS = [
   ["/blog/5", "/blog/top-10-plywood-manufacturers-in-india-leading-the-industry-with-quality-and-innovation"],
 ];
 
+// Legacy top-level PHP pages from the old PHP site (audit gap). On the old site these now soft-404
+// (SPA fallback serves the homepage); on Vercel they 403 (.php is forbidden at the edge). 301 the
+// ones with a real equivalent so any inbound link equity transfers at cutover. Long-tail .php with
+// NO equivalent (e.g. career.php, sitemap.php) are deliberately left to 404/403 — redirecting them
+// to "/" would itself be a soft-404 pattern. Scope the complete equity-bearing set from GSC
+// Pages + Links before cutover; this is the high-confidence + sensible-intent subset.
+const LEGACY_PAGE_REDIRECTS = [
+  ["/index.php", "/"],
+  ["/home.php", "/"],
+  ["/about.php", "/about"],
+  ["/about-us.php", "/about"],
+  ["/contact.php", "/contact"],
+  ["/contact-us.php", "/contact"],
+  ["/gallery.php", "/gallery"],
+  // Dealer / partner intent → contact page (hosts the become-a-dealer form).
+  ["/dealership.php", "/contact"],
+  ["/dealer.php", "/contact"],
+  ["/become-dealer.php", "/contact"],
+  // No /products hub yet (future §3.3) → flagship product for now; re-point to /products when it ships.
+  ["/products.php", "/products/saburi-perennial"],
+  ["/product.php", "/products/saburi-perennial"],
+];
+
 const r301 = (source, destination) => ({ source, destination, statusCode: 301 });
 
 /** @type {import('next').NextConfig} */
@@ -100,7 +123,12 @@ const nextConfig = {
 
       // B. nginx .php / legacy slug → new URL
       ...PHP_REDIRECTS.map(([s, d]) => r301(s, d)),
-      // B. nginx wildcard — any /best-plywood-*.php → marine
+      // B. legacy top-level PHP pages (audit gap — were 403'ing at cutover)
+      ...LEGACY_PAGE_REDIRECTS.map(([s, d]) => r301(s, d)),
+      // B. location .php — SPECIFIC rule BEFORE the wildcard (first match wins): the crude
+      //    wildcard sent bangalore to /products/marine; send it to its real city page instead.
+      r301("/best-plywood-bangalore.php", "/plywood-dealers-bangalore"),
+      // B. nginx wildcard — any OTHER /best-plywood-*.php → marine (catch-all)
       r301("/:slug(best-plywood-.*\\.php)", "/products/marine-plywood-india"),
 
       // C. Legacy /blogs alias → singular /blog (folds into the WP path)
