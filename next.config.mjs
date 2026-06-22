@@ -70,10 +70,12 @@ const PHP_REDIRECTS = [
 // (no 301→308 double-hop through the slash-strip). App.jsx:175-179
 const BLOG_NUM_REDIRECTS = [
   ["/blog/1", "/blog/top-7-stylish-panel-door-for-your-home-interiors"],
-  ["/blog/2", "/blog/top-5-isi-certified-termite-proof-plywood-brands-in-india"],
+  // /blog/2 and /blog/5 originally targeted posts consolidated in D2; repointed to the keepers so
+  // these legacy numeric links resolve in a SINGLE hop (no 301→301 chain through the old slug).
+  ["/blog/2", "/blog/best-termite-proof-plywood-in-india-a-smart-investment"],
   ["/blog/3", "/blog/advantages-of-best-boiling-water-proof-bwp-plywood-brand-in-india"],
   ["/blog/4", "/blog/top-7-trends-of-plywood-brand-in-india"],
-  ["/blog/5", "/blog/top-10-plywood-manufacturers-in-india-leading-the-industry-with-quality-and-innovation"],
+  ["/blog/5", "/blog/top-10-plywood-brands-in-india-of-2025-excellence-innovation"],
 ];
 
 // Legacy top-level PHP pages from the old PHP site (audit gap). On the old site these now soft-404
@@ -112,6 +114,17 @@ const LOCATION_PHP_REDIRECTS = [
   ["/best-plywood-andhra-pradesh.php", "/best-plywood-andhra-pradesh"],
 ];
 
+// Blog cannibalisation consolidation (D2): duplicate posts competing for the same query are 301'd
+// into a single canonical "keeper" (the loser .mdx files are removed). One strong page per topic
+// instead of 2-3 that split ranking signals. Keepers chosen by keyword match + recency.
+const BLOG_CONSOLIDATION_REDIRECTS = [
+  ["/blog/top-10-plywood-company-in-india", "/blog/top-10-plywood-brands-in-india-of-2025-excellence-innovation"],
+  ["/blog/top-10-plywood-manufacturers-in-india-leading-the-industry-with-quality-and-innovation", "/blog/top-10-plywood-brands-in-india-of-2025-excellence-innovation"],
+  ["/blog/top-5-plywood-brands-in-india-durability-and-eco-friendly-practices", "/blog/top-5-plywood-brands-in-india-for-durable-modular-furniture"],
+  ["/blog/top-5-isi-certified-termite-proof-plywood-brands-in-india", "/blog/best-termite-proof-plywood-in-india-a-smart-investment"],
+  ["/blog/finding-the-right-plywood-shop-near-me", "/blog/best-plywood-shop-near-me-what-every-homeowner-must-know-before-buying"],
+];
+
 const r301 = (source, destination) => ({ source, destination, statusCode: 301 });
 
 /** @type {import('next').NextConfig} */
@@ -133,6 +146,8 @@ const nextConfig = {
       r301("/best-plywood-bangalore", "/plywood-dealers-bangalore"),
       // A. In-app <Navigate> — /blog/N → WP slug (trailing slash, §0.2)
       ...BLOG_NUM_REDIRECTS.map(([s, d]) => r301(s, d)),
+      // A. Blog cannibalisation consolidation (D2) — duplicate posts → canonical keeper
+      ...BLOG_CONSOLIDATION_REDIRECTS.map(([s, d]) => r301(s, d)),
 
       // B. nginx .php / legacy slug → new URL
       ...PHP_REDIRECTS.map(([s, d]) => r301(s, d)),

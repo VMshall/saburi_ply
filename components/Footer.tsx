@@ -226,6 +226,7 @@ export function Footer() {
     { name: "Sitemap", onClick: handleSitemapClick },
   ];
   const productLinks: FooterLink[] = [
+    { name: "All Plywood Grades", href: "/plywood" },
     { name: "Saburi Perennial", href: "/products/saburi-perennial" },
     { name: "Saburi Club H+", href: "/products/saburi-club-h-plus" },
     { name: "Fire Retardant", href: "/products/saburi-fr-blockboard" },
@@ -245,7 +246,7 @@ export function Footer() {
   ];
 
   const locations: { city: string; state: string; href?: string }[] = [
-    { city: "Kolkata", state: "West Bengal" },
+    { city: "Kolkata", state: "West Bengal", href: "/best-plywood-kolkata" },
     { city: "Mumbai", state: "Maharashtra" },
     { city: "Delhi", state: "NCR" },
     { city: "Chennai", state: "Tamil Nadu", href: "/best-plywood-tamilnadu" },
@@ -270,7 +271,7 @@ export function Footer() {
                   className="h-12 w-auto mb-4 brightness-0 invert"
                 />
                 <p className="text-gray-300 leading-relaxed">
-                  India's trusted plywood manufacturer since 1998. Delivering
+                  India's trusted plywood manufacturer since 1990. Delivering
                   premium quality plywood products with unmatched reliability
                   and customer service across the nation.
                 </p>

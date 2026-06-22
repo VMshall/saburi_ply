@@ -72,6 +72,7 @@ export const PRODUCT_BANNERS: Record<string, ResponsiveImage> = {
 
 /** All 5 location pages used the same kerela-product-breadcrumb banner in the legacy map. */
 export const LOCATION_BANNERS: Record<string, ResponsiveImage> = {
+  "best-plywood-kolkata": kerela,
   "best-plywood-andhra-pradesh": kerela,
   "best-plywood-kerala": kerela,
   "best-plywood-tamilnadu": kerela,

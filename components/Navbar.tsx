@@ -349,7 +349,9 @@ export function Navbar() {
                               {/* Column 1: Plywood */}
                               <div>
                                 <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
-                                  Plywood
+                                  <Link href="/plywood" className="transition-colors hover:text-red-500">
+                                    Plywood
+                                  </Link>
                                 </h3>
                                 <ul className="space-y-3">
                                   <li>

@@ -40,11 +40,15 @@ function buildMetadata(seo: Seo): Metadata {
 }
 
 export function buildProductMetadata(product: Product): Metadata {
-  return buildMetadata(product.seo);
+  // Default OG/Twitter image to the product's own hero image (encoded — asset filenames contain
+  // spaces) instead of the generic sitewide logo, for better social/SERP share CTR.
+  const hero = product.seo.ogImage ?? product.images[0]?.src;
+  return buildMetadata({ ...product.seo, ogImage: hero ? encodeURI(hero) : undefined });
 }
 
 export function buildLocationMetadata(location: Location): Metadata {
-  return buildMetadata(location.seo);
+  const hero = location.seo.ogImage ?? location.images[0]?.src;
+  return buildMetadata({ ...location.seo, ogImage: hero ? encodeURI(hero) : undefined });
 }
 
 /** For the static content pages (about/gallery/contact/thank-you). `noindex` → robots

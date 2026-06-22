@@ -3,11 +3,12 @@
 
 Saburi Plywood is a leading Indian manufacturer of premium plywood, blockboard,
 flush doors, WPC/PVC boards, MDF, and laminates. Known for quality, innovation,
-and sustainable manufacturing practices. Products are ISI certified and available
-across South and Central India through an extensive dealer network.
+and sustainable manufacturing practices. Products are ISI certified, manufactured in
+Kolkata, and available across India through an extensive dealer network.
 
 Certifications: FSC, CARB Compliant, CE Certified, ISO 9001:2015, IGBC Certified.
-Presence: Andhra Pradesh, Telangana, Tamil Nadu, Kerala, Karnataka (Bangalore).
+Headquarters: Kolkata, West Bengal.
+Presence: West Bengal, Andhra Pradesh, Telangana, Tamil Nadu, Kerala, Karnataka (Bangalore).
 
 ---
 
@@ -25,6 +26,7 @@ Presence: Andhra Pradesh, Telangana, Tamil Nadu, Kerala, Karnataka (Bangalore).
 ## Products
 
 ### Plywood
+- Plywood Range (all grades, types & price guide): https://www.saburiply.com/plywood
 - Saburi Titanium Plus: https://www.saburiply.com/products/saburi-titanium-plus
 - Saburi Perennial: https://www.saburiply.com/products/saburi-perennial
 - Saburi Club H Plus: https://www.saburiply.com/products/saburi-club-h-plus
@@ -59,6 +61,7 @@ Presence: Andhra Pradesh, Telangana, Tamil Nadu, Kerala, Karnataka (Bangalore).
 ---
 
 ## Regional / Dealer Pages
+- Best Plywood in Kolkata (West Bengal): https://www.saburiply.com/best-plywood-kolkata
 - Best Plywood in Andhra Pradesh: https://www.saburiply.com/best-plywood-andhra-pradesh
 - Best Plywood in Kerala: https://www.saburiply.com/best-plywood-kerala
 - Best Plywood in Tamil Nadu: https://www.saburiply.com/best-plywood-tamilnadu
@@ -70,10 +73,8 @@ Presence: Andhra Pradesh, Telangana, Tamil Nadu, Kerala, Karnataka (Bangalore).
 ## Blog
 - Blog Home: https://www.saburiply.com/blog
 - Top 7 Stylish Panel Doors: https://www.saburiply.com/blog/top-7-stylish-panel-door-for-your-home-interiors
-- Top 5 ISI Certified Termite Proof Plywood Brands: https://www.saburiply.com/blog/top-5-isi-certified-termite-proof-plywood-brands-in-india
 - BWP Plywood Advantages: https://www.saburiply.com/blog/advantages-of-best-boiling-water-proof-bwp-plywood-brand-in-india
 - Top 7 Plywood Trends in India: https://www.saburiply.com/blog/top-7-trends-of-plywood-brand-in-india
-- Top 10 Plywood Manufacturers in India: https://www.saburiply.com/blog/top-10-plywood-manufacturers-in-india-leading-the-industry-with-quality-and-innovation
 - Fire Retardant Plywood vs Standard Ply: https://www.saburiply.com/blog/what-makes-fire-retardant-plywood-different-from-standard-ply
 - Materials Used in Flush Doors: https://www.saburiply.com/blog/which-material-is-used-in-flush-doors
 - Best Door Frame Manufacturer in India: https://www.saburiply.com/blog/which-is-the-best-door-frame-manufacturer-in-india
@@ -101,5 +102,3 @@ Presence: Andhra Pradesh, Telangana, Tamil Nadu, Kerala, Karnataka (Bangalore).
 - Door Maintenance Guide: https://www.saburiply.com/blog/keep-your-doors-looking-and-working-their-best
 - Saburi Ply Home Interiors: https://www.saburiply.com/blog/carrying-warmth-and-complexity-to-your-home-with-saburi-ply
 - Termite Proof Plywood Guide: https://www.saburiply.com/blog/best-termite-proof-plywood-in-india-a-smart-investment
-- Top 10 Plywood Companies: https://www.saburiply.com/blog/top-10-plywood-company-in-india
-- Top 5 Eco-Friendly Plywood Brands: https://www.saburiply.com/blog/top-5-plywood-brands-in-india-durability-and-eco-friendly-practices

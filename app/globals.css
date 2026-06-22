@@ -131,6 +131,12 @@
   .animate-press { animation: press-pulse 3.5s ease-in-out infinite; }
   .doodle-grid { background-image: radial-gradient(hsl(var(--primary) / 0.15) 1px, transparent 1.5px); background-size: 18px 18px; }
 
+  /* Single orchestrated page-load reveal (used by the category hero). CSS-only so content is never
+     hidden from crawlers or no-JS users — the animation just plays once and settles visible. */
+  @keyframes fade-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  .animate-fade-up { animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  @media (prefers-reduced-motion: reduce) { .animate-fade-up { animation: none; } }
+
   /* Custom Scrollbar Styles for Timeline */
   .scrollbar-hide::-webkit-scrollbar {
     display: none;

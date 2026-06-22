@@ -7,6 +7,18 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/jsonld";
+import { Bricolage_Grotesque } from "next/font/google";
+
+/**
+ * Display typeface for headings (Bricolage Grotesque) — gives headlines character vs. the system
+ * sans body. Exposed as the `--font-display` CSS variable and opted into via the `font-display`
+ * Tailwind utility, so only elements that ask for it use it; the body stays unchanged.
+ */
+const display = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
 
 /**
  * Root layout — owns <html>/<body>, sitewide <head> (Metadata API), the provider
@@ -87,7 +99,7 @@ export default function RootLayout({
   children: ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={display.variable}>
       <body>
         {/* Google Tag Manager (noscript) */}
         <noscript>
