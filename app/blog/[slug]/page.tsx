@@ -112,7 +112,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           ))}
 
         <div
-          className="prose prose-lg max-w-none mt-8 prose-headings:text-gray-900 prose-a:text-primary prose-img:rounded-lg"
+          className="prose prose-lg max-w-none mt-8 blog-content prose-headings:text-gray-900 prose-a:text-primary prose-img:rounded-lg"
           dangerouslySetInnerHTML={{ __html: post.html }}
         />
 

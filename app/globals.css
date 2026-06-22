@@ -159,3 +159,12 @@
     }
   }
 }
+
+/* P8 review fix: wide scraped blog tables scroll within their column instead of
+   overflowing the page on mobile (the multi-column comparison tables exceed a phone
+   viewport). Desktop is unaffected — the table fits, so no scrollbar appears. */
+.blog-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
