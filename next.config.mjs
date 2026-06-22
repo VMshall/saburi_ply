@@ -99,6 +99,19 @@ const LEGACY_PAGE_REDIRECTS = [
   ["/product.php", "/products/saburi-perennial"],
 ];
 
+// Location .php → its real city page (NOT the →marine wildcard below). Each target is verified to
+// 200, and slugs are NON-uniform (bangalore's page is /plywood-dealers-bangalore, not
+// /best-plywood-bangalore) — so these are explicit, not pattern-derived. Listed before the wildcard
+// so they win (first match). Any location .php NOT here still hits the wildcard → marine; the full
+// indexed set comes from GSC Pages (then map each that has a city page, and revisit the wildcard).
+const LOCATION_PHP_REDIRECTS = [
+  ["/best-plywood-bangalore.php", "/plywood-dealers-bangalore"],
+  ["/best-plywood-kerala.php", "/best-plywood-kerala"],
+  ["/best-plywood-tamilnadu.php", "/best-plywood-tamilnadu"],
+  ["/best-plywood-telangana.php", "/best-plywood-telangana"],
+  ["/best-plywood-andhra-pradesh.php", "/best-plywood-andhra-pradesh"],
+];
+
 const r301 = (source, destination) => ({ source, destination, statusCode: 301 });
 
 /** @type {import('next').NextConfig} */
@@ -125,10 +138,13 @@ const nextConfig = {
       ...PHP_REDIRECTS.map(([s, d]) => r301(s, d)),
       // B. legacy top-level PHP pages (audit gap — were 403'ing at cutover)
       ...LEGACY_PAGE_REDIRECTS.map(([s, d]) => r301(s, d)),
-      // B. location .php — SPECIFIC rule BEFORE the wildcard (first match wins): the crude
-      //    wildcard sent bangalore to /products/marine; send it to its real city page instead.
-      r301("/best-plywood-bangalore.php", "/plywood-dealers-bangalore"),
-      // B. nginx wildcard — any OTHER /best-plywood-*.php → marine (catch-all)
+      // B. location .php → city page — SPECIFIC rules BEFORE the wildcard (first match wins).
+      //    Without these the wildcard sends every "best plywood in <place>" .php to a marine
+      //    PRODUCT page — a topical mismatch. Targets verified to 200; slugs non-uniform.
+      ...LOCATION_PHP_REDIRECTS.map(([s, d]) => r301(s, d)),
+      // B. nginx wildcard — any OTHER /best-plywood-*.php → marine (catch-all). NOTE: →marine is a
+      //    relevance mismatch for an unmapped location; revisit/retire once the GSC Pages pull
+      //    surfaces the full set (map each location .php with a real city page; 404 the rest).
       r301("/:slug(best-plywood-.*\\.php)", "/products/marine-plywood-india"),
 
       // C. Legacy /blogs alias → singular /blog (folds into the WP path)
