@@ -126,6 +126,16 @@ fetches `/sitemap.xml`, now served by `app/sitemap.ts`).
    apex→www permanent redirect; replaces nginx `server_name` 301). http→https is automatic.
 4. **Keep WordPress reachable** through cutover as a transitional safety net — do **not** decommission
    it until §7.
+5. **🔴 GSC backlink pull for legacy `.php` — HARD GATE (do NOT cut over without it).** Vercel forbids
+   `.php` at the edge, so any legacy `.php` URL **not** in the `next.config.mjs` redirect map returns
+   **403** the moment DNS flips. The high-confidence pages + all location `.php` are already mapped
+   (single-hop 301s; `redirect-check` covers them), **but** any *other* `.php` that carries a real
+   **backlink** will 403 at launch and **that link equity is unrecoverable after the fact**. So before
+   promoting: pull **Search Console → Links** (cross-check Ahrefs/Semrush — GSC's sample isn't
+   exhaustive) and add a single-hop `301` for every backlinked `.php` → its closest real page (404 the
+   rest — never `→ /`, that's a soft-404). *Softer follow-up (NOT a gate):* the **GSC Pages** report
+   gives the full indexed `.php` set — map any remaining location `.php` that has a city page, then
+   retire the `best-plywood-*.php → marine` wildcard.
 
 ---
 
