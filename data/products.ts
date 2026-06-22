@@ -496,7 +496,7 @@ export const products: Product[] = [
     ],
     images: [
       { src: "/images/neowud-product/neowud1.webp", alt: "Saburi Neowud board full view" },
-      { src: "/images/neowud-product/neowud2.webp", alt: "Saburi Neowud board full view" },
+      { src: "/images/neowud-product/neowud2.webp", alt: "Saburi Neowud board, close-up detail" },
     ],
   },
   {
@@ -1118,7 +1118,7 @@ export const products: Product[] = [
     ],
     images: [
       { src: "/images/modwud-product/marine1.webp", alt: "Saburi Modwud Marine board full view" },
-      { src: "/images/modwud-product/marine2.webp", alt: "Saburi Modwud Marine board full view" },
+      { src: "/images/modwud-product/marine2.webp", alt: "Saburi Modwud Marine board, close-up detail" },
     ],
     warrantyYears: 15,
   },

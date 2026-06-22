@@ -24,7 +24,7 @@ import {
   LOCAL_BUSINESS,
   LOCALBUSINESS_SAME_AS,
 } from "@/data/site";
-import type { Faq, Product } from "@/data/types";
+import type { Faq, Product, ProductCategory } from "@/data/types";
 
 type Schema = Record<string, unknown>;
 
@@ -107,7 +107,19 @@ export function breadcrumbSchema(pathname: string): Schema {
   };
 }
 
+/** schema.org category + material per product category. Previously hardcoded "Plywood" for ALL
+ * 22 products, which mislabels blockboards, WPC, chipboard, etc. Derived from product.category. */
+const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, { category: string; material: string }> = {
+  plywood: { category: "Plywood", material: "Plywood" },
+  blockboard: { category: "Block Board", material: "Block Board" },
+  flushdoor: { category: "Flush Door", material: "Wood" },
+  "wpc-pvc": { category: "WPC / PVC Board", material: "WPC / PVC" },
+  chipboard: { category: "Chipboard", material: "Particle Board" },
+  laminate: { category: "Laminate", material: "Laminate" },
+};
+
 export function productSchema(product: Product): Schema {
+  const labels = PRODUCT_CATEGORY_LABELS[product.category] ?? PRODUCT_CATEGORY_LABELS.plywood;
   const additionalProperty: Schema[] = [
     { "@type": "PropertyValue", name: "Grade", value: "Premium" },
     {
@@ -131,10 +143,44 @@ export function productSchema(product: Product): Schema {
     description: product.seo.description,
     brand: { "@type": "Brand", name: SITE_NAME },
     manufacturer: { "@type": "Organization", name: LEGAL_NAME, url: SITE_URL },
-    material: "Plywood",
+    material: labels.material,
     additionalProperty,
-    category: "Plywood",
+    category: labels.category,
     url: absUrl(`/products/${product.slug}`),
+  };
+}
+
+/** CollectionPage for a category hub (e.g. /plywood). Entity-links the sitewide WebSite +
+ * Organization so the hub is understood as part of the brand's graph. */
+export function collectionPageSchema(opts: {
+  pathname: string;
+  name: string;
+  description: string;
+}): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${SITE_URL}${opts.pathname}#webpage`,
+    url: absUrl(opts.pathname),
+    name: opts.name,
+    description: opts.description,
+    isPartOf: { "@id": WEBSITE_ID },
+    about: { "@id": ORG_ID },
+  };
+}
+
+/** ItemList of the products shown on a category hub — ordered links to each product page, so
+ * retrieval/AI systems and Google can read the full set from the hub's JSON-LD. */
+export function itemListSchema(products: Product[]): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: products.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: absUrl(`/products/${p.slug}`),
+      name: p.name,
+    })),
   };
 }
 

@@ -2,7 +2,7 @@ import type { Location } from "./types";
 import { LOCATION_BANNERS } from "./banners";
 
 /**
- * The 5 state/city location landing pages (§8). Body content (name/heading/pageHeaderTitle/
+ * The 6 state/city location landing pages (§8). Body content (name/heading/pageHeaderTitle/
  * intro prose/images/areaServed) extracted verbatim from the legacy
  * client/pages/SaburiBestPlywood*.jsx pages — note these pages render ONLY the intro prose
  * block (their tabs/badges/FAQ are commented out).
@@ -16,6 +16,37 @@ import { LOCATION_BANNERS } from "./banners";
  * "Best Plywood Kerela"; the Tamil Nadu page's image is "Bangalore 1.webp".
  */
 export const locations: Location[] = [
+  {
+    slug: "best-plywood-kolkata",
+    name: "The Best Plywood Manufacturer and Supplier in Kolkata",
+    heading: "Plywood Manufacturer & Supplier in Kolkata",
+    pageHeaderTitle: "Best Plywood Kolkata",
+    state: "West Bengal",
+    city: "Kolkata",
+    areaServed: ["Kolkata", "West Bengal", "Howrah", "Siliguri", "Durgapur"],
+    seo: {
+      title: "Best Plywood Manufacturer and Supplier in Kolkata, West Bengal | Saburi Ply",
+      description:
+        "Saburi Ply is a leading plywood manufacturer and supplier in Kolkata, West Bengal. Our Kolkata factory makes marine, BWP, fire-retardant and structural plywood for homes and projects across the state.",
+      keywords:
+        "best plywood in kolkata, plywood manufacturer kolkata, plywood suppliers kolkata, plywood dealers kolkata, plywood west bengal, marine plywood kolkata",
+      canonical: "/best-plywood-kolkata",
+    },
+    introHtml:
+      "<p>Saburi Ply is headquartered in Kolkata, and West Bengal is where our story began. As one of the foremost plywood manufacturers in Bengal, we make every panel close to home, so builders, fabricators, architects and homeowners across Kolkata get factory-direct quality, faster supply and dependable after-sales support.</p>" +
+      "<p>We are recognised among the best plywood brands in Kolkata for a complete, IS-certified range: boiling-waterproof marine plywood (IS 710), structural BWP plywood (IS 10701), moisture-resistant commercial plywood (IS 303), fire-retardant plywood (IS 5509) and heavy-duty shuttering plywood (IS 4990). Every board is made through our QuadPro process, is E0 emission-grade, and is treated to resist termites, borers and fungal decay.</p>" +
+      "<p>From homes in Salt Lake and New Town to large projects across Howrah, Durgapur and Siliguri, Saburi plywood is trusted for kitchens, wardrobes, doors, commercial interiors and structural work. As a leading <strong>plywood supplier in Kolkata</strong>, we offer competitive plywood prices without compromising on strength, finish or warranty, with select grades backed by guarantees from 30 years up to a lifetime money-back warranty.</p>" +
+      "<p>Whether you are a contractor sourcing in bulk, an interior designer specifying for a project, or a homeowner buying a few sheets, our Kolkata team will help you choose the right grade and arrange prompt delivery. Explore <a href=\"/plywood\" class=\"text-primary font-semibold underline underline-offset-2 hover:no-underline\">our full plywood range</a> or <a href=\"/contact\" class=\"text-primary font-semibold underline underline-offset-2 hover:no-underline\">request a quote</a>.</p>" +
+      "<p><strong>Why Saburi is among the best plywood manufacturers in West Bengal</strong></p>" +
+      "<ul>" +
+      "<li>Kolkata-based factory with factory-direct pricing and reliable, fast supply across West Bengal.</li>" +
+      "<li>A full IS-certified plywood range for every use, from marine and fire-retardant to structural and shuttering grades.</li>" +
+      "<li>QuadPro manufacturing, E0 emission, and termite, borer and fungal resistance on every panel.</li>" +
+      "</ul>",
+    images: [
+      { src: "/images/plywood-product/Saburi Gold.webp", alt: "Saburi plywood for Kolkata and West Bengal" },
+    ],
+  },
   {
     slug: "best-plywood-andhra-pradesh",
     name: "Discover the Best Plywood Manufacturer and Supplier in AP",

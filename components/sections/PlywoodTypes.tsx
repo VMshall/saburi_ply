@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { SmartImage } from "@/components/SmartImage";
 import { DoorOpen, Frame, CheckCircle, ArrowRight } from "lucide-react";
 import { GiWoodBeam } from "react-icons/gi";
@@ -53,6 +54,12 @@ export function PlywoodTypes({
         <div className="text-left lg:text-center mb-8 lg:mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-3 lg:mb-4">Our <span className="text-primary">Plywood Range</span></h2>
           <p className="text-base sm:text-lg lg:text-xl text-gray-700 max-w-3xl mx-auto ps-0 lg:px-4">Explore our diverse product range crafted for strength, style, and sustainability to suit every space and purpose.</p>
+          <div className="mt-4 lg:mt-6">
+            <Link href="/plywood" className="inline-flex items-center gap-2 text-sm sm:text-base font-semibold text-primary transition-all hover:gap-3">
+              View the full plywood range
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
         <div className="grid lg:grid-cols-12 gap-6 lg:gap-8">
           <div className="lg:col-span-4 space-y-3 lg:space-y-4 order-2 lg:order-1" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>

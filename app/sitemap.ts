@@ -6,8 +6,9 @@ import { getAllPosts } from "@/lib/blog";
 
 /**
  * Generated sitemap (§6) — single source of truth from the data modules + blog content. Replaces
- * the static public/sitemap.xml (deleted, since it would shadow this route). 74 in-app URLs:
- * home + 7 static pages + 22 products + 5 locations + the blog index + 38 posts.
+ * the static public/sitemap.xml (deleted, since it would shadow this route). 71 in-app URLs:
+ * home + the /plywood category hub + 7 static pages + 22 products + 6 locations + the blog
+ * index + 33 posts.
  *
  * P8: the blog is now in-app (WordPress retired), so WE own the slash-less /blog/<slug> URLs —
  * they were dropped in P5 when WP owned them. Still excluded: the stale /best-plywood-bangalore
@@ -38,6 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     entry("/", 1.0, "daily"),
+    entry("/plywood", 0.9, "weekly"),
     ...STATIC_PATHS.map((p) => entry(p, 0.7, "monthly")),
     ...productSlugs.map((s) => entry(`/products/${s}`, 0.8, "weekly")),
     ...locationSlugs.map((s) => entry(`/${s}`, 0.8, "weekly")),

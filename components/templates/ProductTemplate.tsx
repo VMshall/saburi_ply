@@ -1,6 +1,8 @@
 import { Fragment } from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import type { Product } from "@/data/types";
+import { products } from "@/data/products";
 import { PageHeader } from "@/components/PageHeader";
 import { Icon } from "@/components/Icon";
 import { SmartImage } from "@/components/SmartImage";
@@ -39,6 +41,15 @@ export function ProductTemplate({ product }: { product: Product }) {
     title: b.title,
     sub: b.sub,
   }));
+
+  // Related products (internal linking): explicit `related` slugs, else same-category siblings.
+  const curated = (product.related ?? [])
+    .map((s) => products.find((p) => p.slug === s))
+    .filter((p): p is Product => Boolean(p));
+  const relatedProducts = curated.length
+    ? curated
+    : products.filter((p) => p.category === product.category && p.slug !== product.slug).slice(0, 4);
+  const relatedHeading = product.category === "plywood" ? "Related Plywood" : "Related Products";
 
   return (
     <div className="min-h-screen bg-background">
@@ -161,6 +172,63 @@ export function ProductTemplate({ product }: { product: Product }) {
                 Contact Support
               </Link>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Related products — internal links to siblings (+ the hub for plywood) */}
+      {relatedProducts.length > 0 && (
+        <section className="bg-[#faf8f3] py-12 sm:py-16">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+            <div className="text-center mb-8 lg:mb-12">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary tracking-wide">
+                {relatedHeading}
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {relatedProducts.map((rp) => (
+                <Link
+                  key={rp.slug}
+                  href={`/products/${rp.slug}`}
+                  className="group flex flex-col overflow-hidden rounded-xl bg-white ring-1 ring-gray-100 shadow-[0_8px_30px_rgba(2,6,23,0.05)] transition-all hover:ring-primary/30 hover:shadow-[0_16px_40px_rgba(2,6,23,0.1)]"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-100 to-stone-50">
+                    {rp.images[0] && (
+                      <SmartImage
+                        src={rp.images[0].src}
+                        alt={rp.images[0].alt}
+                        fill
+                        objectFit="contain"
+                        sizes="(max-width: 1024px) 50vw, 25vw"
+                        className="h-full w-full p-3 transition-transform duration-500 group-hover:scale-105"
+                      />
+                    )}
+                    {rp.certification && (
+                      <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-primary ring-1 ring-primary/10 backdrop-blur">
+                        {rp.certification}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3 className="text-sm font-semibold text-gray-900">{rp.name}</h3>
+                    <span className="mt-auto inline-flex items-center gap-1 pt-3 text-sm font-semibold text-primary">
+                      View details
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            {product.category === "plywood" && (
+              <div className="mt-8 text-center">
+                <Link
+                  href="/plywood"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+                >
+                  View the full plywood range <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            )}
           </div>
         </section>
       )}

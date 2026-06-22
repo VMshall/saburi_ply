@@ -89,6 +89,8 @@ export interface Product {
   brochureUrl?: string;
   certification?: string;
   warrantyYears?: number;
+  /** Explicit related-product slugs for the product-page rail; falls back to same-category siblings. */
+  related?: string[];
 }
 
 export interface Location {
@@ -109,6 +111,77 @@ export interface Location {
   /** Rendered intro prose block (HTML: paragraphs, partner heading, bullet list). */
   introHtml: string;
   images: ProductImage[];
+}
+
+/** A linked product reference used in a category table/card (anchor text + target slug). */
+export interface ProductRef {
+  name: string;
+  slug: string;
+}
+
+/** A row in a category page's "grades & types" comparison table. */
+export interface GradeRow {
+  grade: string;
+  isCode: string;
+  waterResistance: string;
+  bestFor: string;
+  products: ProductRef[];
+}
+
+/** A "why choose" USP block on a category page (icon + title + blurb). */
+export interface CategoryUsp {
+  iconKey: IconKey;
+  title: string;
+  description: string;
+}
+
+/** A use-case card that links to the most relevant product/guide. */
+export interface UseCaseCard {
+  iconKey: IconKey;
+  title: string;
+  description: string;
+  href: string;
+}
+
+/** An indicative price row (a buying guide, NOT a quote). */
+export interface PriceRow {
+  grade: string;
+  range: string;
+  note: string;
+}
+
+/**
+ * A category/hub landing page (e.g. /plywood) targeting the category head term. Product
+ * membership is DERIVED by filtering `products` on `productCategory`, so the card grid + ItemList
+ * schema can never drift from the catalogue (mirrors the data-driven product/location model).
+ */
+export interface Category {
+  slug: string;
+  name: string;
+  /** PageHeader (breadcrumb-style) title. */
+  pageHeaderTitle: string;
+  bannerImage?: ResponsiveImage;
+  /** H1 heading (shown over the hero image). */
+  h1: string;
+  /** Small kicker above the hero H1. */
+  heroEyebrow: string;
+  /** Hero subheading under the H1. */
+  heroSubhead: string;
+  /** Hero trust stats (value + label) shown as a chip bar. */
+  heroStats: { value: string; label: string }[];
+  /** Intro prose (may contain inline HTML, e.g. <strong>). */
+  introHtml: string;
+  /** Filter key into data/products.ts — which products appear in the range grid. */
+  productCategory: ProductCategory;
+  rangeHeading: string;
+  rangeSubtitle: string;
+  grades: GradeRow[];
+  useCases: UseCaseCard[];
+  priceGuide: PriceRow[];
+  priceNote: string;
+  usps: CategoryUsp[];
+  faqs: Faq[];
+  seo: Seo;
 }
 
 /**
