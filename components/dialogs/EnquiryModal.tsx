@@ -89,7 +89,7 @@ export function EnquiryModal() {
     message: "",
   });
 
-  // Removed useEffect auto-open logic: Index.jsx handles the deferred mount.
+  // Opens on mount via useState(true); the DeferredEnquiry island gates WHEN this mounts (2s / 400px scroll).
 
   // Handle ESC key to close modal and focus trap
   useEffect(() => {
