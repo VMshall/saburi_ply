@@ -55,7 +55,7 @@ export default function BlogIndexPage() {
         </header>
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
+          {posts.map((post, i) => (
             <article key={post.slug} className="group flex flex-col overflow-hidden rounded-xl ring-1 ring-gray-100 bg-white shadow-[0_6px_24px_rgba(2,6,23,0.05)] transition-shadow hover:shadow-[0_12px_32px_rgba(2,6,23,0.10)]">
               <Link href={`/blog/${post.slug}`} className="block">
                 {post.image ? (
@@ -66,6 +66,7 @@ export default function BlogIndexPage() {
                     objectFit="cover"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="w-full"
+                    priority={i === 0}
                   />
                 ) : (
                   <div className="aspect-[16/9] bg-gray-100" />
