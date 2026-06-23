@@ -45,6 +45,10 @@ const PRODUCT_SLUGS = [
 // nginx .php / legacy-slug → new URL (NON-identity). saburiply.com:58-124
 const PHP_REDIRECTS = [
   ["/marine-plywood-india.php", "/products/marine-plywood-india"],
+  // underscore variant — confirmed external backlink (encorehq.org) via Ahrefs; would 404/403 at
+  // cutover and strand that equity. The old PHP site used underscore_naming (cf. brw_plywood.php,
+  // block_board_gurjan.php below), so other underscore variants may exist — confirm via full GSC Links.
+  ["/marine_plywood.php", "/products/marine-plywood-india"],
   ["/block-board-india.php", "/products/block-board-india"],
   ["/flush-door-india.php", "/products/flush-door-india"],
   ["/flexi-plywood-india.php", "/products/flexi-plywood-india"],

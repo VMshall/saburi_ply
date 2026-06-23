@@ -13,7 +13,7 @@ const extra = process.argv.slice(2).filter((a) => !a.startsWith("http"));
 
 const CANDIDATES = [
   // products
-  "marine-plywood-india.php", "block-board-india.php", "flush-door-india.php",
+  "marine-plywood-india.php", "marine_plywood.php", "block-board-india.php", "flush-door-india.php",
   "flexi-plywood-india.php", "shuttering-plywood-india.php", "fire-retardant-india.php",
   "saburi-board.php", "saburi-perennial.php", "saburi-club.php", "saburi-door-frame.php",
   "saburi-h-plus.php", "saburi-scout-plywood.php", "modwud-particle-board.php",
