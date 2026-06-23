@@ -78,6 +78,6 @@ export const LOCAL_BUSINESS = {
   image: LOGO_WEBP,
   description:
     "Saburi Ply is a trusted name and best plywood manufacturer and supplier in India, known for superior quality, innovation, and sustainable craftsmanship.",
-  priceRange: "¥¥",
+  priceRange: "₹₹",
   openingHours: "Mo-Sa 10:00-18:00",
 } as const;

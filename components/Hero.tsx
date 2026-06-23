@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 // Format: { desktop: "url", tablet: "url", mobile: "url" }
 const slides = [
   {
-    title: "bannerOne",
+    title: "Saburi fire retardant plywood",
     images: {
       desktop: "/images/heroBanners/fire-retardant-desk.webp",
       tablet: "/images/heroBanners/fire-retardant-tab.webp",
@@ -15,7 +15,7 @@ const slides = [
     },
   },
   {
-    title: "bannerTwo",
+    title: "Saburi calibrated plywood — precision-sized panels",
     images: {
       desktop: "/images/heroBanners/calibrated-desk.webp",
       tablet: "/images/heroBanners/calibrated-tab.webp",
@@ -23,7 +23,7 @@ const slides = [
     },
   },
   {
-    title: "bannerThree",
+    title: "Saburi marine grade waterproof plywood",
     images: {
       desktop: "/images/heroBanners/marine-grade-desk.webp",
       tablet: "/images/heroBanners/marine-grade-tab.webp",
@@ -31,7 +31,7 @@ const slides = [
     },
   },
   {
-    title: "bannerFour",
+    title: "Saburi zero-emission E0 plywood",
     images: {
       desktop: "/images/heroBanners/zero-emission-desk.webp",
       tablet: "/images/heroBanners/zero-emission-tab.webp",

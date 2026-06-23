@@ -23,8 +23,14 @@ export const metadata: Metadata = {
     title: indexMeta.title,
     description: indexMeta.description,
     url: "/blog",
+    images: [{ url: "/images/saburi.jpg", width: 1200, height: 630, alt: "Saburi Ply" }],
   },
-  twitter: { card: "summary_large_image", title: indexMeta.title, description: indexMeta.description },
+  twitter: {
+    card: "summary_large_image",
+    title: indexMeta.title,
+    description: indexMeta.description,
+    images: ["/images/saburi.jpg"],
+  },
 };
 
 function formatDate(iso: string): string {
