@@ -48,7 +48,7 @@ export function AboutUs() {
             <div className="space-y-6">
               <p className="text-gray-700 leading-relaxed">
                 That belief became the standard Saburi Ply has upheld ever since.<br />
-                Today, Saburi Ply operates three manufacturing facilities, employs over a thousand people, supplies across 350+ districts, and has served more
+                Today, Saburi Ply operates three manufacturing facilities, employs over a thousand people, supplies across 427+ districts, and has served more
                 than a lakh clients across India.
               </p>
 
@@ -126,7 +126,7 @@ export function AboutUs() {
 
               <div className="text-center bg-white rounded-lg p-6 shadow-sm">
                 <Globe className="h-8 w-8 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-bold text-black">350+</div>
+                <div className="text-2xl font-bold text-black">427+</div>
                 <div className="text-sm text-gray-600">Districts Served</div>
               </div>
               <div className="text-center bg-white rounded-lg p-6 shadow-sm">

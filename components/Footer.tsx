@@ -312,7 +312,7 @@ export function Footer() {
                   <a href="https://www.youtube.com/@saburiplywood" target="_blank" rel="noopener noreferrer" aria-label="Subscribe to our YouTube channel" className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors touch-manipulation">
                     <Youtube className="h-5 w-5" aria-hidden="true" />
                   </a>
-                  <a href="https://www.linkedin.com/in/saburi-ply-347865308/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on LinkedIn" className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors touch-manipulation">
+                  <a href="https://www.linkedin.com/in/saburi-ply/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on LinkedIn" className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors touch-manipulation">
                     <Linkedin className="h-5 w-5" aria-hidden="true" />
                   </a>
                 </div>

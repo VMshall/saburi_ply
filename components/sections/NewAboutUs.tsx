@@ -102,7 +102,7 @@ export function NewAboutUs() {
 
                             <div className="text-center bg-white rounded-lg p-6 shadow-sm">
                                 <Globe className="h-8 w-8 text-primary mx-auto mb-2" />
-                                <div className="text-2xl font-bold text-black">350+</div>
+                                <div className="text-2xl font-bold text-black">427+</div>
                                 <div className="text-sm text-gray-600">Districts Served</div>
                             </div>
                             <div className="text-center bg-white rounded-lg p-6 shadow-sm">

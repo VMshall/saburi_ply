@@ -96,7 +96,7 @@ export function Testimonials() {
           <div className="space-y-4 lg:space-y-8 order-3 lg:order-1">
             <div className="text-center bg-white rounded-lg p-4 lg:p-6 shadow-sm">
               <Building className="h-6 w-6 lg:h-8 lg:w-8 text-primary mx-auto mb-1 lg:mb-2" />
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-black">10,000+</div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-black">1 Lakh+</div>
               <div className="text-xs sm:text-sm text-gray-600">Satisfied Customers</div>
             </div>
             <div className="text-center bg-white rounded-lg p-4 lg:p-6 shadow-sm">
@@ -106,8 +106,8 @@ export function Testimonials() {
             </div>
             <div className="text-center bg-white rounded-lg p-4 lg:p-6 shadow-sm">
               <Star className="h-6 w-6 lg:h-8 lg:w-8 text-primary mx-auto mb-1 lg:mb-2" />
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-black">4.9/5</div>
-              <div className="text-xs sm:text-sm text-gray-600">Average Rating</div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-black">4.7/5</div>
+              <div className="text-xs sm:text-sm text-gray-600">Google Rating</div>
             </div>
           </div>
 

@@ -9,7 +9,7 @@
 
 export const SITE_URL = "https://www.saburiply.com";
 export const SITE_NAME = "Saburi Ply";
-export const LEGAL_NAME = "Saburi Plywood Pvt Ltd";
+export const LEGAL_NAME = "Saburi Panel Private Limited";
 
 export const CONTACT = {
   /** Toll-free, digits-only (as emitted in the current Organization JSON-LD). */
@@ -42,13 +42,13 @@ export const SOCIAL = {
   facebook: "https://www.facebook.com/saburiply",
   instagram: "https://www.instagram.com/saburiply/",
   youtube: "https://www.youtube.com/@saburiplywood",
-  linkedin: "https://www.linkedin.com/in/saburi-ply-347865308/",
+  linkedin: "https://www.linkedin.com/in/saburi-ply/",
   maps: "https://maps.app.goo.gl/mAXnSeaHcvxy8Enr6",
 } as const;
 
 /** Organization-level `sameAs` from PageMeta.jsx (distinct from the LocalBusiness set). */
 export const ORG_SAME_AS = [
-  "https://www.linkedin.com/company/saburi-ply",
+  "https://www.linkedin.com/in/saburi-ply/",
   "https://www.indiamart.com/saburi-ply",
   "https://www.crunchbase.com/organization/saburi-ply",
 ];
