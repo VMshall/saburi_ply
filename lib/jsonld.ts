@@ -25,6 +25,7 @@ import {
   LOCALBUSINESS_SAME_AS,
 } from "@/data/site";
 import type { Faq, Product, ProductCategory } from "@/data/types";
+import { productSpecs } from "@/lib/product-specs";
 
 type Schema = Record<string, unknown>;
 
@@ -120,21 +121,12 @@ const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, { category: string; mater
 
 export function productSchema(product: Product): Schema {
   const labels = PRODUCT_CATEGORY_LABELS[product.category] ?? PRODUCT_CATEGORY_LABELS.plywood;
-  const additionalProperty: Schema[] = [
-    { "@type": "PropertyValue", name: "Grade", value: "Premium" },
-    {
-      "@type": "PropertyValue",
-      name: "Certification",
-      value: product.certification ?? "ISI Certified",
-    },
-  ];
-  if (product.warrantyYears) {
-    additionalProperty.push({
-      "@type": "PropertyValue",
-      name: "Warranty",
-      value: `${product.warrantyYears} years`,
-    });
-  }
+  // Mirror the visible SpecTable rows into structured data (same productSpecs() source → no drift).
+  const additionalProperty: Schema[] = productSpecs(product).map((s) => ({
+    "@type": "PropertyValue",
+    name: s.label,
+    value: s.value,
+  }));
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -144,7 +136,7 @@ export function productSchema(product: Product): Schema {
     brand: { "@type": "Brand", name: SITE_NAME },
     manufacturer: { "@type": "Organization", name: LEGAL_NAME, url: SITE_URL },
     material: labels.material,
-    additionalProperty,
+    ...(additionalProperty.length ? { additionalProperty } : {}),
     category: labels.category,
     url: absUrl(`/products/${product.slug}`),
   };
