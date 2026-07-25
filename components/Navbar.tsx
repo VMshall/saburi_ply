@@ -247,7 +247,7 @@ export function Navbar() {
                   <a href="https://www.youtube.com/@saburiplywood" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="hover:text-primary transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M21.58 7.19a2.75 2.75 0 0 0-1.94-1.94C17.89 5 12 5 12 5s-5.89 0-7.64.25A2.75 2.75 0 0 0 2.42 7.19C2.17 8.94 2.17 12 2.17 12s0 3.06.25 4.81a2.75 2.75 0 0 0 1.94 1.94C6.11 19 12 19 12 19s5.89 0 7.64-.25a2.75 2.75 0 0 0 1.94-1.94c.25-1.75.25-4.81.25-4.81s0-3.06-.25-4.81zM10 15.5v-7l6 3.5-6 3.5z" /></svg>
                   </a>
-                  <a href="https://www.linkedin.com/in/saburi-ply-347865308/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="hover:text-primary transition-colors">
+                  <a href="https://www.linkedin.com/in/saburi-ply/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="hover:text-primary transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M6.94 6.5a1.44 1.44 0 1 1 0-2.88 1.44 1.44 0 0 1 0 2.88zM5.5 8h2.88v10.5H5.5V8zm5.19 0h2.76v1.44h.04c.38-.72 1.32-1.48 2.72-1.48 2.9 0 3.44 1.9 3.44 4.38v6.16h-2.88v-5.46c0-1.3-.02-2.98-1.82-2.98-1.82 0-2.1 1.42-2.1 2.88v5.56h-2.88V8z" /></svg>
                   </a>
                 </div>
@@ -276,7 +276,7 @@ export function Navbar() {
                   <a href="https://www.youtube.com/@saburiplywood" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="hover:text-primary transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M21.58 7.19a2.75 2.75 0 0 0-1.94-1.94C17.89 5 12 5 12 5s-5.89 0-7.64.25A2.75 2.75 0 0 0 2.42 7.19C2.17 8.94 2.17 12 2.17 12s0 3.06.25 4.81a2.75 2.75 0 0 0 1.94 1.94C6.11 19 12 19 12 19s5.89 0 7.64-.25a2.75 2.75 0 0 0 1.94-1.94c.25-1.75.25-4.81.25-4.81s0-3.06-.25-4.81zM10 15.5v-7l6 3.5-6 3.5z" /></svg>
                   </a>
-                  <a href="https://www.linkedin.com/in/saburi-ply-347865308/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="hover:text-primary transition-colors">
+                  <a href="https://www.linkedin.com/in/saburi-ply/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="hover:text-primary transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M6.94 6.5a1.44 1.44 0 1 1 0-2.88 1.44 1.44 0 0 1 0 2.88zM5.5 8h2.88v10.5H5.5V8zm5.19 0h2.76v1.44h.04c.38-.72 1.32-1.48 2.72-1.48 2.9 0 3.44 1.9 3.44 4.38v6.16h-2.88v-5.46c0-1.3-.02-2.98-1.82-2.98-1.82 0-2.1 1.42-2.1 2.88v5.56h-2.88V8z" /></svg>
                   </a>
                 </div>
@@ -725,7 +725,7 @@ export function Navbar() {
             <div className="px-3 py-4 border-t border-gray-200 mt-3 space-y-3">
               <div className="flex items-center space-x-3 text-sm text-black p-2 bg-gray-50 rounded-lg">
                 <Phone className="h-4 w-4 text-primary" />
-                <span>+91 98765 43210</span>
+                <a href="tel:1800313666000" className="hover:text-primary transition-colors">1800 313 666 000</a>
               </div>
               <div className="flex items-center space-x-3 text-sm text-black p-2 bg-gray-50 rounded-lg">
                 <Mail className="h-4 w-4 text-primary" />

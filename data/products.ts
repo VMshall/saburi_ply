@@ -98,7 +98,7 @@ export const products: Product[] = [
       "Bend resistant: balanced construction ensures dimensional stability which prevents warpage and builds strength",
       "Veneers cooked at 60° for removal of starch & micro-organism",
       "QuadPro Technology",
-      "Money back warranty",
+      "7X Money Back Warranty",
       "Lifetime warranty",
     ],
     applications: [
@@ -157,12 +157,13 @@ export const products: Product[] = [
       "Double face 6mm",
       "Pressure impregnated with preservatives",
       "Made from high‑quality hardwood veneers",
+      "5X Money Back Warranty",
+      "Lifetime Warranty",
     ],
     applications: [
       "Manufactured through QuadPro Process",
       "Mechanically pressure treated",
       "Withstands all climatic conditions",
-      "Lifetime Warranty 5x*",
     ],
     thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "18mm", "25mm"],
     sizes: ["10x4 ft.", "8x4 ft.", "7x4 ft. etc."],
@@ -215,7 +216,7 @@ export const products: Product[] = [
       "Bend-resistant: balanced construction prevents warpage and enhances strength",
       "Veneers cooked at 60° to remove starch & micro-organisms",
       "QuadPro Technology",
-      "Money-back warranty",
+      "10X Money Back Warranty",
       "Lifetime warranty",
     ],
     applications: [
@@ -262,7 +263,7 @@ export const products: Product[] = [
       { label: "STRUCTURAL GRADE", iconKey: "shield" },
     ],
     introHtml:
-      "Fires can be frightening and deadly. Saburi Fire Retardant is treated with special fire retardant chemicals as per IS: 5509 specifications, which ensure lesser tendency of spark and ignition or spread of fire over the ply surface. This certification ensures the rate of burning of the plywood should be more than 20 minutes, and the time taken for flames to penetrate the plywood has to be more than 30 minutes. Saburi Fire Retardant Ply also means 30% lesser smoke generation and significant decreased fire spread, allowing you and your loved ones to move to safety. Providing three times money back warranty for lifetime, Saburi Fire Retardant Ply is commonly used in public places where the risk of fire has to be reduced such as for making the woodwork in the kitchens of large restaurants, or for the interior woodwork done in public theatres and halls, and the wood used in the railway compartments of trains. It is highly recommended for homes and offices, and any other such places where the risk and spread of fire has to be reduced.",
+      "Fires can be frightening and deadly. Saburi Fire Retardant is treated with special fire retardant chemicals as per IS: 5509 specifications, which ensure lesser tendency of spark and ignition or spread of fire over the ply surface. This certification ensures the rate of burning of the plywood should be more than 20 minutes, and the time taken for flames to penetrate the plywood has to be more than 30 minutes. Saburi Fire Retardant Ply also means 30% lesser smoke generation and significant decreased fire spread, allowing you and your loved ones to move to safety. Providing two times money back warranty for lifetime, Saburi Fire Retardant Ply is commonly used in public places where the risk of fire has to be reduced such as for making the woodwork in the kitchens of large restaurants, or for the interior woodwork done in public theatres and halls, and the wood used in the railway compartments of trains. It is highly recommended for homes and offices, and any other such places where the risk and spread of fire has to be reduced.",
     features: [
       "Lesser tendency of spark and ignite",
       "Slow burning",
