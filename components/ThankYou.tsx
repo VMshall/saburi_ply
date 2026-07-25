@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { RateOnGoogle } from "@/components/RateOnGoogle";
 
 /**
  * Reusable inline success panel (client) — shown after a form submits (e.g. /contact). Ported
@@ -41,9 +41,13 @@ export function ThankYou({
                 "Your inquiry has been submitted successfully. Our team will contact you within 24 hours with a personalized quote and detailed product information."}
             </p>
             <div className="text-sm text-gray-500">Reference ID: {refId}</div>
-            <Button onClick={onReset} className="mt-6 bg-primary hover:bg-primary/90 text-white">
+            <RateOnGoogle variant="card" placement="thank_you_inline" className="mt-6" />
+            <button
+              onClick={onReset}
+              className="mt-8 text-sm font-medium text-gray-500 underline-offset-4 transition-colors hover:text-gray-800 hover:underline"
+            >
               {buttonText}
-            </Button>
+            </button>
           </div>
         </div>
       </div>

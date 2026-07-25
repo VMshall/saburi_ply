@@ -26,6 +26,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { RateOnGoogle } from "@/components/RateOnGoogle";
 import { FaWhatsapp } from "react-icons/fa";
 import dynamic from "next/dynamic";
 
@@ -315,6 +316,10 @@ export function Footer() {
                   <a href="https://www.linkedin.com/in/saburi-ply/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on LinkedIn" className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors touch-manipulation">
                     <Linkedin className="h-5 w-5" aria-hidden="true" />
                   </a>
+                </div>
+                {/* Google review CTA — persistent trust anchor + collect (Feature 1) */}
+                <div className="mt-5">
+                  <RateOnGoogle variant="footer" placement="footer" />
                 </div>
               </div>
             </div>
