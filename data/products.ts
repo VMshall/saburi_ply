@@ -98,7 +98,7 @@ export const products: Product[] = [
       "Bend resistant: balanced construction ensures dimensional stability which prevents warpage and builds strength",
       "Veneers cooked at 60° for removal of starch & micro-organism",
       "QuadPro Technology",
-      "Money back warranty",
+      "7X Money Back Warranty",
       "Lifetime warranty",
     ],
     applications: [
@@ -157,12 +157,13 @@ export const products: Product[] = [
       "Double face 6mm",
       "Pressure impregnated with preservatives",
       "Made from high‑quality hardwood veneers",
+      "5X Money Back Warranty",
+      "Lifetime Warranty",
     ],
     applications: [
       "Manufactured through QuadPro Process",
       "Mechanically pressure treated",
       "Withstands all climatic conditions",
-      "Lifetime Warranty 5x*",
     ],
     thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "18mm", "25mm"],
     sizes: ["10x4 ft.", "8x4 ft.", "7x4 ft. etc."],
@@ -215,7 +216,7 @@ export const products: Product[] = [
       "Bend-resistant: balanced construction prevents warpage and enhances strength",
       "Veneers cooked at 60° to remove starch & micro-organisms",
       "QuadPro Technology",
-      "Money-back warranty",
+      "10X Money Back Warranty",
       "Lifetime warranty",
     ],
     applications: [
