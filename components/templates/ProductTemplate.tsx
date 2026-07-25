@@ -9,6 +9,7 @@ import { SmartImage } from "@/components/SmartImage";
 import { JsonLd } from "@/components/JsonLd";
 import { ReadMore } from "@/components/islands/ReadMore";
 import { SpecsTabs } from "@/components/islands/SpecsTabs";
+import { SpecTable } from "@/components/SpecTable";
 import { FeatureBadgesRail } from "@/components/islands/FeatureBadgesRail";
 import { FaqAccordion } from "@/components/islands/FaqAccordion";
 import { breadcrumbSchema, faqSchema, productSchema } from "@/lib/jsonld";
@@ -107,13 +108,13 @@ export function ProductTemplate({ product }: { product: Product }) {
                 <ReadMore html={introHtml} />
               </div>
 
+              <SpecTable product={product} />
+
               <hr className="my-5 border-gray-200" />
 
               <SpecsTabs
                 features={product.features}
                 applications={product.applications}
-                thicknesses={product.thicknesses}
-                sizes={product.sizes}
               />
             </div>
           </div>

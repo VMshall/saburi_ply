@@ -89,6 +89,10 @@ export interface Product {
   brochureUrl?: string;
   certification?: string;
   warrantyYears?: number;
+  /** Display warranty for the spec table, e.g. "30-year" or "Lifetime + 7× money-back". */
+  warranty?: string;
+  /** Emission class for the spec table, e.g. "E0". */
+  emission?: string;
   /** Explicit related-product slugs for the product-page rail; falls back to same-category siblings. */
   related?: string[];
 }

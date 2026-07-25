@@ -18,6 +18,7 @@ import { PRODUCT_BANNERS } from "./banners";
 export const products: Product[] = [
   {
     slug: "marine-plywood-india",
+    warranty: "30-year",
     name: "Saburi Gold (IS: 710)",
     heading: "Best Marine Plywood Manufacturer and Supplier in India",
     category: "plywood",
@@ -70,6 +71,8 @@ export const products: Product[] = [
   },
   {
     slug: "saburi-perennial",
+    warranty: "Lifetime + 7× money-back",
+    emission: "E0",
     name: "Saburi Perennial (IS: 10701)",
     heading: "Saburi Perennial",
     category: "plywood",
@@ -132,6 +135,8 @@ export const products: Product[] = [
   },
   {
     slug: "saburi-club-h-plus",
+    warranty: "Lifetime + 5× money-back",
+    emission: "E0",
     name: "Saburi Club H+ (IS: 10701)",
     heading: "Saburi Club H+",
     category: "plywood",
@@ -188,6 +193,8 @@ export const products: Product[] = [
   },
   {
     slug: "saburi-titanium-plus",
+    warranty: "Lifetime + 10× money-back",
+    emission: "E0",
     name: "Saburi Titanium Plus (IS: 10701)",
     heading: "Saburi Titanium Plus",
     category: "plywood",
@@ -248,6 +255,8 @@ export const products: Product[] = [
   },
   {
     slug: "fire-retardant-india",
+    warranty: "Lifetime + 2× money-back",
+    emission: "E0",
     name: "Saburi FR (IS: 5509)",
     heading: "Saburi Fire Retardant",
     category: "plywood",
@@ -1062,6 +1071,7 @@ export const products: Product[] = [
   },
   {
     slug: "saburi-hydramax-board",
+    warranty: "15-year",
     name: "Saburi Modwud Hydramax",
     heading: "Marine Chipboard Manufacturer in India",
     category: "chipboard",
