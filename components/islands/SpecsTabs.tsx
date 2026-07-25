@@ -4,10 +4,10 @@ import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type TabKey = "features" | "applications" | "thickness" | "sizes";
+type TabKey = "features" | "applications";
 
 /**
- * Spec tabs (Unique Features / Application / Available Thickness / Available Sizes). Ports the
+ * Spec tabs (Unique Features / Application). Thickness & sizes now live in the SpecTable (B2). Ports the
  * tabbed lists from the product pages. Improvement over the legacy page: ALL non-empty lists are
  * server-rendered into the HTML and toggled via CSS (the original only prerendered the active
  * tab), so every spec is crawlable. Only tabs with data are shown.
@@ -15,20 +15,14 @@ type TabKey = "features" | "applications" | "thickness" | "sizes";
 export function SpecsTabs({
   features,
   applications,
-  thicknesses,
-  sizes,
 }: {
   features: string[];
   applications: string[];
-  thicknesses: string[];
-  sizes: string[];
 }) {
   const tabs = (
     [
       { key: "features", label: "Unique Features", items: features },
       { key: "applications", label: "Application", items: applications },
-      { key: "thickness", label: "Available Thickness", items: thicknesses },
-      { key: "sizes", label: "Available Sizes", items: sizes },
     ] as { key: TabKey; label: string; items: string[] }[]
   ).filter((t) => t.items.length > 0);
 
