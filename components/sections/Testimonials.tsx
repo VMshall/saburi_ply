@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Star, Quote, Building, Users, Play } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import { RateOnGoogle } from "@/components/RateOnGoogle";
 
 export function Testimonials() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -173,7 +174,10 @@ export function Testimonials() {
             <h6 className="text-xl lg:text-2xl font-bold text-black mb-3 lg:mb-4">Join Our Satisfied Customers</h6>
             <p className="text-sm lg:text-base text-gray-600 mb-4 lg:mb-6 max-w-2xl mx-auto px-4">Experience the same quality and service that our customers rave about. Get your personalized quote today and see the difference.</p>
 
-            <button className="bg-primary hover:bg-primary/90 text-white px-6 lg:px-8 py-3 rounded-lg font-medium transition-colors touch-manipulation w-full sm:w-auto" onClick={() => document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" })}>Get Your Quote Now</button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button className="bg-primary hover:bg-primary/90 text-white px-6 lg:px-8 py-3 rounded-lg font-medium transition-colors touch-manipulation w-full sm:w-auto" onClick={() => document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" })}>Get Your Quote Now</button>
+              <RateOnGoogle variant="button" placement="testimonials" className="w-full sm:w-auto h-auto px-6 lg:px-8 py-3" />
+            </div>
 
             {/* Video Testimonials Slider */}
             <div className="mt-6 lg:mt-10">

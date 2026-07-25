@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { RefId } from "@/components/islands/RefId";
+import { RateOnGoogle } from "@/components/RateOnGoogle";
 
 /**
  * /thank-you content (client). Form-specific context is carried via query params (§8 — the
@@ -35,8 +35,12 @@ export function ThankYouContent() {
         <div className="text-sm text-gray-500 mb-6">
           Reference ID: <RefId />
         </div>
-        <Link href={returnUrl}>
-          <Button className="mt-6 bg-primary hover:bg-primary/90 text-white">{buttonText}</Button>
+        <RateOnGoogle variant="card" placement="thank_you_page" className="mb-6" />
+        <Link
+          href={returnUrl}
+          className="mt-8 inline-block text-sm font-medium text-gray-500 underline-offset-4 transition-colors hover:text-gray-800 hover:underline"
+        >
+          {buttonText}
         </Link>
       </div>
     </div>

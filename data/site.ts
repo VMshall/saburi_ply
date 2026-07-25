@@ -81,3 +81,20 @@ export const LOCAL_BUSINESS = {
   priceRange: "₹₹",
   openingHours: "Mo-Sa 10:00-18:00",
 } as const;
+
+/**
+ * Google Business Profile — single source for the "Rate us on Google" CTA (Feature 1) and the
+ * live-reviews display (Feature 2, later). ONE public write-review link for everyone: no review
+ * gating (FTC Consumer Review Rule + Google policy — see CLAUDE.md).
+ */
+export const GOOGLE = {
+  /** Google Place ID for the Kolkata business profile. */
+  placeId: "ChIJ_3YerzOf-DkRhwOXJ8zCPZc",
+  /** Deep link that opens Google's "write a review" dialog directly. */
+  writeReviewUrl:
+    "https://search.google.com/local/writereview?placeid=ChIJ_3YerzOf-DkRhwOXJ8zCPZc",
+  /** Public Google Business Profile (all reviews). */
+  profileUrl: "https://share.google/DI6QBwkikbGLw5y5a",
+  /** Real aggregate rating shown on Google — always present as "4.7★ on Google" (BRAND_FACTS.md). */
+  rating: 4.7,
+} as const;
