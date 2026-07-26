@@ -147,7 +147,7 @@ Warranty multipliers, IS grades, and E0 on the structural trio all match. Issues
 10. ✅ Club H+ `applications` → real applications (luxury interiors, hotels, hospitals…).
 11. ✅ 12-step process — reordered to the catalogue's 12, "Preservative treatment" restored, leaked captions removed, GLP named in step 6.
 12. ✅ NewAboutUs "Two decades" → "35+ years of excellence" + `:36` grammar. ("35+ Years"/"Since 1990" both correct — kept.)
-13. ✅ Footer + Accreditation updated — footer adds ISO 14001/45001 (links) + ISI (BIS) text; accreditation adds an **IGBC** tile. CARB & CE not added — they duplicate the existing "Certificate of Conformance" / "Certificate of Conformity" tiles.
+13. ✅ Footer + Accreditation updated — footer adds ISO 14001/45001 (links) + ISI (BIS) text; accreditation adds an **IGBC** tile and relabels the existing tiles "Certificate of Conformance **(CARB)**" / "Certificate of Conformity **(CE)**" so those certs are explicit (no duplicate tiles).
 14. ✅ Blog "Saburi Plywood Pvt. Ltd." → "Saburi Panel Private Limited".
 
 **🟢 Low**

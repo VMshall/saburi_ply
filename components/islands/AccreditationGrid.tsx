@@ -13,7 +13,7 @@ export function AccreditationGrid() {
   const certifications = [
     {
       icon: Award,
-      title: "Certificate Of Conformance",
+      title: "Certificate of Conformance (CARB)",
       description: "Forest Wood Industries, Inc.",
       pdfUrl: "/certificates/certificate_of_conformance.webp"
     },
@@ -61,7 +61,7 @@ export function AccreditationGrid() {
     },
     {
       icon: CheckCircle2,
-      title: "Certificate of Conformity",
+      title: "Certificate of Conformity (CE)",
       description: "Certificate of Conformity",
       pdfUrl: "/certificates/certificate_of_conformity.webp"
     }
