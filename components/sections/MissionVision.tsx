@@ -12,7 +12,7 @@ type MissionVisionProps = {
 export function Mission({
   title = "Our Mission",
   description =
-  "Saburi Plywood aims to strengthen its leadership in India’s plywood industry by delivering uncompromised quality, sustainable practices, and long-term trust. Our mission is to create healthier homes and workspaces through continuous improvement and responsible craftsmanship.",
+  "Saburi Plywood aims to strengthen its leadership in India’s plywood industry by delivering uncompromised quality, sustainable practices, and long-term trust. Our mission is to create healthier homes and workspaces through continuous improvement and responsible craftsmanship. Proudly aligned with Make in India, Skill India and Swachh Bharat, we remain committed to youth empowerment, skill development and a self-reliant India.",
   bullets = [
     "Premium quality as standard",
     "Trust built through consistency",

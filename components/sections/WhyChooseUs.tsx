@@ -46,7 +46,7 @@ export function WhyChooseUs() {
   const benefits = [
     { icon: Shield, title: "Assured Quality", description: "Precision-controlled manufacturing ensures every sheet meets global quality standards for strength and stability.", highlight: "100% Quality Assured" },
     { icon: Sprout, title: "Eco Commitment", description: "Sustainable sourcing from farmed timber and recyclable materials to protect the planet.", highlight: "Eco Friendly" },
-    { icon: Globe, title: "Wide Range", description: "Plywood, blockboards, flush doors, and smart panels designed for every need and style.", highlight: "Variety of Products" },
+    { icon: Globe, title: "Wide Range", description: "Plywood, blockboard, Modwud boards, WPC & PVC panels, flush doors, and NRFC eco-panels for every need and style.", highlight: "Variety of Products" },
     { icon: Clock, title: "Lifetime Warranty", description: "Confidence backed by warranty across multiple product lines for lasting peace of mind.", highlight: "Warranty Assured" },
     { icon: Flame, title: "Fire & Water Resistant", description: "Specialized treatments for safety against moisture, fire, and decay in all climates.", highlight: "Water Resistant" },
     { icon: Microchip, title: "Advanced Technology", description: "Automated, calibrated production ensures uniformity, smoothness, and consistency across boards.", highlight: "Technology" },

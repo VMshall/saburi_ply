@@ -3,7 +3,7 @@ import { SmartImage } from "@/components/SmartImage";
 
 export function NewAboutUs() {
     const achievements = [
-        "Two decades of excellence",
+        "35+ years of excellence",
         "100% quality-checked products",
         "PAN-India dealer network",
         "Sustainable manufacturing process",
@@ -33,7 +33,7 @@ export function NewAboutUs() {
 
                         <div className="space-y-6">
                             <p className="text-gray-700 leading-relaxed">
-                                Founded over three decades ago by <strong>Mr. Gajanand Munka</strong>, has started this business on 1990, Saburi Plywood blends modern technology with traditional integrity to deliver versatile plywood, blockboard, flush doors, and panel products.
+                                Founded in 1990 by <strong>Mr. Gajanand Munka</strong>, Saburi Plywood blends modern technology with traditional integrity to deliver versatile plywood, blockboard, pre-laminated (Modwud) boards, WPC & PVC panels, flush doors, and NRFC eco-panels (Neowud).
                             </p>
 
                             <p className="text-gray-700 leading-relaxed">

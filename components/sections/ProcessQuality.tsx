@@ -2,21 +2,21 @@ import { ChevronRight, BadgeCheck } from "lucide-react";
 
 export function ProcessQuality() {
   const leftSteps = [
-    "Timber log selection in yard",
-    "Machine peeling logs",
-    "Face vs. core veneer split",
-    "Drying sheets in line",
-    "Adhesive application scene",
-    "Core sheet arrangement",
+    "Careful selection of timber",
+    "Peeling",
+    "Separation into face & core",
+    "Drying",
+    "Core composition",
+    "Application of adhesive & GLP (Glue Line Protection)",
   ];
 
   const rightSteps = [
-    "Pressing in hydraulic press",
-    "Calibration machine",
-    "Cutting & sanding edge view",
-    "Face veneer overlay close-up",
-    "Quality check with tools",
-    "Final branding + packaged boards stacked",
+    "Matt ply pressing",
+    "Calibration",
+    "Face over-laying press",
+    "Sanding & trimming",
+    "Preservative treatment",
+    "Branding & dispatch",
   ];
 
   return (

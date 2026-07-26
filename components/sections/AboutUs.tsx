@@ -14,7 +14,7 @@ export function AboutUs() {
     },
     {
       label: "Saburi Fire Retardant:",
-      desc: "IS: 5509 certified. Burning rate exceeds 20 minutes. Flame penetration exceeds 30 minutes. 30% less smoke.",
+      desc: "IS: 5509 certified. Burning rate exceeds 20 minutes. Flame penetration exceeds 30 minutes. Reduced smoke generation.",
     },
     {
       label: "Flush Door:",
@@ -22,7 +22,7 @@ export function AboutUs() {
     },
     {
       label: "Certifications:",
-      desc: "IS: 710, IS: 1659, IS: 2202, IS: 5509. ISO 9001:2015 & BIS certified.",
+      desc: "IS: 710, IS: 1659, IS: 2202, IS: 5509. ISO 9001:2015, ISO 14001:2015, ISO 45001:2018, FSC, CARB, IGBC, CE & BIS certified.",
     },
   ];
 
@@ -53,9 +53,9 @@ export function AboutUs() {
               </p>
 
               <p className="text-gray-700 leading-relaxed">
-                Every product, plywood, blockboard, flush doors, fire retardant panels, shuttering ply, flexi plywood, WPC panels, marine grade sheets is
+                Every product — plywood, blockboard, pre-laminated (Modwud) boards, WPC & PVC panels, flush doors, and NRFC eco-panels (Neowud) — is
                 manufactured through an automated process with numerically controlled temperature, pressure, and adhesive spread. Each product line
-                holds an Indian Standard certification. Every product is backed by ISO 9001:2015 & BIS certified.
+                holds an Indian Standard certification. Every product is backed by ISO 9001:2015, ISO 14001:2015, ISO 45001:2018, FSC, CARB, IGBC, CE and BIS certification.
               </p>
               <p className="text-gray-700 leading-relaxed">
                 When you are searching for the <strong>best plywood manufacturer and supplier in India</strong>, what you are really searching for is someone who stands

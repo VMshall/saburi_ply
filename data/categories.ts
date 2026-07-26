@@ -34,7 +34,7 @@ export const categories: Category[] = [
     ],
     introHtml:
       "<p>Plywood is an engineered wood panel made by gluing thin layers (plies) of veneer together, with each layer's grain rotated for strength and dimensional stability. The grade you need depends on where it goes: a kitchen or bathroom calls for a <strong>boiling-waterproof (BWP) marine grade</strong>, everyday furniture is well served by a <strong>moisture-resistant (MR/BWR) grade</strong>, and concrete formwork needs dense <strong>shuttering plywood</strong>.</p>" +
-      "<p>Saburi Ply manufactures its plywood in Kolkata through the <strong>QuadPro process</strong>, using select hardwood veneers that are pressure-impregnated with preservatives, <strong>E0 emission-grade</strong>, termite and borer proof, and antifungal treated. The range is certified to the relevant Indian Standards (IS 710 marine, IS 303 commercial, IS 10701 structural, IS 5509 fire-retardant and IS 4990 shuttering), and select grades carry warranties from 30 years up to a lifetime money-back guarantee.</p>" +
+      "<p>Saburi Ply manufactures its plywood in Kolkata through the <strong>QuadPro process</strong>, using select hardwood veneers that are pressure-impregnated with preservatives, <strong>low-formaldehyde (E0 / E1 by grade)</strong>, termite and borer proof, and antifungal treated. The range is certified to the relevant Indian Standards (IS 710 marine, IS 303 commercial, IS 10701 structural, IS 5509 fire-retardant and IS 4990 shuttering), and select grades carry warranties from 30 years up to a lifetime money-back guarantee.</p>" +
       "<p>Use the grade comparison, buying guide and price guide below to find the right Saburi plywood for your project, whether that is a modular kitchen, a wardrobe, a fire-safe commercial fit-out or heavy structural work.</p>",
     productCategory: "plywood",
     rangeHeading: "Saburi Plywood Range",
@@ -170,6 +170,12 @@ export const categories: Category[] = [
           "A four-stage manufacturing process for uniform density, strength and a smooth, laminate-ready finish.",
       },
       {
+        iconKey: "shield-plus",
+        title: "Glue Line Protection (GLP)",
+        description:
+          "GLP treatment at every glue line for stronger, longer-lasting bonds that resist moisture, fungi and delamination.",
+      },
+      {
         iconKey: "droplets",
         title: "Boiling Waterproof",
         description:
@@ -177,7 +183,7 @@ export const categories: Category[] = [
       },
       {
         iconKey: "leaf",
-        title: "E0 Emission-Grade",
+        title: "Low-Emission (E0 / E1)",
         description: "Low-formaldehyde panels engineered for healthier indoor air.",
       },
       {
