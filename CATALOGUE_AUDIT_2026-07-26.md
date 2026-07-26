@@ -4,7 +4,7 @@
 **Scope:** every fact in the catalogue **except the factory-test tables on pages 7, 9, 11** (excluded per instruction — "can be corrected later"). The FR/Gold/Scout test tables on pp. 13/15/17 **were** audited.
 **Nature:** originally a read-only audit; line references are `file:line`.
 
-> **Update (2026-07-26):** the six 🔴 high-severity items were subsequently **fixed** in `data/products.ts` and `components/sections/AboutUs.tsx` — 18→19 mm on all catalogue plywood; Titanium Plus thickness/sizes populated; Scout 21-yr warranty added; FR "309 %"/"30 %" smoke → qualitative "reduced smoke"; homepage cert line expanded to the catalogue's full set (ISO 9001:2015 / 14001:2015 / 45001:2018, FSC, CARB, IGBC, CE) **+ BIS retained** per founder confirmation (product-level ISI licence). `typecheck` + `vitest` pass. Following founder confirmation (2026-07-26), most 🟡/🟢 items are now fixed too (emission E0/E1, FR pill & 49-min, Club H+ applications, 12-step process, GLP featured, QuadPro wording, ® footer line, plant count → 3). **Still parked:** Footer/Accreditation cert badges (need files), the privacy-policy legal name, and the excluded-table face-veneer value — see §7.
+> **Update (2026-07-26):** the six 🔴 high-severity items were subsequently **fixed** in `data/products.ts` and `components/sections/AboutUs.tsx` — 18→19 mm on all catalogue plywood; Titanium Plus thickness/sizes populated; Scout 21-yr warranty added; FR "309 %"/"30 %" smoke → qualitative "reduced smoke"; homepage cert line expanded to the catalogue's full set (ISO 9001:2015 / 14001:2015 / 45001:2018, FSC, CARB, IGBC, CE) **+ BIS retained** per founder confirmation (product-level ISI licence). `typecheck` + `vitest` pass. Following founder confirmation (2026-07-26), most 🟡/🟢 items are now fixed too (emission E0/E1, FR pill & 49-min, Club H+ applications, 12-step process, GLP featured, QuadPro wording, ® footer line, plant count → 3). **Still parked (by choice):** the privacy-policy legal name and the excluded-table face-veneer value — see §7.
 
 **Legend —** Match: ✅ ok · ⚠️ partial/attention · ❌ mismatch · 🔵 catalogue-vs-brand-facts conflict (needs founder call).
 Severity: 🔴 high · 🟡 medium · 🟢 low · ⚪ out-of-catalogue-scope (bonus).
@@ -147,7 +147,7 @@ Warranty multipliers, IS grades, and E0 on the structural trio all match. Issues
 10. ✅ Club H+ `applications` → real applications (luxury interiors, hotels, hospitals…).
 11. ✅ 12-step process — reordered to the catalogue's 12, "Preservative treatment" restored, leaked captions removed, GLP named in step 6.
 12. ✅ NewAboutUs "Two decades" → "35+ years of excellence" + `:36` grammar. ("35+ Years"/"Since 1990" both correct — kept.)
-13. 🔵 Footer + Accreditation cert badges — **parked per founder** (need cert files or plain-text); homepage already carries the full set.
+13. ✅ Footer + Accreditation now show the full set — footer adds ISO 14001/45001 (links) + ISI (BIS) text; accreditation adds CARB/IGBC/CE tiles (their PDFs converted to webp). No founder files needed (all sourced in-repo).
 14. ✅ Blog "Saburi Plywood Pvt. Ltd." → "Saburi Panel Private Limited".
 
 **🟢 Low**
@@ -160,4 +160,4 @@ Warranty multipliers, IS grades, and E0 on the structural trio all match. Issues
 
 **⚪ Cleanup:** ✅ Deleted orphaned `index.html` (fake 4.8★/152 rating) — verified not served by Next.js (no SEO/AEO/UI impact; git-tracked, recoverable).
 
-**Still open:** #13 (cert badges — needs certificate files). **Parked by choice:** #1 (privacy-policy legal name), #17 (face-veneer — excluded tables). Everything else from the catalogue is done.
+**Still open:** none. **Parked by choice:** #1 (privacy-policy legal name), #17 (face-veneer — excluded tables). Everything else from the catalogue is done.

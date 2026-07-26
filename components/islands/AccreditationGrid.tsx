@@ -43,6 +43,24 @@ export function AccreditationGrid() {
     },
     {
       icon: CheckCircle2,
+      title: "CARB",
+      description: "California Air Resources Board – Formaldehyde Emissions",
+      pdfUrl: "/certificates/carb.webp"
+    },
+    {
+      icon: CheckCircle2,
+      title: "IGBC",
+      description: "Indian Green Building Council",
+      pdfUrl: "/certificates/igbc.webp"
+    },
+    {
+      icon: CheckCircle2,
+      title: "CE",
+      description: "CE Marking – European Conformity",
+      pdfUrl: "/certificates/ce.webp"
+    },
+    {
+      icon: CheckCircle2,
       title: "ASTM D7032 - 17",
       description: "Manufacturer of Super Quality Plywood Panel Boards, WPC & PVC - 2017",
       pdfUrl: "/certificates/astm_d7032_17.webp"

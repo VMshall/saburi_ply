@@ -369,6 +369,13 @@ export function Footer() {
                   <a href="/footer-certificate/ISO_90012015_Certified.pdf" target="_blank" rel="noopener noreferrer" className="block text-gray-300 hover:text-primary transition-colors text-sm">
                     ISO 9001:2015 Certified
                   </a>
+                  <a href="/certificates/iso_14001_2015.webp" target="_blank" rel="noopener noreferrer" className="block text-gray-300 hover:text-primary transition-colors text-sm">
+                    ISO 14001:2015 Certified
+                  </a>
+                  <a href="/certificates/iso_45001_2018.webp" target="_blank" rel="noopener noreferrer" className="block text-gray-300 hover:text-primary transition-colors text-sm">
+                    ISO 45001:2018 Certified
+                  </a>
+                  <span className="block text-gray-300 text-sm">ISI (BIS) Certified</span>
                 </div>
               </div>
             </div>
