@@ -19,6 +19,7 @@ export const products: Product[] = [
   {
     slug: "marine-plywood-india",
     warranty: "30-year",
+    emission: "E1",
     name: "Saburi Gold (IS: 710)",
     heading: "Best Marine Plywood Manufacturer and Supplier in India",
     category: "plywood",
@@ -36,7 +37,7 @@ export const products: Product[] = [
     introHtml:
       "Saburi Gold Plywood is the dependable choice for applications where moisture resistance cannot be compromised. Manufactured from select hardwood with phenolic glued core veneers and a long panel finish, it conforms to Marine Grade IS: 710 standards, making it suitable for the most demanding environments. Each veneer is treated with preservatives prior to pressing, ensuring uniform distribution of moisture and adhesive throughout the panel. The plywood is boiling water proof and performs reliably in both indoor and outdoor conditions. Saburi Gold 710 is recommended for partitions, panelling, all types of furniture, roofing, boat construction, and outdoor applications where structural integrity and moisture resistance are essential. Every panel carries a 30-year warranty. Saburi Ply is a leading <strong>Marine Plywood Manufacturer in India</strong> and the foremost producer of marine plywood in Bengal. All products are IS: 710 certified and engineered to perform consistently across dry and wet conditions, meeting the requirements of a broad range of construction and fabrication applications. As a recognised <strong>Marine Plywood Supplier in India</strong>, Saburi Ply serves customers across Kolkata and throughout the country. For projects that demand durable, high-quality marine plywood, Saburi Ply remains the preferred choice among builders, fabricators, and contractors alike.",
     features: [
-      "Emission Free Product",
+      "E1 low-emission grade",
       "Boiling Water proof",
       "Manufactured through QuadPro Process",
       "Resistant to termites and powdering",
@@ -49,12 +50,12 @@ export const products: Product[] = [
       "This category of plywood is most suitable for partition and panelling, panel insert in doors, false ceiling, lawn chairs, garden tables and chairs, cavity flooring, cupboard shelving and also as kitchen cabinets",
       "This plywood is perfect to construct boats, kayaks, etc. Saburi Gold Plywood and is of high quality hardwood, bonded with un-extended BWP type phenolic resin using superior technology. The outstanding feature of this plywood is its ability to withstand dry and wet conditions, making it an ideal choice for boats, roofing and other outdoor applications where it's exposed to water for a prolonged period",
     ],
-    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "18mm", "25mm"],
+    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "19mm", "25mm"],
     sizes: ["10x4 ft.", "8x4 ft.", "7x4 ft. etc."],
     featureBadges: [
       { id: "waterproof", iconKey: "droplets", title: "Boiling Waterproof", sub: "Available" },
       { id: "calibrated", iconKey: "dumbbell", title: "Calibrated", sub: "High" },
-      { id: "emission", iconKey: "flame", title: "Emission Free", sub: "Available" },
+      { id: "emission", iconKey: "flame", title: "Low Emission", sub: "E1" },
       { id: "Termite Proof", iconKey: "bug", title: "Termite Proof", sub: "High" },
       { id: "Antifungal", iconKey: "bacteria", title: "Antifungal", sub: "High" },
     ],
@@ -100,7 +101,7 @@ export const products: Product[] = [
       "Both Side Calibrated",
       "Bend resistant: balanced construction ensures dimensional stability which prevents warpage and builds strength",
       "Veneers cooked at 60° for removal of starch & micro-organism",
-      "QuadPro Technology",
+      "QuadPro Process",
       "7X Money Back Warranty",
       "Lifetime warranty",
     ],
@@ -110,7 +111,7 @@ export const products: Product[] = [
       "Ship‑building and boats",
       "Structural applications",
     ],
-    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "18mm", "25mm"],
+    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "19mm", "25mm"],
     sizes: ["10x4 ft.", "8x4 ft.", "7x4 ft. etc."],
     featureBadges: [
       { id: "waterproof", iconKey: "droplets", title: "Waterproof", sub: "Available" },
@@ -166,11 +167,11 @@ export const products: Product[] = [
       "Lifetime Warranty",
     ],
     applications: [
-      "Manufactured through QuadPro Process",
-      "Mechanically pressure treated",
-      "Withstands all climatic conditions",
+      "Luxury home interiors, premium furniture and modular kitchens",
+      "Hotels, hospitals, auditoriums and dining halls",
+      "Commercial partitions and high-end offices",
     ],
-    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "18mm", "25mm"],
+    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "19mm", "25mm"],
     sizes: ["10x4 ft.", "8x4 ft.", "7x4 ft. etc."],
     featureBadges: [
       { id: "waterproof", iconKey: "droplets", title: "Boiling Water Resistant", sub: "Available" },
@@ -222,7 +223,7 @@ export const products: Product[] = [
       "Both-side calibrated",
       "Bend-resistant: balanced construction prevents warpage and enhances strength",
       "Veneers cooked at 60° to remove starch & micro-organisms",
-      "QuadPro Technology",
+      "QuadPro Process",
       "10X Money Back Warranty",
       "Lifetime warranty",
     ],
@@ -230,8 +231,8 @@ export const products: Product[] = [
       "A premium structural-grade product ideal for elite furniture in personal or commercial interiors — hotel suites, auditoriums, dining halls, partitions, and panelings",
       "Designed for high-moisture environments, ship-building, boats, and other structural applications",
     ],
-    thicknesses: [],
-    sizes: [],
+    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "19mm", "25mm"],
+    sizes: ["10x4 ft.", "8x4 ft.", "7x4 ft. etc."],
     featureBadges: [
       { id: "waterproof", iconKey: "droplets", title: "Waterproof", sub: "Available" },
       { id: "Bil Resistant", iconKey: "flame", title: "Fire Resistant", sub: "Available" },
@@ -269,10 +270,10 @@ export const products: Product[] = [
     },
     gradePills: [
       { label: "IS: 5509", iconKey: "award" },
-      { label: "STRUCTURAL GRADE", iconKey: "shield" },
+      { label: "FIRE RETARDANT", iconKey: "flame" },
     ],
     introHtml:
-      "Fires can be frightening and deadly. Saburi Fire Retardant is treated with special fire retardant chemicals as per IS: 5509 specifications, which ensure lesser tendency of spark and ignition or spread of fire over the ply surface. This certification ensures the rate of burning of the plywood should be more than 20 minutes, and the time taken for flames to penetrate the plywood has to be more than 30 minutes. Saburi Fire Retardant Ply also means 30% lesser smoke generation and significant decreased fire spread, allowing you and your loved ones to move to safety. Providing two times money back warranty for lifetime, Saburi Fire Retardant Ply is commonly used in public places where the risk of fire has to be reduced such as for making the woodwork in the kitchens of large restaurants, or for the interior woodwork done in public theatres and halls, and the wood used in the railway compartments of trains. It is highly recommended for homes and offices, and any other such places where the risk and spread of fire has to be reduced.",
+      "Fires can be frightening and deadly. Saburi Fire Retardant is treated with special fire retardant chemicals as per IS: 5509 specifications, which ensure lesser tendency of spark and ignition or spread of fire over the ply surface. This certification ensures the rate of burning of the plywood should be more than 20 minutes, and the time taken for flames to penetrate the plywood has to be more than 30 minutes. Saburi Fire Retardant Ply also means significantly reduced smoke generation and decreased fire spread, allowing you and your loved ones to move to safety. Providing two times money back warranty for lifetime, Saburi Fire Retardant Ply is commonly used in public places where the risk of fire has to be reduced such as for making the woodwork in the kitchens of large restaurants, or for the interior woodwork done in public theatres and halls, and the wood used in the railway compartments of trains. It is highly recommended for homes and offices, and any other such places where the risk and spread of fire has to be reduced.",
     features: [
       "Lesser tendency of spark and ignite",
       "Slow burning",
@@ -282,13 +283,13 @@ export const products: Product[] = [
       "Specially formulated fireproofing chemicals infusion",
       "High density",
       "2X Money Back Warranty For Lifetime",
-      "Protection Time: As per IS : 5509 - 49 Mins",
+      "Protection Time (19mm): 49 mins, as per IS 5509",
     ],
     applications: [
-      "Saburi Fire Retardant Plywood resists spark and ignition without any penetration. It offers 309% lesser smoke generation with extended flame penetration time, it offers very slow burning having a decreased tendency of the fire to spread over the surface of the plywood",
+      "Saburi Fire Retardant Plywood resists spark and ignition without any penetration. It offers significantly reduced smoke generation with extended flame penetration time, it offers very slow burning having a decreased tendency of the fire to spread over the surface of the plywood",
       "Seeking trustworthy fire resistant plywood manufacturers in Kolkata, West Bengal? We are recognized as leading fire resistant plywood manufacturers in India, delivering high-quality products at competitive prices. You can rely on us for finest fire retardant plywood suppliers in Kolkata, India!",
     ],
-    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "18mm", "25mm"],
+    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "19mm", "25mm"],
     sizes: ["10x4 ft.", "8x4 ft.", "7x4 ft. etc."],
     featureBadges: [
       { id: "spark", iconKey: "laser-sparks", title: "Lesser Spark Tendency", sub: "Available" },
@@ -354,6 +355,8 @@ export const products: Product[] = [
   },
   {
     slug: "saburi-scout-plywood",
+    warranty: "21-year",
+    emission: "E1",
     name: "Saburi Scout (IS: 303)",
     heading: "Saburi Scout Plywood",
     category: "plywood",
@@ -371,7 +374,7 @@ export const products: Product[] = [
     introHtml:
       "Made with high grade and treated wood veneers from matured plantation timber of high density wood, each panel is crafted with extreme precision and care. Saburi SCOUT plywood is pressed at 130°C and extreme pressure to compress the veneer-resin pack to obtain superior quality plywood. The bonding process is done using highly viscous melamine- fortified resin with a high solid content which keeps its layers strongly bonded for a lasting affair. To ensure maximum protection, this plywood is treated with unique and specially formulated chemicals to protect from Termites and Borers. It is dimensionally stable and amazingly durable, ensuring satisfaction for the entire woodworking need according to the designers and architects.",
     features: [
-      "Available Thickness: 4mm, 6mm, 9mm, 12mm, 16mm, 18mm, 25mm",
+      "Available Thickness: 4mm, 6mm, 9mm, 12mm, 16mm, 19mm, 25mm",
       "Best for commercial interior furniture making",
       "Manufactured by matured plantation timber of Eucalyptus and Poplar",
       "Perform better than other brand because of its manufacturing process",
@@ -382,7 +385,7 @@ export const products: Product[] = [
       "Structural Home Building, Ceiling, Furniture, Cupboards, Staircases",
       "Temples, Engineered Doors, Carved Surfaces, Handicrafts etc.",
     ],
-    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "18mm", "25mm"],
+    thicknesses: ["4mm", "6mm", "9mm", "12mm", "16mm", "19mm", "25mm"],
     sizes: ["8x4 ft.", "7x4 ft. etc."],
     featureBadges: [
       { id: "variants", iconKey: "gr-multiple", title: "Multiple Variants", sub: "Available" },
@@ -397,11 +400,12 @@ export const products: Product[] = [
       { question: "Does Saburi Scout warp during seasonal weather changes?", answerHtml: "Saburi Scout is manufactured with perfectly seasoned wood, ensuring the optimal moisture content is locked in. This prevents the plywood from warping, expanding, or contracting during seasonal transitions." },
     ],
     images: [
-      { src: "/images/scoutPly1.webp", alt: "Saburi Scout 710 BWP plywood" },
-      { src: "/images/scoutPly2.webp", alt: "Saburi Scout 303 BWR plywood" },
+      { src: "/images/scoutPly1.webp", alt: "Saburi Scout BWP plywood" },
+      { src: "/images/scoutPly2.webp", alt: "Saburi Scout BWR plywood" },
       { src: "/images/scoutPly3.webp", alt: "Saburi Scout MR plywood" },
     ],
     certification: "IS: 303",
+    warrantyYears: 21,
   },
   {
     slug: "shuttering-plywood-india",
