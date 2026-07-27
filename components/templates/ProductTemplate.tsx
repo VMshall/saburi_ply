@@ -14,6 +14,7 @@ import { SpecTable } from "@/components/SpecTable";
 import { FeatureBadgesRail } from "@/components/islands/FeatureBadgesRail";
 import { FaqAccordion } from "@/components/islands/FaqAccordion";
 import { breadcrumbSchema, faqSchema, productSchema } from "@/lib/jsonld";
+import { getProductFaqs } from "@/lib/faqs";
 
 /**
  * Shared product page (§3). Server shell — H1/grade pills, banner, image, brand, action bar,
@@ -27,7 +28,9 @@ import { breadcrumbSchema, faqSchema, productSchema } from "@/lib/jsonld";
  * island-light layout per §9.
  */
 export function ProductTemplate({ product }: { product: Product }) {
-  const { name, heading, gradePills, introHtml, images, featureBadges, faqs } = product;
+  const { name, heading, gradePills, introHtml, images, featureBadges } = product;
+  // Product-page FAQs = the curated ones in data/products.ts + reconciled library FAQs (Phase 4).
+  const faqs = [...product.faqs, ...getProductFaqs(product.slug)];
   const pathname = `/products/${product.slug}`;
   const waHref = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(
     `Hi Saburi, I'd like a quote for ${name}.`,

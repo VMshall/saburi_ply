@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { STATIC_BANNERS } from "@/data/banners";
 import { buildPageMetadata } from "@/lib/seo";
+import { FaqSection } from "@/components/FaqSection";
+import { getAboutFaqs } from "@/lib/faqs";
 import { Leaf, Recycle, TreePine, Droplets, Wind, Sun } from "lucide-react";
 
 export const dynamic = "force-static";
@@ -223,6 +225,11 @@ export default function EnvironmentStewardship() {
           </div>
         </div>
       </section> */}
+      <FaqSection
+        faqs={getAboutFaqs("/about/environment-stewardship")}
+        eyebrow="Sustainability"
+        title="Sustainability — FAQs"
+      />
     </div>
   );
 }

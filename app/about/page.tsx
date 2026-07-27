@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { STATIC_BANNERS } from "@/data/banners";
 import { buildPageMetadata } from "@/lib/seo";
+import { FaqSection } from "@/components/FaqSection";
+import { getAboutFaqs } from "@/lib/faqs";
 import { NewAboutUs } from "@/components/sections/NewAboutUs";
 import { ProcessQuality } from "@/components/sections/ProcessQuality";
 import { PlywoodGallery } from "@/components/sections/PlywoodGallery";
@@ -27,6 +29,12 @@ export default function AboutPage() {
       <GoGreen />
       <Mission />
       <Vision />
+      <FaqSection
+        faqs={getAboutFaqs("/about")}
+        eyebrow="FAQ"
+        title="Frequently Asked Questions"
+        subtitle="About Saburi Ply — the company, product range, warranty and support."
+      />
       <BecomeOurPartner />
     </div>
   );

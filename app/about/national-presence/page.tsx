@@ -4,6 +4,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { SmartImage } from "@/components/SmartImage";
 import { STATIC_BANNERS } from "@/data/banners";
 import { buildPageMetadata } from "@/lib/seo";
+import { FaqSection } from "@/components/FaqSection";
+import { getAboutFaqs } from "@/lib/faqs";
 import { MapPin, Building2, Users, TrendingUp, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -244,6 +246,11 @@ export default function NationalPresence() {
           </button>
         </div>
       </section> */}
+      <FaqSection
+        faqs={getAboutFaqs("/about/national-presence")}
+        eyebrow="Manufacturing & Reach"
+        title="Manufacturing & Reach — FAQs"
+      />
     </div>
   );
 }

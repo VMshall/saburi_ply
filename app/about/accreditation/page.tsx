@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { STATIC_BANNERS } from "@/data/banners";
 import { buildPageMetadata } from "@/lib/seo";
+import { FaqSection } from "@/components/FaqSection";
+import { getAboutFaqs } from "@/lib/faqs";
 import { AccreditationGrid } from "@/components/islands/AccreditationGrid";
 
 export const dynamic = "force-static";
@@ -33,6 +35,11 @@ export default function Accreditation() {
           <AccreditationGrid />
         </div>
       </section>
+      <FaqSection
+        faqs={getAboutFaqs("/about/accreditation")}
+        eyebrow="Certifications & Quality"
+        title="Certifications & Quality — FAQs"
+      />
     </div>
   );
 }
