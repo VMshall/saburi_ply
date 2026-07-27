@@ -82,7 +82,10 @@ export function websiteSchema(): Schema {
 }
 
 /** Path-derived breadcrumb, byte-for-byte matching PageMeta.jsx:8-36. */
-export function breadcrumbSchema(pathname: string): Schema {
+export function breadcrumbSchema(
+  pathname: string,
+  labelOverrides?: Record<string, string>,
+): Schema {
   const parts = pathname.split("/").filter(Boolean);
   const itemListElement: Schema[] = [
     { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
@@ -90,10 +93,12 @@ export function breadcrumbSchema(pathname: string): Schema {
   let currentUrl = SITE_URL;
   parts.forEach((part, index) => {
     currentUrl += `/${part}`;
-    const name = part
-      .split("-")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
+    const name =
+      labelOverrides?.[part] ??
+      part
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
     itemListElement.push({
       "@type": "ListItem",
       position: index + 2,
@@ -105,6 +110,32 @@ export function breadcrumbSchema(pathname: string): Schema {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement,
+  };
+}
+
+/**
+ * Article schema for a knowledge-hub (guide) page — pillar or cluster. Author is the Organization;
+ * publisher links the sitewide Organization node by @id; `about` scopes it to plywood. Emitted
+ * alongside FAQPage + BreadcrumbList on /plywood-guide/*.
+ */
+export function guideArticleSchema(opts: {
+  path: string;
+  headline: string;
+  description: string;
+}): Schema {
+  const url = absUrl(opts.path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: opts.headline,
+    description: opts.description,
+    inLanguage: "en-IN",
+    about: "Plywood",
+    image: LOGO,
+    author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    publisher: { "@id": ORG_ID },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url,
   };
 }
 

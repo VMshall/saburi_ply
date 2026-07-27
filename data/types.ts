@@ -38,6 +38,39 @@ export interface Faq {
   answerHtml: string;
 }
 
+/**
+ * One entry in the extracted FAQ library (`content/faq-library.json`) — the single source of
+ * truth for the 197 fact-checked FAQs. Two answers per Q: a short AEO answer (AI-extractable) and
+ * a long SEO answer (keyword-rich). See FAQ_IMPLEMENTATION_PLAN.md.
+ */
+export interface FaqLibraryEntry {
+  number: number;
+  section: "Company" | "Product" | "Technical" | "Purchase";
+  question: string;
+  aeoAnswer: string;
+  seoAnswer: string;
+}
+
+/**
+ * A knowledge-hub page — either the `/plywood-guide` pillar or a topic `cluster` under it.
+ * `faqNumbers` are the library FAQs homed on this page (one canonical home per FAQ, enforced by
+ * `assertPlacementIntegrity`). `relatedProducts` are product slugs → `/products/{slug}` links.
+ */
+export interface GuidePage {
+  slug: string; // "" for the pillar, e.g. "is-standards" for a cluster
+  path: string; // "/plywood-guide" | "/plywood-guide/is-standards"
+  kind: "pillar" | "cluster";
+  seo: Seo;
+  eyebrow?: string;
+  h1: string;
+  heroSubhead?: string;
+  introHtml: string;
+  faqNumbers: number[];
+  relatedProducts: string[];
+  /** Pillar only: child cluster slugs, for the cluster-nav cards. */
+  clusters?: string[];
+}
+
 /** A feature badge in the product rail (icon + title + sub-label). */
 export interface FeatureBadge {
   id: string;

@@ -15,6 +15,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { GUIDE_PAGES, GUIDE_LABELS } from "@/data/faq-placement";
 
 /**
  * Navbar client island (P1). Ported from client/components/Navbar.jsx with react-router-dom
@@ -28,9 +29,11 @@ export function Navbar() {
   // Mobile submenu state
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
+  const [mobileGuidesOpen, setMobileGuidesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [showProductsMega, setShowProductsMega] = useState(false);
   const [showAboutMega, setShowAboutMega] = useState(false);
+  const [showGuidesMega, setShowGuidesMega] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -79,6 +82,7 @@ export function Navbar() {
   // Timeout refs to prevent immediate closing
   const productsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const aboutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const guidesTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleProductsMouseEnter = () => {
     if (productsTimeoutRef.current) {
@@ -106,6 +110,19 @@ export function Navbar() {
     }, 150);
   };
 
+  const handleGuidesMouseEnter = () => {
+    if (guidesTimeoutRef.current) {
+      clearTimeout(guidesTimeoutRef.current);
+    }
+    setShowGuidesMega(true);
+  };
+
+  const handleGuidesMouseLeave = () => {
+    guidesTimeoutRef.current = setTimeout(() => {
+      setShowGuidesMega(false);
+    }, 150);
+  };
+
   const productPaths = [
     "/products/saburi-perennial",
     "/products/saburi-titanium-plus",
@@ -129,6 +146,19 @@ export function Navbar() {
     "/products/saburi-neowud",
   ];
   const isProductsActive = productPaths.some((p) => pathname.startsWith(p));
+
+  // "Guides" mega-menu, derived from the guide registry so it auto-syncs with the clusters.
+  const isGuidesActive =
+    pathname.startsWith("/plywood-guide") || pathname.startsWith("/plywood-buying-guide");
+  const guideLabel = (path: string) => GUIDE_LABELS[path.split("/").filter(Boolean).pop() ?? ""] ?? path;
+  const guideColumns = GUIDE_PAGES.filter((p) => p.kind === "pillar").map((pillar) => ({
+    heading: guideLabel(pillar.path),
+    href: pillar.path,
+    clusters: (pillar.clusters ?? []).flatMap((slug) => {
+      const c = GUIDE_PAGES.find((p) => p.slug === slug);
+      return c ? [{ label: guideLabel(c.path), href: c.path }] : [];
+    }),
+  }));
 
   const routeNameByPath: Record<string, string> = {
     "/": "Home",
@@ -331,7 +361,7 @@ export function Navbar() {
                         onMouseLeave={handleProductsMouseLeave}
                       >
                         <div
-                          className="relative shadow-2xl border-t-2 border-primary/30 pb-16"
+                          className="relative shadow-2xl border-t-2 border-primary/30 pb-16 min-h-[600px]"
                           style={{
                             backgroundImage: 'url(/images/nav-product.jpeg)',
                             backgroundSize: '100% 100%',
@@ -517,6 +547,77 @@ export function Navbar() {
                     )}
                   </div>
 
+                  {/* Guides Mega Menu (data-driven from GUIDE_PAGES) */}
+                  <div
+                    className="relative"
+                    onMouseEnter={handleGuidesMouseEnter}
+                    onMouseLeave={handleGuidesMouseLeave}
+                  >
+                    <button
+                      className={cn(
+                        "px-3 py-2 text-sm font-medium transition-colors relative",
+                        isGuidesActive || showGuidesMega
+                          ? "text-primary after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-0.5 after:bg-primary after:rounded-full"
+                          : "text-black hover:text-primary hover:after:absolute hover:after:left-3 hover:after:right-3 hover:after:-bottom-0.5 hover:after:h-0.5 after:bg-primary/60 hover:after:rounded-full"
+                      )}
+                    >
+                      Guides
+                    </button>
+
+                    {showGuidesMega && (
+                      <div
+                        className="fixed left-0 right-0 top-[112px] z-50"
+                        onMouseEnter={handleGuidesMouseEnter}
+                        onMouseLeave={handleGuidesMouseLeave}
+                      >
+                        <div
+                          className="relative shadow-2xl border-t-2 border-primary/30 pb-16 min-h-[600px]"
+                          style={{
+                            backgroundImage: 'url(/images/nav-product.jpeg)',
+                            backgroundSize: '100% 100%',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundColor: '#000000',
+                          }}
+                        >
+                          {/* Dark overlay for readability (matches the Products mega) */}
+                          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60"></div>
+                          <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
+                            <div className="grid grid-cols-2 gap-16">
+                              {guideColumns.map((col) => (
+                                <div key={col.href}>
+                                  <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
+                                    <Link href={col.href} className="transition-colors hover:text-red-500">
+                                      {col.heading}
+                                    </Link>
+                                  </h3>
+                                  <ul className="space-y-3">
+                                    {col.clusters.map((c) => (
+                                      <li key={c.href}>
+                                        <Link
+                                          href={c.href}
+                                          className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1"
+                                        >
+                                          {c.label}
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                  <Link
+                                    href={col.href}
+                                    className="mt-5 inline-block text-sm font-semibold text-primary hover:text-red-500 transition-colors"
+                                  >
+                                    View the full guide →
+                                  </Link>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <Link href="/gallery" className={navLinkClass(isActive("/gallery"))}>
                     Gallery
                   </Link>
@@ -677,6 +778,42 @@ export function Navbar() {
                   >
                     • {routeNameByPath[to] ?? formatLabel(to)}
                   </Link>
+                ))}
+              </div>
+            )}
+            <button
+              className={cn("w-full text-left px-3 py-2 text-base font-semibold tracking-wide text-black flex items-center justify-between transition-colors hover:text-primary min-h-[48px]", mobileGuidesOpen ? "" : "")}
+              onClick={() => setMobileGuidesOpen((open) => !open)}
+              aria-expanded={mobileGuidesOpen}
+              aria-label={mobileGuidesOpen ? "Collapse Guides menu" : "Expand Guides menu"}
+            >
+              Guides
+              <span className="ml-2">
+                {mobileGuidesOpen ? <MdKeyboardArrowDown size={20} aria-hidden="true" /> : <MdKeyboardArrowRight size={20} aria-hidden="true" />}
+              </span>
+            </button>
+            {mobileGuidesOpen && (
+              <div className="pl-6 space-y-1">
+                {guideColumns.map((col) => (
+                  <div key={col.href} className="pt-1">
+                    <Link
+                      href={col.href}
+                      className="block py-2 text-sm font-semibold text-black hover:text-primary"
+                      onClick={toggleMenu}
+                    >
+                      {col.heading}
+                    </Link>
+                    {col.clusters.map((c) => (
+                      <Link
+                        key={c.href}
+                        href={c.href}
+                        className="block py-2 pl-3 text-sm text-black hover:text-primary"
+                        onClick={toggleMenu}
+                      >
+                        • {c.label}
+                      </Link>
+                    ))}
+                  </div>
                 ))}
               </div>
             )}

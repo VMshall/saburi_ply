@@ -11,7 +11,8 @@
     "format.fix": "prettier --write .",
     "typecheck": "tsc",
     "redirect-check": "node scripts/redirect-check.mjs",
-    "seo-check": "node scripts/seo-check.mjs"
+    "seo-check": "node scripts/seo-check.mjs",
+    "faq-check": "node scripts/faq-check.mjs"
   },
   "dependencies": {
     "dotenv": "^17.2.0",
