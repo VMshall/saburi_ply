@@ -131,6 +131,19 @@
   .animate-press { animation: press-pulse 3.5s ease-in-out infinite; }
   .doodle-grid { background-image: radial-gradient(hsl(var(--primary) / 0.15) 1px, transparent 1.5px); background-size: 18px 18px; }
 
+  /* Red underline-wipe for product links (Our Plywood Range). Grows left→right on card hover/focus.
+     Pure CSS (no JS) and never hides the link text — the wipe is a background layer only. */
+  .link-underline {
+    background-image: linear-gradient(hsl(var(--primary)), hsl(var(--primary)));
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 2px;
+    transition: background-size 0.3s ease;
+  }
+  .group:hover .link-underline,
+  .link-underline:focus-visible { background-size: 100% 2px; }
+  @media (prefers-reduced-motion: reduce) { .link-underline { transition: none; } }
+
   /* Single orchestrated page-load reveal (used by the category hero). CSS-only so content is never
      hidden from crawlers or no-JS users — the animation just plays once and settles visible. */
   @keyframes fade-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }

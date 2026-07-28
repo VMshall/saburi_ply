@@ -1,154 +1,286 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { SmartImage } from "@/components/SmartImage";
-import { DoorOpen, Frame, CheckCircle, ArrowRight } from "lucide-react";
-import { GiWoodBeam } from "react-icons/gi";
-import { SiHiveBlockchain } from "react-icons/si";
-import { TfiBlackboard } from "react-icons/tfi";
-import { PiChalkboardFill } from "react-icons/pi";
-import { GrFormView } from "react-icons/gr";
+import Image from "next/image";
+import {
+  Layers,
+  Box,
+  DoorOpen,
+  Frame,
+  LayoutGrid,
+  Droplets,
+  CheckCircle,
+  ArrowRight,
+  type LucideIcon,
+} from "lucide-react";
+
+/**
+ * Home "Our Plywood Range" — an editorial product grid (redesign). A featured flagship band
+ * (Plywood) leads, followed by five equal product cards. Red is used as an accent only (pills,
+ * icons, one featured CTA); the scroll-in reveal reuses the CSS-only `.animate-fade-up` utility
+ * so content is never hidden from crawlers / no-JS users (see globals.css §utilities).
+ *
+ * Interaction: the whole card is a stretched Link to its product page (SEO internal linking),
+ * with a per-product "Get quote" button layered above it (opens the page-level QuoteModal via
+ * onOpenQuoteModal). Chipboard has no product page yet, so it is intentionally quote-only.
+ */
+
+type ProductCard = {
+  name: string;
+  /** Product/category page; omitted → quote-only card (no deep link). */
+  href?: string;
+  image: string;
+  icon: LucideIcon;
+  description: string;
+  highlight: string;
+  thickness: string;
+  sizes: string;
+  /** Shown only on the featured band. */
+  features?: string[];
+  brochure?: string;
+};
+
+const PRODUCTS: ProductCard[] = [
+  {
+    name: "Plywood",
+    href: "/plywood",
+    image: "/images/plywoodRange/Plywood.webp",
+    icon: Layers,
+    description:
+      "Durable, termite-proof and fire-resistant plywood engineered through our QuadPro process for lasting strength and a smooth, workable finish.",
+    highlight: "Most Popular",
+    thickness: "4–25 mm",
+    sizes: "10×4, 8×4, 7×4 ft.",
+    features: ["Durable", "Eco-Safe", "Fire-Resistant", "Termite-Proof"],
+    brochure: "/brochure/plywood.pdf",
+  },
+  {
+    name: "Blockboard",
+    href: "/products/block-board-india",
+    image: "/images/plywoodRange/Blockboard.webp",
+    icon: Box,
+    description:
+      "High-density blockboard for wardrobes and cabinets — dimensionally stable with high screw-holding strength and anti-warp treatment.",
+    highlight: "Best Value",
+    thickness: "19–25 mm",
+    sizes: "10×4 ft. +",
+    brochure: "/brochure/blockboard.pdf",
+  },
+  {
+    name: "Flush Door",
+    href: "/products/flush-door-india",
+    image: "/images/plywoodRange/Flush-Door.webp",
+    icon: DoorOpen,
+    description:
+      "BWP-grade flush doors with superior strength, a smooth finish and termite resistance for main doors, bedrooms and offices.",
+    highlight: "Smooth Finish",
+    thickness: "25–40 mm",
+    sizes: "Up to 10 ft.",
+    brochure: "/brochure/flushdoor.pdf",
+  },
+  {
+    name: "Shuttering Ply",
+    href: "/products/shuttering-plywood-india",
+    image: "/images/plywoodRange/Shuttering-Ply.webp",
+    icon: Frame,
+    description:
+      "High-density shuttering plywood with a mirror-finish surface, built for repeated concrete formwork and heavy-duty site use.",
+    highlight: "Weather-Resistant",
+    thickness: "9–25 mm",
+    sizes: "8×4 ft.",
+    brochure: "/brochure/shuttering.pdf",
+  },
+  {
+    // Quote-only: no product page exists yet (see plan). Card omits href → not navigable.
+    name: "Chipboard",
+    image: "/images/plywoodRange/Chipboard.webp",
+    icon: LayoutGrid,
+    description:
+      "High-density chipboard with a smooth surface, uniform core and excellent machinability for cabinets, tables and shelves.",
+    highlight: "Versatile",
+    thickness: "9–25 mm",
+    sizes: "8×6, 9×6 ft.",
+    brochure: "/brochure/chipboard.pdf",
+  },
+  {
+    name: "WPC / PVC Boards",
+    href: "/products/saburi-smart-panel-wpc-board",
+    image: "/images/plywoodRange/WPC-doors.webp",
+    icon: Droplets,
+    description:
+      "100% waterproof, termite-proof and eco-friendly WPC/PVC panels — ideal for kitchens, bathrooms and ceilings.",
+    highlight: "Lifetime Warranty",
+    thickness: "6–18 mm",
+    sizes: "8×4 ft.",
+    brochure: "/brochure/wpc-pvc.pdf",
+  },
+];
 
 export function PlywoodTypes({
   onOpenQuoteModal,
 }: {
   onOpenQuoteModal: (productName: string, brochureUrl?: string) => void;
 }) {
-  const [activeCategory, setActiveCategory] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const isMobile = useIsMobile();
-  const sectionRef = useRef<HTMLElement>(null);
-
-  const categories = [
-    { id: 0, name: "Plywood", icon: GiWoodBeam, image: "/images/plywoodRange/Plywood.webp", description: "Durable, termite-proof and fire-resistant plywood engineered through our QuadPro process for lasting strength and a smooth, workable finish.", features: ["Durable ", "Eco-Safe", "Fire-Resistant", "Termite-Proof"], applications: ["Furniture ", "Wall Panels", "Flooring", "Partition"], thickness: "4mm–25mm", sizes: "10x4 ft., 8x4 ft., 7x4 ft., etc", highlight: "Most Popular", brochure: "/brochure/plywood.pdf" },
-
-    { id: 1, name: "Blockboard", icon: SiHiveBlockchain, image: "/images/plywoodRange/Blockboard.webp", description: "High-density blockboard used for wardrobes and cabinets. Dimensional stability with high screw-holding strength and anti-warp treatment.", features: ["Stable ", "Strong", "Seasoned ", "Long-Lasting"], applications: ["Cabinets", "Shelves", "Doors", "Interiors"], thickness: "19mm, 25mm", sizes: "10x4 ft., 8x4 ft., 7x4 ft., etc", highlight: "Best Value", brochure: "/brochure/blockboard.pdf" },
-
-    { id: 2, name: "Flush Door", icon: DoorOpen, image: "/images/plywoodRange/Flush-Door.webp", description: "BWP-grade flush doors offering superior strength, a smooth finish and termite resistance for main doors, bedrooms and offices.", features: ["BWP ", "Termite-Proof", "Sturdy", "Elegant"], applications: ["Main Door", "Bedrooms", "Offices", "Hotels"], thickness: "25mm–40mm", sizes: "Upto 10 Ft.", highlight: "Smooth Finish", brochure: "/brochure/flushdoor.pdf" },
-
-    { id: 3, name: "Shuttering Ply", icon: Frame, image: "/images/plywoodRange/Shuttering-Ply.webp", description: "High-density shuttering plywood with a mirror-finish surface, built for repeated concrete formwork and heavy-duty site use.", features: ["Reusable", "Heavy-Duty", "Smooth", "Weather-Resistant"], applications: ["Beams", "Columns", "Slabs", "Framework"], thickness: "9mm–25mm", mass: "30–51kg variants", sizes: "8x4 ft.", highlight: "Weather-Resistant", brochure: "/brochure/shuttering.pdf" },
-
-    { id: 4, name: "Chipboard", icon: TfiBlackboard, image: "/images/plywoodRange/Chipboard.webp", description: "High-density chipboard with a smooth surface, uniform core and excellent machinability for cabinets, tables and shelves.", features: ["Dense", "Smooth", "Durable", "Versatile"], applications: ["Cabinets", "Tables", "Shelves", "Partitions"], thickness: "9mm–25mm", sizes: "8x6 ft., 9x6 ft.", highlight: "Versatile", brochure: "/brochure/chipboard.pdf" },
-
-    { id: 5, name: "WPC / PVC Boards", icon: PiChalkboardFill, image: "/images/plywoodRange/WPC-doors.webp", description: "100% waterproof, termite-proof and eco-friendly WPC/PVC panels with a lifetime warranty — ideal for kitchens, bathrooms and ceilings.", features: ["Waterproof", "Termite-Proof", "Recyclable", "Paintable"], applications: ["Kitchen", "Bathroom", "Ceiling", "Furniture"], thickness: "6mm–18mm", sizes: "8 x 4 ft.", highlight: "Lifetime Warranty", brochure: "/brochure/wpc-pvc.pdf" },
-  ];
-
-  useEffect(() => {
-    if (!isPaused && !isMobile) {
-      const timer = setInterval(() => {
-        setActiveCategory((prev) => (prev + 1) % categories.length);
-      }, 4000);
-      return () => clearInterval(timer);
-    }
-  }, [isPaused, isMobile]);
-
-  const activeProduct = categories[activeCategory];
-  const ActiveIcon = activeProduct.icon;
+  const [featured, ...rest] = PRODUCTS;
+  const FeaturedIcon = featured.icon;
 
   return (
-    <section id="products" ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+    <section id="products" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div className="text-left lg:text-center mb-8 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-3 lg:mb-4">Our <span className="text-primary">Plywood Range</span></h2>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-700 max-w-3xl mx-auto ps-0 lg:px-4">Explore our diverse product range crafted for strength, style, and sustainability to suit every space and purpose.</p>
+        {/* Header */}
+        <div className="text-left lg:text-center mb-8 lg:mb-14">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-3 lg:mb-4">
+            Our <span className="text-primary">Plywood Range</span>
+          </h2>
+          <p className="text-base sm:text-lg lg:text-xl text-gray-700 max-w-3xl mx-auto ps-0 lg:px-4">
+            Explore our diverse product range crafted for strength, style, and sustainability to suit every space and purpose.
+          </p>
           <div className="mt-4 lg:mt-6">
-            <Link href="/plywood" className="inline-flex items-center gap-2 text-sm sm:text-base font-semibold text-primary transition-all hover:gap-3">
+            <Link
+              href="/plywood"
+              className="inline-flex items-center gap-2 text-sm sm:text-base font-semibold text-primary transition-all hover:gap-3"
+            >
               View the full plywood range
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
-        <div className="grid lg:grid-cols-12 gap-6 lg:gap-8">
-          <div className="lg:col-span-4 space-y-3 lg:space-y-4 order-2 lg:order-1" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
-            {categories.map((category, index) => {
-              const IconComponent = category.icon;
-              return (
-                <div key={category.id} onClick={() => {
-                  setActiveCategory(index);
-                  setIsPaused(true);
-                  setTimeout(() => setIsPaused(false), 1000);
-                  if (isMobile && sectionRef.current) {
-                    const y = sectionRef.current.getBoundingClientRect().top + window.scrollY - 80;
-                    window.scrollTo({ top: y, behavior: 'smooth' });
-                  }
-                }} className={`cursor-pointer rounded-lg p-4 lg:p-6 transition-all duration-300 relative overflow-hidden touch-manipulation ${activeCategory === index ? "bg-primary text-white shadow-lg transform scale-105" : "bg-white hover:bg-gray-50 hover:shadow-md hover:scale-102"}`}>
-                  {activeCategory === index && (
-                    <div className="absolute bottom-0 left-0 w-full h-1 bg-white/30"><div className="h-full bg-white w-full animate-pulse" /></div>
-                  )}
-                  <div className="flex items-start space-x-3 lg:space-x-4">
-                    <div className={`flex-shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center ${activeCategory === index ? "bg-white/20" : "bg-primary/10"}`}>
-                      <IconComponent className={`h-5 w-5 lg:h-6 lg:w-6 ${activeCategory === index ? "text-white" : "text-primary"}`} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className={`text-sm lg:text-base font-semibold ${activeCategory === index ? "text-white" : "text-black"}`}>{category.name}</h3>
-                        <span className={`text-xs px-2 py-1 rounded-full hidden sm:inline ${activeCategory === index ? "bg-white/20 text-white" : "bg-primary/10 text-primary"}`}>{category.highlight}</span>
-                      </div>
-                      <p className={`text-xs lg:text-sm ${activeCategory === index ? "text-white/90" : "text-gray-700 font-medium"}`}>{category.description}</p>
-                    </div>
-                  </div>
+
+        {/* Featured flagship band */}
+        <div className="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm transition-shadow duration-300 hover:shadow-xl animate-fade-up mb-6 lg:mb-8">
+          <div className="grid lg:grid-cols-2">
+            {/* image */}
+            <div className="relative overflow-hidden bg-gray-100 aspect-[16/10] lg:aspect-auto lg:min-h-[400px]">
+              <Image
+                src={featured.image}
+                alt={featured.name}
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transform-none"
+              />
+              <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur text-primary text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                {featured.highlight}
+              </span>
+            </div>
+            {/* content */}
+            <div className="p-6 sm:p-8 lg:p-10 flex flex-col">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <FeaturedIcon className="h-6 w-6" />
                 </div>
-              );
-            })}
-          </div>
-          <div className="lg:col-span-8 order-1 lg:order-2" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-500">
-              <div className="aspect-video relative overflow-hidden">
-                <SmartImage key={activeProduct.id} src={activeProduct.image} alt={activeProduct.name} fill objectFit="cover" sizes="(max-width: 1024px) 100vw, 66vw" className="h-full w-full" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute bottom-4 left-4 text-white">
-                  <div className="flex items-center space-x-2 mb-2"><ActiveIcon className="h-6 w-6" /><span className="bg-primary px-2 py-1 rounded text-xs font-medium">{activeProduct.highlight}</span></div>
-                  <p className="text-lg font-medium">{activeProduct.name}</p>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Flagship range</span>
+              </div>
+              <h3 className="text-2xl lg:text-3xl font-bold text-black mb-3">
+                <Link href={featured.href!} className="link-underline">
+                  {featured.name}
+                </Link>
+              </h3>
+              <p className="text-sm lg:text-base text-gray-700 leading-relaxed mb-5">{featured.description}</p>
+              {/* feature ticks */}
+              <div className="flex flex-wrap gap-x-5 gap-y-2 mb-6">
+                {featured.features?.map((f) => (
+                  <span key={f} className="inline-flex items-center gap-1.5 text-xs lg:text-sm text-gray-700">
+                    <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
+                    {f}
+                  </span>
+                ))}
+              </div>
+              {/* specs */}
+              <div className="flex flex-wrap gap-x-10 gap-y-3 mb-6 pt-5 border-t border-gray-100">
+                <div>
+                  <div className="text-xs text-gray-500 mb-0.5">Available thickness</div>
+                  <div className="text-sm font-semibold text-black">{featured.thickness}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500 mb-0.5">Standard sizes</div>
+                  <div className="text-sm font-semibold text-black">{featured.sizes}</div>
                 </div>
               </div>
-              <div className="p-4 sm:p-6 lg:p-8 transition-all duration-300">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 lg:mb-6 gap-2">
-                  <h3 className="text-xl lg:text-2xl font-bold text-black transition-all duration-300">{activeProduct.name}</h3>
-                  <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 self-start">{activeProduct.highlight}</span>
-                </div>
-                <p className="text-sm lg:text-base text-gray-700 mb-4 lg:mb-6 leading-relaxed transition-all duration-300 font-medium">{activeProduct.description}</p>
-                <div className="grid sm:grid-cols-2 gap-4 lg:gap-8">
-                  <div>
-                    <h4 className="text-base lg:text-lg font-semibold text-black mb-3 lg:mb-4">Key Features</h4>
-                    <div className="space-y-2">
-                      {activeProduct.features.map((feature, index) => (
-                        <div key={index} className="flex items-center space-x-2"><CheckCircle className="h-3 w-3 lg:h-4 lg:w-4 text-primary flex-shrink-0" /><span className="text-gray-700 text-xs lg:text-sm">{feature}</span></div>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-base lg:text-lg font-semibold text-black mb-3 lg:mb-4">Applications</h4>
-                    <div className="space-y-2">
-                      {activeProduct.applications.map((application, index) => (
-                        <div key={index} className="flex items-center space-x-2"><ArrowRight className="h-3 w-3 lg:h-4 lg:w-4 text-primary flex-shrink-0" /><span className="text-gray-700 text-xs lg:text-sm">{application}</span></div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-6 lg:mt-8 pt-4 lg:pt-6 border-t border-gray-200">
-                  <h4 className="text-base lg:text-lg font-semibold text-black mb-3 lg:mb-4">Specifications</h4>
-                  <div className="grid grid-cols-2 gap-4 lg:gap-6">
-                    {activeProduct.thickness && <div><span className="text-xs lg:text-sm text-gray-500">Available Thickness</span><p className="text-sm lg:text-base font-medium text-black">{activeProduct.thickness}</p></div>}
-                    {activeProduct.mass && <div><span className="text-xs lg:text-sm text-gray-500">Mass</span><p className="text-sm lg:text-base font-medium text-black">{activeProduct.mass}</p></div>}
-                    {activeProduct.sizes && <div><span className="text-xs lg:text-sm text-gray-500">Standard Sizes</span><p className="text-sm lg:text-base font-medium text-black">{activeProduct.sizes}</p></div>}
-                  </div>
-                </div>
-                <div className="mt-6 lg:mt-8 flex flex-col sm:flex-row gap-3 lg:gap-4">
-                  <button className="bg-primary hover:bg-primary/90 text-white px-4 lg:px-6 py-3 rounded-lg font-medium transition-colors flex-1 text-sm lg:text-base touch-manipulation" onClick={() => onOpenQuoteModal(activeProduct.name, activeProduct.brochure)}>Get Quote for {activeProduct.name}</button>
-                  <button
-                    className="border border-gray-300 hover:border-primary text-black hover:text-primary px-4 lg:px-6 py-3 rounded-lg font-medium transition-colors text-sm lg:text-base touch-manipulation flex items-center justify-center flex-1"
-                    onClick={() => onOpenQuoteModal(activeProduct.name, activeProduct.brochure)}
-                  >
-                    <GrFormView className="h-8 w-8 mr-3" />
-                    <span>View Brochure</span>
-                  </button>
-                </div>
+              {/* CTAs */}
+              <div className="mt-auto flex flex-col sm:flex-row gap-3">
+                <Link
+                  href={featured.href!}
+                  className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white text-sm font-semibold px-5 py-3 rounded-lg transition-colors"
+                >
+                  Explore the full range
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => onOpenQuoteModal(featured.name, featured.brochure)}
+                  className="inline-flex items-center justify-center gap-2 border border-gray-300 hover:border-primary text-black hover:text-primary text-sm font-semibold px-5 py-3 rounded-lg transition-colors"
+                >
+                  Get quote
+                </button>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Product grid — flex-wrap so the final (partial) row stretches to fill: 5 cards render as
+            3 equal + 2 wider with no vacant cell, at every breakpoint (a 3-col grid would leave a gap). */}
+        <div className="flex flex-wrap gap-6">
+          {rest.map((p, i) => {
+            const Icon = p.icon;
+            return (
+              <article
+                key={p.name}
+                style={{ animationDelay: `${(i + 1) * 80}ms` }}
+                className="group relative grow basis-full min-w-0 sm:basis-[calc(50%-0.75rem)] lg:basis-[calc(33.333%-1rem)] bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 motion-reduce:hover:translate-y-0 animate-fade-up flex flex-col"
+              >
+                <div className="relative overflow-hidden bg-gray-100 aspect-[16/10]">
+                  <Image
+                    src={p.image}
+                    alt={p.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transform-none"
+                  />
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur text-primary text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    {p.highlight}
+                  </span>
+                  <div className="absolute top-3 right-3 w-9 h-9 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-primary shadow-sm">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                </div>
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="text-lg font-semibold text-black mb-2">
+                    {p.href ? (
+                      <Link
+                        href={p.href}
+                        className="link-underline inline-flex items-center gap-1.5 rounded-sm after:absolute after:inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+                      >
+                        {p.name}
+                        <ArrowRight className="h-4 w-4 opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+                      </Link>
+                    ) : (
+                      <span>{p.name}</span>
+                    )}
+                  </h3>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-4">{p.description}</p>
+                  <div className="flex flex-wrap gap-2 mb-4 mt-auto">
+                    <span className="inline-flex items-center text-xs font-medium text-gray-600 bg-gray-100 rounded-full px-3 py-1">
+                      {p.thickness}
+                    </span>
+                    <span className="inline-flex items-center text-xs font-medium text-gray-600 bg-gray-100 rounded-full px-3 py-1">
+                      {p.sizes}
+                    </span>
+                  </div>
+                  <div className="pt-4 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => onOpenQuoteModal(p.name, p.brochure)}
+                      className="relative z-10 w-full inline-flex items-center justify-center gap-2 border border-gray-300 hover:border-primary text-gray-700 hover:text-primary text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
+                    >
+                      Get quote
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
