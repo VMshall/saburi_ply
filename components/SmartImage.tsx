@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -44,6 +44,13 @@ export function SmartImage({
   const [error, setError] = useState(false);
   const useFill = fill ?? (!!aspectRatio || !width || !height);
 
+  // Hydration-race guard: an image that finished loading before React attached `onLoad`
+  // (common for cached / above-the-fold images) never fires the event, so it would stay stuck
+  // at opacity-0. When the ref attaches to an already-complete <img>, mark it loaded too.
+  const handleRef = useCallback((node: HTMLImageElement | null) => {
+    if (node && node.complete && node.naturalWidth > 0) setLoaded(true);
+  }, []);
+
   const imageClassName = cn(
     "transition-opacity duration-700 ease-in-out",
     objectFit === "contain" ? "object-contain" : "object-cover",
@@ -64,6 +71,7 @@ export function SmartImage({
           <Image
             src={src}
             alt={alt}
+            ref={handleRef}
             fill
             sizes={sizes ?? "100vw"}
             priority={priority}
@@ -75,6 +83,7 @@ export function SmartImage({
           <Image
             src={src}
             alt={alt}
+            ref={handleRef}
             width={width!}
             height={height!}
             sizes={sizes}
