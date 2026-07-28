@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
-// Hero slides with responsive images for different screen sizes
+// Hero slides with responsive images for different screen sizes. These banners are art-directed
+// marketing assets that already carry their own headline baked into the image, so the slider
+// renders image-only. Slide navigation mirrors rockwool.com/group: a row of text tabs at the
+// bottom of the hero over a soft gradient, each tab carrying a grey track and the active tab a red
+// progress bar that fills over the slide's display duration, then auto-advances.
 // Format: { desktop: "url", tablet: "url", mobile: "url" }
+const SLIDE_MS = 5000;
+
 const slides = [
   {
     title: "Saburi fire retardant plywood",
+    tab: "Fire Retardant",
     images: {
       desktop: "/images/heroBanners/fire-retardant-desk.webp",
       tablet: "/images/heroBanners/fire-retardant-tab.webp",
@@ -16,6 +22,7 @@ const slides = [
   },
   {
     title: "Saburi calibrated plywood — precision-sized panels",
+    tab: "Calibrated",
     images: {
       desktop: "/images/heroBanners/calibrated-desk.webp",
       tablet: "/images/heroBanners/calibrated-tab.webp",
@@ -24,6 +31,7 @@ const slides = [
   },
   {
     title: "Saburi marine grade waterproof plywood",
+    tab: "Marine Grade",
     images: {
       desktop: "/images/heroBanners/marine-grade-desk.webp",
       tablet: "/images/heroBanners/marine-grade-tab.webp",
@@ -32,6 +40,7 @@ const slides = [
   },
   {
     title: "Saburi zero-emission E0 plywood",
+    tab: "E-Zero Emission",
     images: {
       desktop: "/images/heroBanners/zero-emission-desk.webp",
       tablet: "/images/heroBanners/zero-emission-tab.webp",
@@ -43,36 +52,29 @@ const slides = [
 export function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Reset the auto-advance timer on every slide change (auto OR manual tab click) so the red
+  // progress bar — which restarts via its `key` below — always tracks the real time-to-advance.
   useEffect(() => {
-    const timer = setInterval(() => {
+    const timer = setTimeout(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    }, SLIDE_MS);
+    return () => clearTimeout(timer);
+  }, [currentSlide]);
 
   return (
-    <section className="relative w-full overflow-hidden">
-      <div className="relative w-full aspect-[824/620] sm:aspect-[16/9] md:aspect-[21/9] lg:aspect-[8/3] bg-black">
+    <section className="relative w-full overflow-hidden bg-black">
+      <div className="relative w-full aspect-[824/620] sm:aspect-[16/9] md:aspect-[21/9] lg:aspect-auto lg:h-[500px] bg-black">
         {slides.map((slide, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'
+            className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? "opacity-100" : "opacity-0"
               }`}
           >
             <picture>
               {/* Desktop image - visible on large screens (>= 1024px) */}
-              <source
-                media="(min-width: 1024px)"
-                srcSet={slide.images.desktop}
-              />
+              <source media="(min-width: 1024px)" srcSet={slide.images.desktop} />
               {/* Tablet image - visible on medium screens (768px - 1023px) */}
-              <source
-                media="(min-width: 768px)"
-                srcSet={slide.images.tablet}
-              />
+              <source media="(min-width: 768px)" srcSet={slide.images.tablet} />
               {/* Mobile image with srcSet for 1x/2x support */}
               <img
                 src={slide.images.mobile}
@@ -86,34 +88,42 @@ export function Hero() {
             </picture>
           </div>
         ))}
-      </div>
 
-      <button
-        onClick={prevSlide}
-        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 text-white transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" aria-hidden="true" />
-      </button>
-      <button
-        onClick={nextSlide}
-        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 text-white transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" aria-hidden="true" />
-      </button>
-
-      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 flex space-x-2 sm:space-x-3">
-        {slides.map((slide, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 sm:w-4 sm:h-4 rounded-full transition-all ${index === currentSlide ? "bg-primary scale-110" : "bg-white/50 hover:bg-white/80"
-              }`}
-            aria-label={`Go to slide ${index + 1}: ${slide.title}`}
-            aria-current={index === currentSlide ? "true" : "false"}
-          />
-        ))}
+        {/* Rockwool-style bottom tab navigation — labels over a soft gradient, each with a grey
+            track; the active tab's red bar fills over the slide's display time, then auto-advances. */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-white/85 via-white/85 to-transparent pt-2 pb-2">
+          <div className="mx-auto max-w-[800px] px-4 sm:px-6 lg:px-8">
+            <div className="flex items-stretch justify-between">
+              {slides.map((slide, index) => {
+                const activeTab = index === currentSlide;
+                return (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`relative flex-1 px-2 pb-4 pt-3 text-center text-xs transition-colors sm:text-sm ${activeTab ? "font-semibold text-neutral-900" : "font-medium text-neutral-500 hover:text-neutral-800"
+                      }`}
+                    aria-current={activeTab ? "true" : "false"}
+                  >
+                    <span className="line-clamp-1">{slide.tab}</span>
+                    {/* Grey track (every tab). */}
+                    <span
+                      className="pointer-events-none absolute bottom-0 left-4 right-4 h-[3px] rounded-full bg-neutral-300"
+                      aria-hidden="true"
+                    />
+                    {/* Red progress fill on the active tab; `key` restarts the animation each slide. */}
+                    {activeTab && (
+                      <span
+                        key={currentSlide}
+                        className="animate-hero-tab-progress pointer-events-none absolute bottom-0 left-4 right-4 h-[3px] rounded-full bg-[#D20014]"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
