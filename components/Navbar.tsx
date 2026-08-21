@@ -37,8 +37,9 @@ export function Navbar() {
   const router = useRouter();
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // ===== Products click-panel (replaces the old hover mega-menu) =====
-  // `productsOpen` controls the panel; `activeCategory` is the drill-down level (null = tile grid).
+  // ===== Products panel =====
+  // Opens on hover (mouse) or on keyboard activation; the panel's own contents are unchanged —
+  // tiles still drill down on click. `activeCategory` is the drill-down level (null = tile grid).
   const [productsOpen, setProductsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const productsTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -57,17 +58,51 @@ export function Navbar() {
     if (returnFocus) productsTriggerRef.current?.focus();
   }, []);
 
-  const toggleProducts = () => {
-    if (productsOpen) {
-      setProductsOpen(false);
-      setActiveCategory(null);
-      return;
-    }
-    pendingFocus.current = "[data-panel-first]";
-    // Only one panel at a time — a click on Products dismisses the hover menus.
+  /** Grace period so moving the pointer from the trigger down into the panel doesn't close it. */
+  const productsHoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelScheduledClose = () => {
+    if (productsHoverTimeout.current) clearTimeout(productsHoverTimeout.current);
+    productsHoverTimeout.current = null;
+  };
+  const scheduleClose = () => {
+    cancelScheduledClose();
+    productsHoverTimeout.current = setTimeout(() => closeProducts(), 150);
+  };
+  useEffect(() => cancelScheduledClose, []);
+
+  /** Hover-open. Never moves focus — yanking focus out from under a moving mouse is hostile. */
+  const openProducts = () => {
+    cancelScheduledClose();
+    // Only one panel at a time.
     setShowGuidesMega(false);
     setShowAboutMega(false);
     setProductsOpen(true);
+  };
+
+  /** Hover only applies to a real mouse; on touch the tap-to-click path below handles it. */
+  const handleTriggerPointerEnter = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") openProducts();
+  };
+  const handleTriggerPointerLeave = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") scheduleClose();
+  };
+
+  /**
+   * Activating the trigger. `detail === 0` means keyboard (Enter/Space) — that toggles and moves
+   * focus into the panel. A real mouse/touch click only ever opens: toggling would fight hover,
+   * since the pointer is still sitting on the trigger and mouseenter won't fire again.
+   */
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    if (e.detail === 0) {
+      if (productsOpen) {
+        closeProducts();
+        return;
+      }
+      pendingFocus.current = "[data-panel-first]";
+      openProducts();
+      return;
+    }
+    if (!productsOpen) openProducts();
   };
 
   /** Drill into a category: focus lands on its back button. */
@@ -136,15 +171,8 @@ export function Navbar() {
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [productsOpen, closeProducts]);
 
-  // Lock body scroll while the panel is open so the page doesn't slide under the overlay.
-  useEffect(() => {
-    if (!productsOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [productsOpen]);
+  // No body scroll lock: the panel opens on hover now, and freezing the page because the pointer
+  // happened to cross a nav item would be hostile. The scrim stays purely visual.
 
   // Move focus to whatever the last user action asked for (open → first tile, drill-in → back
   // button, back → the originating tile).
@@ -382,12 +410,18 @@ export function Navbar() {
                   Home
                 </Link>
 
-                {/* Products — click-to-open category panel (panel itself is rendered below the bar) */}
-                <div className="relative">
+                {/* Products — hover-to-open category panel (panel itself is rendered below the bar).
+                    The wrapper spans the full bar height so there's no dead gap between the label
+                    and the panel for the pointer to fall through on its way down. */}
+                <div
+                  className="relative flex h-full items-center"
+                  onPointerEnter={handleTriggerPointerEnter}
+                  onPointerLeave={handleTriggerPointerLeave}
+                >
                   <button
                     ref={productsTriggerRef}
                     type="button"
-                    onClick={toggleProducts}
+                    onClick={handleTriggerClick}
                     aria-expanded={productsOpen}
                     aria-controls="products-panel"
                     className={cn(megaTriggerClass(isProductsActive || productsOpen), "inline-flex items-center gap-1")}
@@ -563,6 +597,10 @@ export function Navbar() {
         id="products-panel"
         ref={productsPanelRef}
         aria-hidden={!productsOpen}
+        onPointerEnter={cancelScheduledClose}
+        onPointerLeave={(e) => {
+          if (e.pointerType === "mouse") scheduleClose();
+        }}
         className={cn(
           "absolute inset-x-0 top-full hidden border-t-4 border-[#D20014] bg-white shadow-2xl",
           "transition-[opacity,transform] duration-200 ease-out lg:block motion-reduce:transition-none",
