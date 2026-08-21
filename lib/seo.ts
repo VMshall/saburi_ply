@@ -11,11 +11,20 @@ import { SITE_NAME } from "@/data/site";
  *
  * `canonical`/`url` are relative; metadataBase (layout) resolves them to absolute www URLs.
  */
-const DEFAULT_OG_IMAGE = "/images/saburi.jpg";
+/**
+ * Sitewide share card. A real 1200x630 banner — the previous default was a 233x234 logo declared
+ * as 1200x630, which is below the ~300x200 floor scrapers need, so WhatsApp and friends fell back
+ * to the small square thumbnail layout.
+ */
+const DEFAULT_OG_IMAGE = "/images/og/saburiply-og.jpg";
 const OG_IMAGE_ALT = "Saburi Ply - Leading Plywood Manufacturer";
 
 function buildMetadata(seo: Seo): Metadata {
   const ogImage = seo.ogImage ?? DEFAULT_OG_IMAGE;
+  // Only declare dimensions for the banner, whose size we actually know. A page-supplied image is
+  // some product photo of unknown shape; asserting 1200x630 for it would be a guess, and scrapers
+  // that trust the declared size render the result badly. Omitted, they measure it themselves.
+  const isDefault = ogImage === DEFAULT_OG_IMAGE;
   return {
     title: seo.title,
     description: seo.description,
@@ -27,7 +36,11 @@ function buildMetadata(seo: Seo): Metadata {
       title: seo.title,
       description: seo.description,
       url: seo.canonical,
-      images: [{ url: ogImage, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+      images: [
+        isDefault
+          ? { url: ogImage, width: 1200, height: 630, alt: OG_IMAGE_ALT }
+          : { url: ogImage, alt: OG_IMAGE_ALT },
+      ],
     },
     twitter: {
       card: "summary_large_image",

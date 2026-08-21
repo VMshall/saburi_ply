@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     url: "/",
     images: [
       {
-        url: "/images/saburi.jpg",
+        url: "/images/og/saburiply-og.jpg",
         width: 1200,
         height: 630,
         alt: "Saburi Ply - Leading Plywood Manufacturer",
@@ -67,8 +67,9 @@ export const metadata: Metadata = {
       "Best Plywood Manufacturer and Supplier in India | Saburi Ply",
     description:
       "Saburi Ply is the best plywood manufacturer and supplier in India, offering premium plywood, block boards, and decorative panels for homes and commercial use.",
-    images: ["/images/saburi.jpg"],
+    images: ["/images/og/saburiply-og.jpg"],
   },
+  // Icons stay on the square logo — the OG banner is 1.9:1 and would be cropped to nothing.
   icons: {
     icon: [
       { url: "/favicon.ico" },
