@@ -18,6 +18,32 @@ import {
 import { GUIDE_PAGES, GUIDE_LABELS } from "@/data/faq-placement";
 import { PRODUCT_NAV } from "@/data/product-nav";
 
+/** The three hover-opened nav panels. One is open at a time, or none. */
+type PanelId = "products" | "guides" | "about";
+
+/**
+ * About Us is five static links in two groups — small enough that a `data/` module would be more
+ * indirection than it saves. Products lives in `data/product-nav.ts` because it drives a drill-down
+ * over the catalogue and needs a drift check against real product slugs; this doesn't.
+ */
+const ABOUT_NAV: { heading: string; items: { label: string; href: string }[] }[] = [
+  {
+    heading: "Company",
+    items: [
+      { label: "Company Overview", href: "/about" },
+      { label: "Accreditation", href: "/about/accreditation" },
+    ],
+  },
+  {
+    heading: "Our Initiatives",
+    items: [
+      { label: "Our National Presence", href: "/about/national-presence" },
+      { label: "Environment Stewardship", href: "/about/environment-stewardship" },
+      { label: "Privacy Policy", href: "/about/privacy-policy" },
+    ],
+  },
+];
+
 /**
  * Navbar client island (P1). Restyled to mirror rockwool.com/group: a two-tier header — a dark-red
  * utility strip (contact + social) above a bright-red main nav bar with a knocked-out (white) logo
@@ -31,19 +57,19 @@ export function Navbar() {
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [mobileGuidesOpen, setMobileGuidesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [showAboutMega, setShowAboutMega] = useState(false);
-  const [showGuidesMega, setShowGuidesMega] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // ===== Products panel =====
-  // Opens on hover (mouse) or on keyboard activation; the panel's own contents are unchanged —
-  // tiles still drill down on click. `activeCategory` is the drill-down level (null = tile grid).
-  const [productsOpen, setProductsOpen] = useState(false);
+  // ===== Nav panels (Products / Guides / About) =====
+  // All three share one surface, one trigger behaviour and one set of effects. A single `openPanel`
+  // (rather than three booleans) makes "only one panel at a time" fall out of the data model instead
+  // of needing every trigger to explicitly close its siblings.
+  const [openPanel, setOpenPanel] = useState<PanelId | null>(null);
+  /** Products-only: the drill-down level (null = tile grid). */
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const productsTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const productsPanelRef = useRef<HTMLDivElement | null>(null);
+  const triggerRefs = useRef<Partial<Record<PanelId, HTMLButtonElement | null>>>({});
+  const panelRefs = useRef<Partial<Record<PanelId, HTMLDivElement | null>>>({});
   const headerRef = useRef<HTMLDivElement | null>(null);
   /**
    * Selector for the element that should receive focus after the next panel render, set by whichever
@@ -52,57 +78,72 @@ export function Navbar() {
    */
   const pendingFocus = useRef<string | null>(null);
 
-  const closeProducts = useCallback((returnFocus = false) => {
-    setProductsOpen(false);
+  const closePanel = useCallback((returnFocusTo?: PanelId) => {
+    setOpenPanel(null);
     setActiveCategory(null);
-    if (returnFocus) productsTriggerRef.current?.focus();
+    if (returnFocusTo) triggerRefs.current[returnFocusTo]?.focus();
   }, []);
 
-  /** Grace period so moving the pointer from the trigger down into the panel doesn't close it. */
-  const productsHoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const cancelScheduledClose = () => {
-    if (productsHoverTimeout.current) clearTimeout(productsHoverTimeout.current);
-    productsHoverTimeout.current = null;
-  };
-  const scheduleClose = () => {
+  /** Grace period so moving the pointer from a trigger down into its panel doesn't close it. */
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelScheduledClose = useCallback(() => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    hoverTimeout.current = null;
+  }, []);
+  const scheduleClose = useCallback(() => {
     cancelScheduledClose();
-    productsHoverTimeout.current = setTimeout(() => closeProducts(), 150);
-  };
-  useEffect(() => cancelScheduledClose, []);
+    hoverTimeout.current = setTimeout(() => closePanel(), 150);
+  }, [cancelScheduledClose, closePanel]);
+  useEffect(() => cancelScheduledClose, [cancelScheduledClose]);
 
   /** Hover-open. Never moves focus — yanking focus out from under a moving mouse is hostile. */
-  const openProducts = () => {
-    cancelScheduledClose();
-    // Only one panel at a time.
-    setShowGuidesMega(false);
-    setShowAboutMega(false);
-    setProductsOpen(true);
-  };
-
-  /** Hover only applies to a real mouse; on touch the tap-to-click path below handles it. */
-  const handleTriggerPointerEnter = (e: React.PointerEvent) => {
-    if (e.pointerType === "mouse") openProducts();
-  };
-  const handleTriggerPointerLeave = (e: React.PointerEvent) => {
-    if (e.pointerType === "mouse") scheduleClose();
-  };
+  const openPanelById = useCallback(
+    (id: PanelId) => {
+      cancelScheduledClose();
+      setActiveCategory(null);
+      setOpenPanel(id);
+    },
+    [cancelScheduledClose]
+  );
 
   /**
-   * Activating the trigger. `detail === 0` means keyboard (Enter/Space) — that toggles and moves
-   * focus into the panel. A real mouse/touch click only ever opens: toggling would fight hover,
-   * since the pointer is still sitting on the trigger and mouseenter won't fire again.
+   * Hover props for a trigger's wrapper (which spans the full bar height, so there's no dead gap
+   * between the label and the panel). Gated to a real mouse; on touch there is no hover, so the tap
+   * falls through to the activation handler below.
    */
-  const handleTriggerClick = (e: React.MouseEvent) => {
+  const triggerHoverProps = (id: PanelId) => ({
+    onPointerEnter: (e: React.PointerEvent) => {
+      if (e.pointerType === "mouse") openPanelById(id);
+    },
+    onPointerLeave: (e: React.PointerEvent) => {
+      if (e.pointerType === "mouse") scheduleClose();
+    },
+  });
+
+  /**
+   * Activating a trigger. `detail === 0` means keyboard (Enter/Space) — that toggles and moves focus
+   * into the panel. A real mouse/touch click only ever opens: toggling would fight hover, since the
+   * pointer is still on the trigger and pointerenter won't fire again.
+   */
+  const handleTriggerActivate = (id: PanelId) => (e: React.MouseEvent) => {
     if (e.detail === 0) {
-      if (productsOpen) {
-        closeProducts();
+      if (openPanel === id) {
+        closePanel();
         return;
       }
       pendingFocus.current = "[data-panel-first]";
-      openProducts();
+      openPanelById(id);
       return;
     }
-    if (!productsOpen) openProducts();
+    if (openPanel !== id) openPanelById(id);
+  };
+
+  /** Props shared by all three panel surfaces, keeping the pointer inside them from closing. */
+  const panelHoverProps = {
+    onPointerEnter: cancelScheduledClose,
+    onPointerLeave: (e: React.PointerEvent) => {
+      if (e.pointerType === "mouse") scheduleClose();
+    },
   };
 
   /** Drill into a category: focus lands on its back button. */
@@ -135,81 +176,49 @@ export function Navbar() {
     }
   };
 
-  // Timeout refs to prevent immediate closing (Guides + About still use the hover pattern)
-  const aboutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const guidesTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Close the panel whenever the route changes (a product link was followed).
+  // Close whatever is open whenever the route changes (a nav link was followed).
   useEffect(() => {
-    setProductsOpen(false);
+    setOpenPanel(null);
     setActiveCategory(null);
   }, [pathname]);
 
-  // Escape: step back out of a drill-down first, then close the panel.
+  // Escape: step back out of the Products drill-down first, then close.
   useEffect(() => {
-    if (!productsOpen) return;
+    if (!openPanel) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.preventDefault();
       // Go through backToGrid so Escape restores focus to the originating tile rather than
       // dropping it on <body>.
-      if (activeCategory) backToGrid(activeCategory);
-      else closeProducts(true);
+      if (openPanel === "products" && activeCategory) backToGrid(activeCategory);
+      else closePanel(openPanel);
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [productsOpen, activeCategory, closeProducts, backToGrid]);
+  }, [openPanel, activeCategory, closePanel, backToGrid]);
 
-  // Click outside the header (panel + trigger both live inside it) closes the panel.
+  // Click outside the header (panels + triggers all live inside it) closes.
   useEffect(() => {
-    if (!productsOpen) return;
+    if (!openPanel) return;
     const onPointerDown = (e: PointerEvent) => {
       if (headerRef.current?.contains(e.target as Node)) return;
-      closeProducts();
+      closePanel();
     };
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [productsOpen, closeProducts]);
+  }, [openPanel, closePanel]);
 
-  // No body scroll lock: the panel opens on hover now, and freezing the page because the pointer
-  // happened to cross a nav item would be hostile. The scrim stays purely visual.
+  // No body scroll lock: panels open on hover, and freezing the page because the pointer happened
+  // to cross a nav item would be hostile. The scrim stays purely visual.
 
-  // Move focus to whatever the last user action asked for (open → first tile, drill-in → back
+  // Move focus to whatever the last user action asked for (open → first item, drill-in → back
   // button, back → the originating tile).
   useEffect(() => {
     const selector = pendingFocus.current;
-    if (!productsOpen || !selector) return;
+    if (!openPanel || !selector) return;
     pendingFocus.current = null;
-    productsPanelRef.current?.querySelector<HTMLElement>(selector)?.focus();
-  }, [productsOpen, activeCategory]);
-
-  const handleAboutMouseEnter = () => {
-    if (aboutTimeoutRef.current) {
-      clearTimeout(aboutTimeoutRef.current);
-    }
-    closeProducts();
-    setShowAboutMega(true);
-  };
-
-  const handleAboutMouseLeave = () => {
-    aboutTimeoutRef.current = setTimeout(() => {
-      setShowAboutMega(false);
-    }, 150);
-  };
-
-  const handleGuidesMouseEnter = () => {
-    if (guidesTimeoutRef.current) {
-      clearTimeout(guidesTimeoutRef.current);
-    }
-    closeProducts();
-    setShowGuidesMega(true);
-  };
-
-  const handleGuidesMouseLeave = () => {
-    guidesTimeoutRef.current = setTimeout(() => {
-      setShowGuidesMega(false);
-    }, 150);
-  };
+    panelRefs.current[openPanel]?.querySelector<HTMLElement>(selector)?.focus();
+  }, [openPanel, activeCategory]);
 
   const isProductsActive = pathname.startsWith("/products/");
 
@@ -290,13 +299,43 @@ export function Navbar() {
         : "text-white/85 hover:text-white hover:after:absolute hover:after:left-3 hover:after:right-3 hover:after:-bottom-1 hover:after:h-0.5 hover:after:bg-white/60 hover:after:rounded-full"
     );
 
-  const megaTriggerClass = (active: boolean) =>
+  const panelTriggerClass = (active: boolean) =>
     cn(
       "px-3 py-2 text-[15px] xl:text-[17px] font-medium transition-colors relative",
       active
         ? "text-white after:absolute after:left-3 after:right-3 after:-bottom-1 after:h-0.5 after:bg-white after:rounded-full"
         : "text-white/85 hover:text-white"
     );
+
+  /**
+   * The shared panel surface. Always rendered and toggled with visibility rather than conditionally
+   * mounted, so every link inside ships in the static HTML instead of only existing after a hover.
+   * Anchored with `top-full` on the header wrapper, so it tracks the header's real height.
+   */
+  const panelSurfaceClass = (open: boolean) =>
+    cn(
+      "absolute inset-x-0 top-full hidden border-t-4 border-[#D20014] bg-white shadow-2xl",
+      "transition-[opacity,transform] duration-200 ease-out lg:block motion-reduce:transition-none",
+      open ? "visible translate-y-0 opacity-100" : "pointer-events-none invisible -translate-y-2 opacity-0"
+    );
+
+  /** A link row inside a panel: red on hover with a chevron that slides in. */
+  const panelLinkClass = (rule: boolean) =>
+    cn(
+      "group flex items-center justify-between gap-3 rounded-md py-2.5 pr-1 text-[15px] font-medium text-neutral-700",
+      "transition-colors hover:text-[#D20014] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] motion-reduce:transition-none",
+      rule && "border-b border-neutral-100"
+    );
+
+  const panelChevron = (
+    <ChevronRight
+      className="h-4 w-4 flex-none text-neutral-300 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[#D20014] group-hover:opacity-100 motion-reduce:transition-none"
+      aria-hidden="true"
+    />
+  );
+
+  /** Small-caps eyebrow at the top of each panel. */
+  const panelEyebrowClass = "mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500";
 
   /**
    * Stacks the Products panel's levels. The visible pane is in normal flow (so it sizes the panel);
@@ -317,14 +356,14 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 shadow-md">
-      {/* Scrim behind the Products panel. Sits under the header wrapper (z-50) but above the page. */}
+      {/* Scrim behind whichever panel is open. Sits under the header wrapper (z-50), above the page. */}
       <div
         className={cn(
           "fixed inset-0 z-40 bg-black/50 transition-opacity duration-200 motion-reduce:transition-none",
-          productsOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          openPanel ? "opacity-100" : "pointer-events-none opacity-0"
         )}
         aria-hidden="true"
-        onClick={() => closeProducts()}
+        onClick={() => closePanel()}
       />
 
       {/* Header wrapper: the Products panel anchors to this with `top-full`, so it always sits
@@ -413,146 +452,85 @@ export function Navbar() {
                 {/* Products — hover-to-open category panel (panel itself is rendered below the bar).
                     The wrapper spans the full bar height so there's no dead gap between the label
                     and the panel for the pointer to fall through on its way down. */}
-                <div
-                  className="relative flex h-full items-center"
-                  onPointerEnter={handleTriggerPointerEnter}
-                  onPointerLeave={handleTriggerPointerLeave}
-                >
+                <div className="relative flex h-full items-center" {...triggerHoverProps("products")}>
                   <button
-                    ref={productsTriggerRef}
+                    ref={(el) => {
+                      triggerRefs.current.products = el;
+                    }}
                     type="button"
-                    onClick={handleTriggerClick}
-                    aria-expanded={productsOpen}
+                    onClick={handleTriggerActivate("products")}
+                    aria-expanded={openPanel === "products"}
                     aria-controls="products-panel"
-                    className={cn(megaTriggerClass(isProductsActive || productsOpen), "inline-flex items-center gap-1")}
+                    className={cn(
+                      panelTriggerClass(isProductsActive || openPanel === "products"),
+                      "inline-flex items-center gap-1"
+                    )}
                   >
                     Products
                     <ChevronDown
                       className={cn(
                         "h-4 w-4 transition-transform duration-200 motion-reduce:transition-none",
-                        productsOpen && "rotate-180"
+                        openPanel === "products" && "rotate-180"
                       )}
                       aria-hidden="true"
                     />
                   </button>
-
                 </div>
 
-                {/* Guides Mega Menu (data-driven from GUIDE_PAGES) */}
-                <div
-                  className="relative"
-                  onMouseEnter={handleGuidesMouseEnter}
-                  onMouseLeave={handleGuidesMouseLeave}
-                >
-                  <button className={megaTriggerClass(isGuidesActive || showGuidesMega)}>
+                {/* Guides — hover-to-open panel */}
+                <div className="relative flex h-full items-center" {...triggerHoverProps("guides")}>
+                  <button
+                    ref={(el) => {
+                      triggerRefs.current.guides = el;
+                    }}
+                    type="button"
+                    onClick={handleTriggerActivate("guides")}
+                    aria-expanded={openPanel === "guides"}
+                    aria-controls="guides-panel"
+                    className={cn(
+                      panelTriggerClass(isGuidesActive || openPanel === "guides"),
+                      "inline-flex items-center gap-1"
+                    )}
+                  >
                     Guides
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 transition-transform duration-200 motion-reduce:transition-none",
+                        openPanel === "guides" && "rotate-180"
+                      )}
+                      aria-hidden="true"
+                    />
                   </button>
-
-                  {showGuidesMega && (
-                    <div
-                      className="fixed left-0 right-0 top-[124px] z-50"
-                      onMouseEnter={handleGuidesMouseEnter}
-                      onMouseLeave={handleGuidesMouseLeave}
-                    >
-                      <div
-                        className="relative shadow-2xl border-t-2 border-white/30 pb-16 min-h-[600px]"
-                        style={{
-                          backgroundImage: 'url(/images/nav-product.jpeg)',
-                          backgroundSize: '100% 100%',
-                          backgroundPosition: 'center',
-                          backgroundRepeat: 'no-repeat',
-                          backgroundColor: '#000000',
-                        }}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60"></div>
-                        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
-                          <div className="grid grid-cols-2 gap-16">
-                            {guideColumns.map((col) => (
-                              <div key={col.href}>
-                                <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
-                                  <Link href={col.href} className="transition-colors hover:text-red-500">
-                                    {col.heading}
-                                  </Link>
-                                </h3>
-                                <ul className="space-y-3">
-                                  {col.clusters.map((c) => (
-                                    <li key={c.href}>
-                                      <Link
-                                        href={c.href}
-                                        className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1"
-                                      >
-                                        {c.label}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                                <Link
-                                  href={col.href}
-                                  className="mt-5 inline-block text-sm font-semibold text-white hover:text-red-400 transition-colors"
-                                >
-                                  View the full guide →
-                                </Link>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 <Link href="/gallery" className={navLinkClass(isActive("/gallery"))}>
                   Gallery
                 </Link>
 
-                {/* About Us Mega Menu */}
-                <div
-                  className="relative"
-                  onMouseEnter={handleAboutMouseEnter}
-                  onMouseLeave={handleAboutMouseLeave}
-                >
-                  <button className={megaTriggerClass(pathname.startsWith("/about") || showAboutMega)}>
+                {/* About Us — hover-to-open panel */}
+                <div className="relative flex h-full items-center" {...triggerHoverProps("about")}>
+                  <button
+                    ref={(el) => {
+                      triggerRefs.current.about = el;
+                    }}
+                    type="button"
+                    onClick={handleTriggerActivate("about")}
+                    aria-expanded={openPanel === "about"}
+                    aria-controls="about-panel"
+                    className={cn(
+                      panelTriggerClass(pathname.startsWith("/about") || openPanel === "about"),
+                      "inline-flex items-center gap-1"
+                    )}
+                  >
                     About Us
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 transition-transform duration-200 motion-reduce:transition-none",
+                        openPanel === "about" && "rotate-180"
+                      )}
+                      aria-hidden="true"
+                    />
                   </button>
-
-                  {showAboutMega && (
-                    <div
-                      className="fixed left-0 right-0 top-[124px] z-50"
-                      onMouseEnter={handleAboutMouseEnter}
-                      onMouseLeave={handleAboutMouseLeave}
-                    >
-                      <div
-                        className="relative shadow-2xl border-t-2 border-white/30 pb-16 min-h-[500px]"
-                        style={{
-                          backgroundImage: 'url(/images/about-nav.webp)',
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          backgroundRepeat: 'no-repeat'
-                        }}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/70"></div>
-                        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                          <div className="grid grid-cols-3 gap-16">
-                            <div>
-                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">Company</h3>
-                              <ul className="space-y-3">
-                                <li><Link href="/about" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">Company Overview</Link></li>
-                                <li><Link href="/about/accreditation" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">Accreditation</Link></li>
-                              </ul>
-                            </div>
-                            <div>
-                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">Our Initiatives</h3>
-                              <ul className="space-y-3">
-                                <li><Link href="/about/national-presence" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">Our National Presence</Link></li>
-                                <li><Link href="/about/environment-stewardship" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">Environment Stewardship</Link></li>
-                                <li><Link href="/about/privacy-policy" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">Privacy Policy</Link></li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 <a href="/blog" className={navLinkClass(pathname === "/blog")}>
@@ -591,23 +569,16 @@ export function Navbar() {
       </div>
 
       {/* ===== Products panel =====
-          Always rendered (never conditionally mounted) and toggled with visibility/opacity, so all
-          20 product links ship in the static HTML instead of appearing only after an interaction. */}
+          Products is the only panel with two levels: 20 items across 7 categories earns a
+          drill-down. Guides (13) and About (5) are flat — see below. */}
       <div
         id="products-panel"
-        ref={productsPanelRef}
-        aria-hidden={!productsOpen}
-        onPointerEnter={cancelScheduledClose}
-        onPointerLeave={(e) => {
-          if (e.pointerType === "mouse") scheduleClose();
+        ref={(el) => {
+          panelRefs.current.products = el;
         }}
-        className={cn(
-          "absolute inset-x-0 top-full hidden border-t-4 border-[#D20014] bg-white shadow-2xl",
-          "transition-[opacity,transform] duration-200 ease-out lg:block motion-reduce:transition-none",
-          productsOpen
-            ? "visible translate-y-0 opacity-100"
-            : "pointer-events-none invisible -translate-y-2 opacity-0"
-        )}
+        aria-hidden={openPanel !== "products"}
+        {...panelHoverProps}
+        className={panelSurfaceClass(openPanel === "products")}
       >
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Panes are stacked: the active one is in flow, the rest are absolute + invisible (which
@@ -616,9 +587,7 @@ export function Navbar() {
           <div className="relative">
             {/* ---- Level 1: category grid ---- */}
             <div className={panePosition(activeCategory === null)}>
-              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
-                Our Products
-              </p>
+              <p className={panelEyebrowClass}>Our Products</p>
               <div className="grid grid-cols-3 gap-4">
                 {PRODUCT_NAV.map((cat, i) => (
                   <button
@@ -700,26 +669,104 @@ export function Navbar() {
                   >
                     {cat.items.map((item) => (
                       <li key={item.href}>
-                        <Link
-                          href={item.href}
-                          className={cn(
-                            "group flex items-center justify-between gap-3 rounded-md py-2.5 pr-1 text-[15px] font-medium text-neutral-700",
-                            "transition-colors hover:text-[#D20014] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] motion-reduce:transition-none",
-                            // Row rules aid scanning in a long list; under a lone product they'd just
-                            // draw a stray full-width line.
-                            cat.items.length > 1 && "border-b border-neutral-100"
-                          )}
-                        >
+                        {/* Row rules aid scanning in a long list; under a lone product they'd
+                            just draw a stray full-width line. */}
+                        <Link href={item.href} className={panelLinkClass(cat.items.length > 1)}>
                           {item.label}
-                          <ChevronRight
-                            className="h-4 w-4 flex-none text-neutral-300 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[#D20014] group-hover:opacity-100 motion-reduce:transition-none"
-                            aria-hidden="true"
-                          />
+                          {panelChevron}
                         </Link>
                       </li>
                     ))}
                   </ul>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ===== Guides panel =====
+          13 links across 2 pillars. Flat rather than drilled: a 2-tile grid would look half-empty
+          and a drill-down would add a click to reach pages that are all one click away today. */}
+      <div
+        id="guides-panel"
+        ref={(el) => {
+          panelRefs.current.guides = el;
+        }}
+        aria-hidden={openPanel !== "guides"}
+        {...panelHoverProps}
+        className={panelSurfaceClass(openPanel === "guides")}
+      >
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <p className={panelEyebrowClass}>Plywood Guides</p>
+          {/* items-start so a card with fewer links hugs its content instead of stretching to
+              match its neighbour and leaving a dead gap under the last row. */}
+          <div className="grid grid-cols-2 items-start gap-6">
+            {guideColumns.map((col, i) => (
+              <div key={col.href} className="rounded-lg border border-neutral-200 p-5">
+                <h3 className="text-[17px] font-semibold text-neutral-900">
+                  <Link
+                    href={col.href}
+                    data-panel-first={i === 0 ? "" : undefined}
+                    className="rounded-sm transition-colors hover:text-[#D20014] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none"
+                  >
+                    {col.heading}
+                  </Link>
+                </h3>
+                <ul className="mt-4 grid grid-cols-2 gap-x-8">
+                  {col.clusters.map((c) => (
+                    <li key={c.href}>
+                      <Link href={c.href} className={panelLinkClass(true)}>
+                        {c.label}
+                        {panelChevron}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={col.href}
+                  className="mt-4 inline-block rounded-sm text-sm font-semibold text-[#D20014] transition-colors hover:text-[#8C101E] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none"
+                >
+                  View the full guide →
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ===== About Us panel ===== 5 links in 2 groups — flat, same card language. */}
+      <div
+        id="about-panel"
+        ref={(el) => {
+          panelRefs.current.about = el;
+        }}
+        aria-hidden={openPanel !== "about"}
+        {...panelHoverProps}
+        className={panelSurfaceClass(openPanel === "about")}
+      >
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <p className={panelEyebrowClass}>About Saburi</p>
+          {/* items-start so a card with fewer links hugs its content instead of stretching to
+              match its neighbour and leaving a dead gap under the last row. */}
+          <div className="grid grid-cols-2 items-start gap-6">
+            {ABOUT_NAV.map((group, gi) => (
+              <div key={group.heading} className="rounded-lg border border-neutral-200 p-5">
+                <h3 className="text-[17px] font-semibold text-neutral-900">{group.heading}</h3>
+                <ul className="mt-4">
+                  {group.items.map((item, i) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        data-panel-first={gi === 0 && i === 0 ? "" : undefined}
+                        className={panelLinkClass(i < group.items.length - 1)}
+                      >
+                        {item.label}
+                        {panelChevron}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
@@ -845,21 +892,17 @@ export function Navbar() {
             </button>
             {mobileAboutOpen && (
               <div className="pl-6 space-y-1">
-                <Link href="/about" className="block py-2 text-sm text-black hover:text-primary" onClick={toggleMenu}>
-                  • Company Overview
-                </Link>
-                <Link href="/about/accreditation" className="block py-2 text-sm text-black hover:text-primary" onClick={toggleMenu}>
-                  • Accreditation
-                </Link>
-                <Link href="/about/national-presence" className="block py-2 text-sm text-black hover:text-primary" onClick={toggleMenu}>
-                  • Our National Presence
-                </Link>
-                <Link href="/about/environment-stewardship" className="block py-2 text-sm text-black hover:text-primary" onClick={toggleMenu}>
-                  • Environment Stewardship
-                </Link>
-                <Link href="/about/privacy-policy" className="block py-2 text-sm text-black hover:text-primary" onClick={toggleMenu}>
-                  • Privacy Policy
-                </Link>
+                {/* Same source as the desktop panel, so the two can't drift apart. */}
+                {ABOUT_NAV.flatMap((g) => g.items).map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block py-2 text-sm text-black hover:text-primary"
+                    onClick={toggleMenu}
+                  >
+                    • {item.label}
+                  </Link>
+                ))}
               </div>
             )}
             <Link href="/gallery" className={mobileLinkClass(isActive("/gallery"))} onClick={toggleMenu}>
