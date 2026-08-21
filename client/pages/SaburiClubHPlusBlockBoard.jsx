@@ -46,7 +46,7 @@ export default function SaburiClubHPlusBlockBoard() {
     const images = [
         {
             id: 1,
-            src: "/images/blockboard-product/Club H+.webp",
+            src: "/images/blockboard-product/Club H Plus.webp",
             alt: "Saburi Perennial board full view",
         },
     ];

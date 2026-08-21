@@ -189,7 +189,7 @@ export const products: Product[] = [
       { question: "Do you offer any warranty on your Structural Grade Plywood?", answerHtml: "Yes, our Structural Grade Plywood comes with a lifetime warranty along with a money-back guarantee. We are committed to delivering superior quality products, and if the plywood fails under normal structural use due to manufacturing defects, we assure a full replacement or money-back, ensuring complete peace of mind for our customers." },
       { question: "Is it termite and borer proof?", answerHtml: "Yes, Saburi Perennial is boiling water proof, termite proof, and undergoes three-stage preservative treatment along with antifungal treatment." },
     ],
-    images: [{ src: "/images/plywood-product/Club H+.webp", alt: "Saburi Club H+ product board" }],
+    images: [{ src: "/images/plywood-product/Club H Plus.webp", alt: "Saburi Club H+ product board" }],
     certification: "IS: 10701",
   },
   {
@@ -661,7 +661,7 @@ export const products: Product[] = [
       { question: "What kind of finish can I expect when cutting or routing this board?", answerHtml: "Because of the premium face veneers and solid core, carpenters will experience smooth, clean cuts with zero splintering. This makes it ideal for highly detailed, custom woodwork and flawless edge-banding." },
       { question: "What kind of pest protection does Club H+ offer?", answerHtml: "It undergoes a multi-stage, deep-penetration chemical treatment that renders it completely immune to termites and wood borers, ensuring your premium furniture investments are protected for decades." },
     ],
-    images: [{ src: "/images/blockboard-product/Club H+.webp", alt: "Saburi Club H+ Block Board (IS: 1659)" }],
+    images: [{ src: "/images/blockboard-product/Club H Plus.webp", alt: "Saburi Club H+ Block Board (IS: 1659)" }],
     certification: "IS: 1659",
   },
   {
@@ -971,7 +971,7 @@ export const products: Product[] = [
     images: [
       { src: "/images/wpcpvc-product/pvc/ACE.webp", alt: "Saburi Ace PVC board panel" },
       { src: "/images/wpcpvc-product/pvc/ECO.webp", alt: "Saburi Eco Smart PVC board panel" },
-      { src: "/images/wpcpvc-product/pvc/SABURI-HD+-SMART-PANELS-SABURI-HD+-SMART-PANELS-Saburi-hd-+-Smart-Panels.webp", alt: "Saburi HD+ Smart PVC board panel" },
+      { src: "/images/wpcpvc-product/pvc/SABURI-HD-PLUS-SMART-PANELS.webp", alt: "Saburi HD+ Smart PVC board panel" },
     ],
   },
   {
