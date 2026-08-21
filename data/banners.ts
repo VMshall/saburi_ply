@@ -97,4 +97,5 @@ export const STATIC_BANNERS: Record<string, ResponsiveImage> = {
     mobile: "/images/gallery/breadcrumb/mob-breadcrumb.webp",
   },
   "/contact": one("/images/breadcrumbs/Contact.webp"),
+  // No "/blog" entry — the blog index is deliberately banner-free (see app/blog/page.tsx).
 };
