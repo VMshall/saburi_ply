@@ -503,11 +503,9 @@ export function Navbar() {
                   </button>
                 </div>
 
-                <Link href="/gallery" className={navLinkClass(isActive("/gallery"))}>
-                  Gallery
-                </Link>
-
-                {/* About Us — hover-to-open panel */}
+                {/* About Us — hover-to-open panel. Sits directly after Guides so the three
+                    panel triggers are contiguous and the plain links follow; this also matches the
+                    order the mobile menu has always used. */}
                 <div className="relative flex h-full items-center" {...triggerHoverProps("about")}>
                   <button
                     ref={(el) => {
@@ -532,6 +530,10 @@ export function Navbar() {
                     />
                   </button>
                 </div>
+
+                <Link href="/gallery" className={navLinkClass(isActive("/gallery"))}>
+                  Gallery
+                </Link>
 
                 <a href="/blog" className={navLinkClass(pathname === "/blog")}>
                   Blog
