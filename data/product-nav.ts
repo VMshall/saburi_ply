@@ -19,6 +19,9 @@ export interface ProductNavItem {
   /** Short nav label — intentionally not `Product.name`. */
   label: string;
   href: string;
+  /** Derived from the catalogue — never hand-written. See `resolve()` below. */
+  image?: string;
+  certification?: string;
 }
 
 export interface ProductNavCategory {
@@ -32,7 +35,12 @@ export interface ProductNavCategory {
   items: ProductNavItem[];
 }
 
-export const PRODUCT_NAV: ProductNavCategory[] = [
+/**
+ * Hand-authored IA: labels, ordering and membership only. Presentation data that already lives in
+ * the catalogue (image, IS code) is attached by `resolve()` below rather than duplicated here, so
+ * the panel's preview image and spec chip can never disagree with the product page.
+ */
+const NAV_SOURCE: ProductNavCategory[] = [
   {
     id: "plywood",
     label: "Plywood",
@@ -101,6 +109,25 @@ export const PRODUCT_NAV: ProductNavCategory[] = [
     ],
   },
 ];
+
+const productBySlug = new Map(products.map((p) => [p.slug, p]));
+
+/**
+ * Attaches catalogue-derived presentation data to each nav item. `certification` is genuinely absent
+ * for some products (WPC, Liner, the new launches) — the chip is simply omitted there rather than
+ * faked. Every product has an image, so the preview never falls back to a placeholder.
+ */
+export const PRODUCT_NAV: ProductNavCategory[] = NAV_SOURCE.map((cat) => ({
+  ...cat,
+  items: cat.items.map((item) => {
+    const product = productBySlug.get(item.href.replace("/products/", ""));
+    return {
+      ...item,
+      image: product?.images?.[0]?.src,
+      certification: product?.certification,
+    };
+  }),
+}));
 
 /** Every product link in the panel, in panel order. Used for flat renderings and link audits. */
 export const PRODUCT_NAV_ITEMS: ProductNavItem[] = PRODUCT_NAV.flatMap((c) => c.items);

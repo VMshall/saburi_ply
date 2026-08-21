@@ -146,9 +146,19 @@ export function Navbar() {
     },
   };
 
+  /** Which product the detail pane is previewing (defaults to the category's first). */
+  const [previewHref, setPreviewHref] = useState<string | null>(null);
+
   /** Drill into a category: focus lands on its back button. */
   const openCategory = useCallback((id: string) => {
     pendingFocus.current = `[data-pane="${id}"] [data-pane-first]`;
+    const cat = PRODUCT_NAV.find((c) => c.id === id);
+    setPreviewHref(cat?.items[0]?.href ?? null);
+    // Warm the category's images so hovering a row swaps instantly instead of flashing. Only the
+    // opened category is preloaded — eagerly loading all 20 would tax every page for a nav.
+    cat?.items.forEach((item) => {
+      if (item.image) new Image().src = item.image;
+    });
     setActiveCategory(id);
   }, []);
 
@@ -341,11 +351,20 @@ export function Navbar() {
    * Stacks the Products panel's levels. The visible pane is in normal flow (so it sizes the panel);
    * the rest are absolutely positioned and `invisible` — removed from the tab order and a11y tree,
    * but still present in the HTML so their product links stay crawlable.
+   *
+   * `level` (0 = category grid, 1 = category detail) makes the motion directional without tracking
+   * which way the user travelled: a hidden pane always rests on the side it belongs on, so drilling
+   * in slides content leftward and going back slides it rightward, automatically.
    */
-  const panePosition = (visible: boolean) =>
+  const panePosition = (visible: boolean, level: 0 | 1) =>
     cn(
-      "transition-opacity duration-150 ease-out motion-reduce:transition-none",
-      visible ? "relative opacity-100" : "pointer-events-none invisible absolute inset-0 opacity-0"
+      "transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none motion-reduce:transform-none",
+      visible
+        ? "relative translate-x-0 opacity-100"
+        : cn(
+            "pointer-events-none invisible absolute inset-0 opacity-0",
+            level === 0 ? "-translate-x-4" : "translate-x-4"
+          )
     );
 
   const mobileLinkClass = (active: boolean) =>
@@ -587,8 +606,8 @@ export function Navbar() {
               keeps them out of the tab order and a11y tree while leaving their links in the HTML).
               No fixed min-height — a one-product category should not open a 400px void. */}
           <div className="relative">
-            {/* ---- Level 1: category grid ---- */}
-            <div className={panePosition(activeCategory === null)}>
+            {/* ---- Level 0: category grid ---- */}
+            <div className={panePosition(activeCategory === null, 0)}>
               <p className={panelEyebrowClass}>Our Products</p>
               <div className="grid grid-cols-3 gap-4">
                 {PRODUCT_NAV.map((cat, i) => (
@@ -598,7 +617,6 @@ export function Navbar() {
                     data-tile={cat.id}
                     data-panel-first={i === 0 ? "" : undefined}
                     onClick={() => openCategory(cat.id)}
-                    aria-label={`${cat.label} — ${cat.items.length} products`}
                     className={cn(
                       // items-start so every tile title sits on the same baseline regardless of how
                       // many lines its blurb wraps to.
@@ -610,18 +628,8 @@ export function Navbar() {
                     )}
                   >
                     <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-2">
-                        <span className="text-[17px] font-semibold leading-none text-neutral-900 transition-colors group-hover:text-[#D20014] motion-reduce:transition-none">
-                          {cat.label}
-                        </span>
-                        <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-semibold leading-none text-neutral-500 transition-colors group-hover:bg-[#D20014] group-hover:text-white motion-reduce:transition-none">
-                          {cat.items.length}
-                        </span>
-                        {cat.featured && (
-                          <span className="rounded-sm bg-[#D20014] px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wider text-white">
-                            New
-                          </span>
-                        )}
+                      <span className="block text-[17px] font-semibold leading-none text-neutral-900 transition-colors group-hover:text-[#D20014] motion-reduce:transition-none">
+                        {cat.label}
                       </span>
                       <span className="mt-2 block text-[13px] leading-snug text-neutral-500">
                         {cat.featured ? cat.items.map((p) => p.label).join("   ·   ") : cat.blurb}
@@ -636,9 +644,9 @@ export function Navbar() {
               </div>
             </div>
 
-            {/* ---- Level 2: one pane per category ---- */}
+            {/* ---- Level 1: one pane per category ---- */}
             {PRODUCT_NAV.map((cat) => (
-              <div key={cat.id} data-pane={cat.id} className={panePosition(activeCategory === cat.id)}>
+              <div key={cat.id} data-pane={cat.id} className={panePosition(activeCategory === cat.id, 1)}>
                 <div className="flex items-center justify-between gap-4 border-b border-neutral-200 pb-4">
                   <button
                     type="button"
@@ -659,27 +667,82 @@ export function Navbar() {
                   )}
                 </div>
 
-                <div className="pt-6">
-                  <h3 className="text-xl font-bold text-neutral-900">{cat.label}</h3>
-                  <p className="mt-1 text-sm text-neutral-500">{cat.blurb}</p>
-                  {/* Column count tracks the list length so short categories don't leave a dead grid. */}
-                  <ul
-                    className={cn(
-                      "mt-5 grid gap-x-10",
-                      cat.items.length > 4 ? "grid-cols-3" : cat.items.length > 1 ? "grid-cols-2" : "grid-cols-1"
-                    )}
-                  >
-                    {cat.items.map((item) => (
-                      <li key={item.href}>
-                        {/* Row rules aid scanning in a long list; under a lone product they'd
-                            just draw a stray full-width line. */}
-                        <Link href={item.href} className={panelLinkClass(cat.items.length > 1)}>
-                          {item.label}
-                          {panelChevron}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="flex gap-10 pt-6">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-xl font-bold text-neutral-900">{cat.label}</h3>
+                    <p className="mt-1 text-sm text-neutral-500">{cat.blurb}</p>
+                    {/* Two columns beside the preview; a lone product doesn't need a grid at all. */}
+                    <ul className={cn("mt-5 grid gap-x-10", cat.items.length > 1 ? "grid-cols-2" : "grid-cols-1")}>
+                      {cat.items.map((item, i) => {
+                        const current = pathname === item.href;
+                        return (
+                          <li key={item.href}>
+                            <Link
+                              href={item.href}
+                              aria-current={current ? "page" : undefined}
+                              onPointerEnter={() => item.image && setPreviewHref(item.href)}
+                              onFocus={() => item.image && setPreviewHref(item.href)}
+                              style={
+                                activeCategory === cat.id ? { animationDelay: `${i * 25}ms` } : undefined
+                              }
+                              className={cn(
+                                panelLinkClass(cat.items.length > 1),
+                                // Red rule wipes in left→right under the row on hover.
+                                "relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-full",
+                                "after:origin-left after:scale-x-0 after:bg-[#D20014] after:transition-transform",
+                                "after:duration-200 hover:after:scale-x-100 motion-reduce:after:transition-none",
+                                activeCategory === cat.id &&
+                                  "animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards duration-300",
+                                current && "text-[#D20014]"
+                              )}
+                            >
+                              <span className="flex min-w-0 items-center gap-2">
+                                <span className="truncate">{item.label}</span>
+                                {item.certification && (
+                                  <span className="flex-none rounded-sm bg-neutral-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold leading-none tracking-tight text-neutral-500">
+                                    {/* Catalogue stores "IS: 710"; the colon is noise in a chip. */}
+                                    {item.certification.replace(":", "").replace(/\s+/g, " ")}
+                                  </span>
+                                )}
+                              </span>
+                              {panelChevron}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+
+                  {/* Preview: every product has an image, so this never falls back to a placeholder.
+                      One <img> with a swapping src (keyed to re-trigger the fade) rather than a stack
+                      of 8 — openCategory preloads the set, so the swap is instant. */}
+                  {cat.items.some((it) => it.image) && (
+                    <div className="hidden w-[260px] flex-none xl:block" aria-hidden="true">
+                      {(() => {
+                        const shown =
+                          cat.items.find((it) => it.href === previewHref && it.image) ??
+                          cat.items.find((it) => it.image)!;
+                        return (
+                          <figure className="overflow-hidden rounded-lg bg-neutral-50">
+                            {/* object-contain in a portrait frame: 19 of the 20 catalogue images are
+                                portrait or square, and cover was cropping the tallest three (aspect
+                                ~0.5) down to a third of the board. These are product shots — showing
+                                the whole panel matters more than filling the frame edge to edge. */}
+                            <img
+                              key={shown.image}
+                              src={shown.image}
+                              alt=""
+                              loading="lazy"
+                              className="h-[280px] w-full animate-in fade-in object-contain p-3 duration-300 motion-reduce:animate-none"
+                            />
+                            <figcaption className="px-3 py-2 text-[13px] font-medium text-neutral-600">
+                              {shown.label}
+                            </figcaption>
+                          </figure>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -806,12 +869,7 @@ export function Navbar() {
                         onClick={() => setMobileCategory(open ? null : cat.id)}
                         aria-expanded={open}
                       >
-                        <span>
-                          {cat.label}
-                          <span className="ml-2 text-xs font-normal text-gray-500">
-                            {cat.items.length}
-                          </span>
-                        </span>
+                        <span>{cat.label}</span>
                         {open ? (
                           <MdKeyboardArrowDown size={18} aria-hidden="true" />
                         ) : (
