@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { getAllPostCards, getBlogIndexMeta, getCategoryCounts } from "@/lib/blog";
 import { PageHeader } from "@/components/PageHeader";
 import { STATIC_BANNERS } from "@/data/banners";
@@ -28,13 +29,13 @@ export const metadata: Metadata = {
     title: indexMeta.title,
     description: indexMeta.description,
     url: "/blog",
-    images: [{ url: "/images/og/saburiply-og.jpg", width: 1200, height: 630, alt: "Saburi Ply" }],
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: "Saburi Ply" }],
   },
   twitter: {
     card: "summary_large_image",
     title: indexMeta.title,
     description: indexMeta.description,
-    images: ["/images/og/saburiply-og.jpg"],
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

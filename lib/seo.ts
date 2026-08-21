@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { Location, Product, Seo } from "@/data/types";
-import { SITE_NAME } from "@/data/site";
+import { SITE_NAME, SITE_URL } from "@/data/site";
 
 /**
  * Per-page Metadata API builders (§6). Reproduce the PageMeta.jsx output for a route:
@@ -12,11 +12,27 @@ import { SITE_NAME } from "@/data/site";
  * `canonical`/`url` are relative; metadataBase (layout) resolves them to absolute www URLs.
  */
 /**
+ * Host that og:image URLs resolve against.
+ *
+ * metadataBase is pinned to production so canonicals are always correct, but that also makes every
+ * relative og:image absolute to www — and a preview deployment's assets don't exist there yet, so
+ * scrapers 404 and the card silently falls back. Only the OG image follows the deployment host;
+ * canonical/alternates are untouched, so this can't leak a preview URL into search.
+ *
+ * VERCEL_ENV/VERCEL_URL are set by Vercel at build time. Locally both are undefined and this is
+ * just the production host, which is the correct default.
+ */
+const OG_HOST =
+  process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production" && process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : SITE_URL;
+
+/**
  * Sitewide share card. A real 1200x630 banner — the previous default was a 233x234 logo declared
  * as 1200x630, which is below the ~300x200 floor scrapers need, so WhatsApp and friends fell back
  * to the small square thumbnail layout.
  */
-const DEFAULT_OG_IMAGE = "/images/og/saburiply-og.jpg";
+export const DEFAULT_OG_IMAGE = `${OG_HOST}/images/og/saburiply-og.jpg`;
 const OG_IMAGE_ALT = "Saburi Ply - Leading Plywood Manufacturer";
 
 function buildMetadata(seo: Seo): Metadata {
