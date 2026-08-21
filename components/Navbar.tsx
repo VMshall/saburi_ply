@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Menu, X, Phone, Mail } from "lucide-react";
+import { Menu, X, Phone, Mail, ChevronDown, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MdKeyboardArrowRight, MdKeyboardArrowDown } from "react-icons/md";
 import {
@@ -16,6 +16,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { GUIDE_PAGES, GUIDE_LABELS } from "@/data/faq-placement";
+import { PRODUCT_NAV } from "@/data/product-nav";
 
 /**
  * Navbar client island (P1). Restyled to mirror rockwool.com/group: a two-tier header — a dark-red
@@ -25,15 +26,61 @@ import { GUIDE_PAGES, GUIDE_LABELS } from "@/data/faq-placement";
 export function Navbar() {
   // Mobile submenu state
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
+  /** Which product category is expanded inside the mobile Products accordion (null = none). */
+  const [mobileCategory, setMobileCategory] = useState<string | null>(null);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [mobileGuidesOpen, setMobileGuidesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [showProductsMega, setShowProductsMega] = useState(false);
   const [showAboutMega, setShowAboutMega] = useState(false);
   const [showGuidesMega, setShowGuidesMega] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  // ===== Products click-panel (replaces the old hover mega-menu) =====
+  // `productsOpen` controls the panel; `activeCategory` is the drill-down level (null = tile grid).
+  const [productsOpen, setProductsOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const productsTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const productsPanelRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  /**
+   * Selector for the element that should receive focus after the next panel render, set by whichever
+   * handler caused the change. Consumed (and cleared) by the effect below, so focus only moves on a
+   * user-initiated transition — never on an incidental re-render.
+   */
+  const pendingFocus = useRef<string | null>(null);
+
+  const closeProducts = useCallback((returnFocus = false) => {
+    setProductsOpen(false);
+    setActiveCategory(null);
+    if (returnFocus) productsTriggerRef.current?.focus();
+  }, []);
+
+  const toggleProducts = () => {
+    if (productsOpen) {
+      setProductsOpen(false);
+      setActiveCategory(null);
+      return;
+    }
+    pendingFocus.current = "[data-panel-first]";
+    // Only one panel at a time — a click on Products dismisses the hover menus.
+    setShowGuidesMega(false);
+    setShowAboutMega(false);
+    setProductsOpen(true);
+  };
+
+  /** Drill into a category: focus lands on its back button. */
+  const openCategory = useCallback((id: string) => {
+    pendingFocus.current = `[data-pane="${id}"] [data-pane-first]`;
+    setActiveCategory(id);
+  }, []);
+
+  /** Back out to the grid: focus returns to the tile you came from. */
+  const backToGrid = useCallback((id: string) => {
+    pendingFocus.current = `[data-tile="${id}"]`;
+    setActiveCategory(null);
+  }, []);
 
   const handleGetQuote = () => {
     if (pathname === "/") {
@@ -53,51 +100,66 @@ export function Navbar() {
     }
   };
 
-  const mobileProductLinks = [
-    "/products/saburi-titanium-plus",
-    "/products/saburi-perennial",
-    "/products/saburi-club-h-plus",
-    "/products/fire-retardant-india",
-    "/products/marine-plywood-india",
-    "/products/saburi-perennial-blockboard",
-    "/products/block-board-india",
-    "/products/saburi-gold-blockboard",
-    "/products/saburi-fr-blockboard",
-    "/products/saburi-scout-plywood",
-    "/products/flexi-plywood-india",
-    "/products/shuttering-plywood-india",
-    "/products/flush-door-india",
-    "/products/saburi-smart-panel-wpc-board",
-    "/products/saburi-smart-wpc-door-frame",
-    "/products/saburi-modwud-pre-lam",
-    "/products/saburi-modwud-plain",
-    "/products/saburi-lam",
-    "/products/saburi-hydramax-board",
-    "/products/saburi-neowud",
-  ];
-
-  // Timeout refs to prevent immediate closing
-  const productsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Timeout refs to prevent immediate closing (Guides + About still use the hover pattern)
   const aboutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const guidesTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleProductsMouseEnter = () => {
-    if (productsTimeoutRef.current) {
-      clearTimeout(productsTimeoutRef.current);
-    }
-    setShowProductsMega(true);
-  };
+  // Close the panel whenever the route changes (a product link was followed).
+  useEffect(() => {
+    setProductsOpen(false);
+    setActiveCategory(null);
+  }, [pathname]);
 
-  const handleProductsMouseLeave = () => {
-    productsTimeoutRef.current = setTimeout(() => {
-      setShowProductsMega(false);
-    }, 150);
-  };
+  // Escape: step back out of a drill-down first, then close the panel.
+  useEffect(() => {
+    if (!productsOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      // Go through backToGrid so Escape restores focus to the originating tile rather than
+      // dropping it on <body>.
+      if (activeCategory) backToGrid(activeCategory);
+      else closeProducts(true);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [productsOpen, activeCategory, closeProducts, backToGrid]);
+
+  // Click outside the header (panel + trigger both live inside it) closes the panel.
+  useEffect(() => {
+    if (!productsOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (headerRef.current?.contains(e.target as Node)) return;
+      closeProducts();
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [productsOpen, closeProducts]);
+
+  // Lock body scroll while the panel is open so the page doesn't slide under the overlay.
+  useEffect(() => {
+    if (!productsOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [productsOpen]);
+
+  // Move focus to whatever the last user action asked for (open → first tile, drill-in → back
+  // button, back → the originating tile).
+  useEffect(() => {
+    const selector = pendingFocus.current;
+    if (!productsOpen || !selector) return;
+    pendingFocus.current = null;
+    productsPanelRef.current?.querySelector<HTMLElement>(selector)?.focus();
+  }, [productsOpen, activeCategory]);
 
   const handleAboutMouseEnter = () => {
     if (aboutTimeoutRef.current) {
       clearTimeout(aboutTimeoutRef.current);
     }
+    closeProducts();
     setShowAboutMega(true);
   };
 
@@ -111,6 +173,7 @@ export function Navbar() {
     if (guidesTimeoutRef.current) {
       clearTimeout(guidesTimeoutRef.current);
     }
+    closeProducts();
     setShowGuidesMega(true);
   };
 
@@ -207,6 +270,17 @@ export function Navbar() {
         : "text-white/85 hover:text-white"
     );
 
+  /**
+   * Stacks the Products panel's levels. The visible pane is in normal flow (so it sizes the panel);
+   * the rest are absolutely positioned and `invisible` — removed from the tab order and a11y tree,
+   * but still present in the HTML so their product links stay crawlable.
+   */
+  const panePosition = (visible: boolean) =>
+    cn(
+      "transition-opacity duration-150 ease-out motion-reduce:transition-none",
+      visible ? "relative opacity-100" : "pointer-events-none invisible absolute inset-0 opacity-0"
+    );
+
   const mobileLinkClass = (active: boolean) =>
     cn(
       "block px-3 py-2 text-base font-semibold tracking-wide transition-colors",
@@ -215,6 +289,19 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 shadow-md">
+      {/* Scrim behind the Products panel. Sits under the header wrapper (z-50) but above the page. */}
+      <div
+        className={cn(
+          "fixed inset-0 z-40 bg-black/50 transition-opacity duration-200 motion-reduce:transition-none",
+          productsOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        )}
+        aria-hidden="true"
+        onClick={() => closeProducts()}
+      />
+
+      {/* Header wrapper: the Products panel anchors to this with `top-full`, so it always sits
+          flush under the bar regardless of the utility strip's height (no magic offset). */}
+      <div ref={headerRef} className="relative z-50">
       {/* ===== Tier 1: utility strip (Rockwool dark-red) ===== */}
       <div className="hidden lg:block bg-[#8C101E] text-white">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
@@ -295,208 +382,26 @@ export function Navbar() {
                   Home
                 </Link>
 
-                {/* Products Mega Menu */}
-                <div
-                  className="relative"
-                  onMouseEnter={handleProductsMouseEnter}
-                  onMouseLeave={handleProductsMouseLeave}
-                >
-                  <button className={megaTriggerClass(isProductsActive || showProductsMega)}>
+                {/* Products — click-to-open category panel (panel itself is rendered below the bar) */}
+                <div className="relative">
+                  <button
+                    ref={productsTriggerRef}
+                    type="button"
+                    onClick={toggleProducts}
+                    aria-expanded={productsOpen}
+                    aria-controls="products-panel"
+                    className={cn(megaTriggerClass(isProductsActive || productsOpen), "inline-flex items-center gap-1")}
+                  >
                     Products
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 transition-transform duration-200 motion-reduce:transition-none",
+                        productsOpen && "rotate-180"
+                      )}
+                      aria-hidden="true"
+                    />
                   </button>
 
-                  {/* Mega Menu Dropdown - Full Width */}
-                  {showProductsMega && (
-                    <div
-                      className="fixed left-0 right-0 top-[124px] z-50"
-                      onMouseEnter={handleProductsMouseEnter}
-                      onMouseLeave={handleProductsMouseLeave}
-                    >
-                      <div
-                        className="relative shadow-2xl border-t-2 border-white/30 pb-16 min-h-[600px]"
-                        style={{
-                          backgroundImage: 'url(/images/nav-product.jpeg)',
-                          backgroundSize: '100% 100%',
-                          backgroundPosition: 'center',
-                          backgroundRepeat: 'no-repeat',
-                          backgroundColor: '#000000',
-                        }}
-                      >
-                        {/* Dark overlay for readability */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60"></div>
-
-                        {/* Content */}
-                        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                          <div className="grid grid-cols-8 gap-4">
-                            {/* Column 1: Plywood */}
-                            <div>
-                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
-                                <Link href="/plywood" className="transition-colors hover:text-red-500">
-                                  Plywood
-                                </Link>
-                              </h3>
-                              <ul className="space-y-3">
-                                <li>
-                                  <Link href="/products/saburi-titanium-plus" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Titanium Plus
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/saburi-perennial" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Perennial
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/saburi-club-h-plus" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Club H+
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/marine-plywood-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Gold
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/fire-retardant-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi FR
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/saburi-scout-plywood" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Scout
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/flexi-plywood-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Gold Flexi
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/shuttering-plywood-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Shine Platinum
-                                  </Link>
-                                </li>
-                              </ul>
-                            </div>
-
-                            {/* Column 2: Block Board */}
-                            <div>
-                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
-                                Block Board
-                              </h3>
-                              <ul className="space-y-3">
-                                <li>
-                                  <Link href="/products/saburi-perennial-blockboard" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Perennial Block Board
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/saburi-fr-blockboard" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi FR Block Board
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/block-board-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Club H+ Block Board
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/saburi-gold-blockboard" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Gold Block Board
-                                  </Link>
-                                </li>
-                              </ul>
-                            </div>
-
-                            {/* Column 3: Flush Door */}
-                            <div>
-                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
-                                Flush Door
-                              </h3>
-                              <ul className="space-y-3">
-                                <li>
-                                  <Link href="/products/flush-door-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Flush Door Gold
-                                  </Link>
-                                </li>
-                              </ul>
-                            </div>
-
-                            {/* Column 4: WPC/PVC */}
-                            <div>
-                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
-                                WPC
-                              </h3>
-                              <ul className="space-y-3">
-                                <li>
-                                  <Link href="/products/saburi-smart-panel-wpc-board" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Smart Panel WPC Board
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/saburi-smart-wpc-door-frame" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Smart WPC Door Frame
-                                  </Link>
-                                </li>
-                              </ul>
-                            </div>
-
-                            {/* Column 5: ChipBoard */}
-                            <div>
-                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
-                                ChipBoard
-                              </h3>
-                              <ul className="space-y-3">
-                                <li>
-                                  <Link href="/products/saburi-modwud-pre-lam" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Modwud Pre-Lam
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/saburi-modwud-plain" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Modwud Plain
-                                  </Link>
-                                </li>
-                              </ul>
-                            </div>
-
-                            {/* Column 6: Liner */}
-                            <div>
-                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
-                                Liner
-                              </h3>
-                              <ul className="space-y-3">
-                                <li>
-                                  <Link href="/products/saburi-lam" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Lam
-                                  </Link>
-                                </li>
-                              </ul>
-                            </div>
-
-                            {/* Column 7: New Launch */}
-                            <div>
-                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
-                                New Launch
-                              </h3>
-                              <ul className="space-y-3">
-                                <li>
-                                  <Link href="/products/saburi-hydramax-board" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Modwud Hydramax
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link href="/products/saburi-neowud" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
-                                    Saburi Neowud
-                                  </Link>
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Guides Mega Menu (data-driven from GUIDE_PAGES) */}
@@ -651,6 +556,139 @@ export function Navbar() {
         </div>
       </div>
 
+      {/* ===== Products panel =====
+          Always rendered (never conditionally mounted) and toggled with visibility/opacity, so all
+          20 product links ship in the static HTML instead of appearing only after an interaction. */}
+      <div
+        id="products-panel"
+        ref={productsPanelRef}
+        aria-hidden={!productsOpen}
+        className={cn(
+          "absolute inset-x-0 top-full hidden border-t-4 border-[#D20014] bg-white shadow-2xl",
+          "transition-[opacity,transform] duration-200 ease-out lg:block motion-reduce:transition-none",
+          productsOpen
+            ? "visible translate-y-0 opacity-100"
+            : "pointer-events-none invisible -translate-y-2 opacity-0"
+        )}
+      >
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {/* Panes are stacked: the active one is in flow, the rest are absolute + invisible (which
+              keeps them out of the tab order and a11y tree while leaving their links in the HTML).
+              No fixed min-height — a one-product category should not open a 400px void. */}
+          <div className="relative">
+            {/* ---- Level 1: category grid ---- */}
+            <div className={panePosition(activeCategory === null)}>
+              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
+                Our Products
+              </p>
+              <div className="grid grid-cols-3 gap-4">
+                {PRODUCT_NAV.map((cat, i) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    data-tile={cat.id}
+                    data-panel-first={i === 0 ? "" : undefined}
+                    onClick={() => openCategory(cat.id)}
+                    aria-label={`${cat.label} — ${cat.items.length} products`}
+                    className={cn(
+                      // items-start so every tile title sits on the same baseline regardless of how
+                      // many lines its blurb wraps to.
+                      "group flex items-start gap-4 rounded-lg border border-neutral-200 bg-white p-5 text-left",
+                      "transition-colors duration-200 hover:border-[#D20014] hover:bg-[#D20014]/[0.03]",
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2",
+                      "motion-reduce:transition-none",
+                      cat.featured && "col-span-3"
+                    )}
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span className="text-[17px] font-semibold leading-none text-neutral-900 transition-colors group-hover:text-[#D20014] motion-reduce:transition-none">
+                          {cat.label}
+                        </span>
+                        <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-semibold leading-none text-neutral-500 transition-colors group-hover:bg-[#D20014] group-hover:text-white motion-reduce:transition-none">
+                          {cat.items.length}
+                        </span>
+                        {cat.featured && (
+                          <span className="rounded-sm bg-[#D20014] px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wider text-white">
+                            New
+                          </span>
+                        )}
+                      </span>
+                      <span className="mt-2 block text-[13px] leading-snug text-neutral-500">
+                        {cat.featured ? cat.items.map((p) => p.label).join("   ·   ") : cat.blurb}
+                      </span>
+                    </span>
+                    <ChevronRight
+                      className="mt-0.5 h-5 w-5 flex-none text-neutral-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[#D20014] motion-reduce:transition-none"
+                      aria-hidden="true"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ---- Level 2: one pane per category ---- */}
+            {PRODUCT_NAV.map((cat) => (
+              <div key={cat.id} data-pane={cat.id} className={panePosition(activeCategory === cat.id)}>
+                <div className="flex items-center justify-between gap-4 border-b border-neutral-200 pb-4">
+                  <button
+                    type="button"
+                    data-pane-first=""
+                    onClick={() => backToGrid(cat.id)}
+                    className="inline-flex items-center gap-1.5 rounded-sm text-sm font-semibold text-neutral-600 transition-colors hover:text-[#D20014] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none"
+                  >
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                    All categories
+                  </button>
+                  {cat.href && (
+                    <Link
+                      href={cat.href}
+                      className="rounded-sm text-sm font-semibold text-[#D20014] transition-colors hover:text-[#8C101E] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none"
+                    >
+                      View the {cat.label} range →
+                    </Link>
+                  )}
+                </div>
+
+                <div className="pt-6">
+                  <h3 className="text-xl font-bold text-neutral-900">{cat.label}</h3>
+                  <p className="mt-1 text-sm text-neutral-500">{cat.blurb}</p>
+                  {/* Column count tracks the list length so short categories don't leave a dead grid. */}
+                  <ul
+                    className={cn(
+                      "mt-5 grid gap-x-10",
+                      cat.items.length > 4 ? "grid-cols-3" : cat.items.length > 1 ? "grid-cols-2" : "grid-cols-1"
+                    )}
+                  >
+                    {cat.items.map((item) => (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "group flex items-center justify-between gap-3 rounded-md py-2.5 pr-1 text-[15px] font-medium text-neutral-700",
+                            "transition-colors hover:text-[#D20014] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] motion-reduce:transition-none",
+                            // Row rules aid scanning in a long list; under a lone product they'd just
+                            // draw a stray full-width line.
+                            cat.items.length > 1 && "border-b border-neutral-100"
+                          )}
+                        >
+                          {item.label}
+                          <ChevronRight
+                            className="h-4 w-4 flex-none text-neutral-300 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[#D20014] group-hover:opacity-100 motion-reduce:transition-none"
+                            aria-hidden="true"
+                          />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      </div>
+
       {/* Mobile Navigation */}
       {isOpen && (
         <div className="lg:hidden max-h-[calc(100vh-80px)] overflow-y-auto">
@@ -670,17 +708,55 @@ export function Navbar() {
               </span>
             </button>
             {mobileProductsOpen && (
-              <div className="pl-6 space-y-1">
-                {mobileProductLinks.map((to) => (
-                  <Link
-                    key={to}
-                    href={to}
-                    className="block py-2 text-sm text-black hover:text-primary"
-                    onClick={toggleMenu}
-                  >
-                    • {routeNameByPath[to] ?? formatLabel(to)}
-                  </Link>
-                ))}
+              <div className="pl-4 space-y-1">
+                {/* Same category-first IA as the desktop panel, as a nested accordion. */}
+                {PRODUCT_NAV.map((cat) => {
+                  const open = mobileCategory === cat.id;
+                  return (
+                    <div key={cat.id}>
+                      <button
+                        className="w-full text-left px-3 py-2 text-sm font-semibold text-black flex items-center justify-between transition-colors hover:text-primary min-h-[44px]"
+                        onClick={() => setMobileCategory(open ? null : cat.id)}
+                        aria-expanded={open}
+                      >
+                        <span>
+                          {cat.label}
+                          <span className="ml-2 text-xs font-normal text-gray-500">
+                            {cat.items.length}
+                          </span>
+                        </span>
+                        {open ? (
+                          <MdKeyboardArrowDown size={18} aria-hidden="true" />
+                        ) : (
+                          <MdKeyboardArrowRight size={18} aria-hidden="true" />
+                        )}
+                      </button>
+                      {open && (
+                        <div className="pl-5 space-y-1 pb-1">
+                          {cat.items.map((item) => (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              className="block py-2 text-sm text-black hover:text-primary"
+                              onClick={toggleMenu}
+                            >
+                              • {item.label}
+                            </Link>
+                          ))}
+                          {cat.href && (
+                            <Link
+                              href={cat.href}
+                              className="block py-2 text-sm font-semibold text-primary"
+                              onClick={toggleMenu}
+                            >
+                              View the {cat.label} range →
+                            </Link>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
             <button
