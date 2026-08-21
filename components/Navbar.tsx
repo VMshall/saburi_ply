@@ -24,9 +24,11 @@ import { GUIDE_PAGES, GUIDE_LABELS } from "@/data/faq-placement";
  */
 export function Navbar() {
   // Mobile submenu state
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [mobileGuidesOpen, setMobileGuidesOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [showProductsMega, setShowProductsMega] = useState(false);
   const [showAboutMega, setShowAboutMega] = useState(false);
   const [showGuidesMega, setShowGuidesMega] = useState(false);
   const pathname = usePathname();
@@ -51,9 +53,46 @@ export function Navbar() {
     }
   };
 
+  const mobileProductLinks = [
+    "/products/saburi-titanium-plus",
+    "/products/saburi-perennial",
+    "/products/saburi-club-h-plus",
+    "/products/fire-retardant-india",
+    "/products/marine-plywood-india",
+    "/products/saburi-perennial-blockboard",
+    "/products/block-board-india",
+    "/products/saburi-gold-blockboard",
+    "/products/saburi-fr-blockboard",
+    "/products/saburi-scout-plywood",
+    "/products/flexi-plywood-india",
+    "/products/shuttering-plywood-india",
+    "/products/flush-door-india",
+    "/products/saburi-smart-panel-wpc-board",
+    "/products/saburi-smart-wpc-door-frame",
+    "/products/saburi-modwud-pre-lam",
+    "/products/saburi-modwud-plain",
+    "/products/saburi-lam",
+    "/products/saburi-hydramax-board",
+    "/products/saburi-neowud",
+  ];
+
   // Timeout refs to prevent immediate closing
+  const productsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const aboutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const guidesTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleProductsMouseEnter = () => {
+    if (productsTimeoutRef.current) {
+      clearTimeout(productsTimeoutRef.current);
+    }
+    setShowProductsMega(true);
+  };
+
+  const handleProductsMouseLeave = () => {
+    productsTimeoutRef.current = setTimeout(() => {
+      setShowProductsMega(false);
+    }, 150);
+  };
 
   const handleAboutMouseEnter = () => {
     if (aboutTimeoutRef.current) {
@@ -81,10 +120,7 @@ export function Navbar() {
     }, 150);
   };
 
-  const isProductsActive =
-    pathname === "/products" ||
-    pathname.startsWith("/products/") ||
-    pathname === "/plywood";
+  const isProductsActive = pathname.startsWith("/products/");
 
   // "Guides" mega-menu, derived from the guide registry so it auto-syncs with the clusters.
   const isGuidesActive =
@@ -259,9 +295,209 @@ export function Navbar() {
                   Home
                 </Link>
 
-                <Link href="/products" className={navLinkClass(isProductsActive)}>
-                  Products
-                </Link>
+                {/* Products Mega Menu */}
+                <div
+                  className="relative"
+                  onMouseEnter={handleProductsMouseEnter}
+                  onMouseLeave={handleProductsMouseLeave}
+                >
+                  <button className={megaTriggerClass(isProductsActive || showProductsMega)}>
+                    Products
+                  </button>
+
+                  {/* Mega Menu Dropdown - Full Width */}
+                  {showProductsMega && (
+                    <div
+                      className="fixed left-0 right-0 top-[124px] z-50"
+                      onMouseEnter={handleProductsMouseEnter}
+                      onMouseLeave={handleProductsMouseLeave}
+                    >
+                      <div
+                        className="relative shadow-2xl border-t-2 border-white/30 pb-16 min-h-[600px]"
+                        style={{
+                          backgroundImage: 'url(/images/nav-product.jpeg)',
+                          backgroundSize: '100% 100%',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundColor: '#000000',
+                        }}
+                      >
+                        {/* Dark overlay for readability */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60"></div>
+
+                        {/* Content */}
+                        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                          <div className="grid grid-cols-8 gap-4">
+                            {/* Column 1: Plywood */}
+                            <div>
+                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
+                                <Link href="/plywood" className="transition-colors hover:text-red-500">
+                                  Plywood
+                                </Link>
+                              </h3>
+                              <ul className="space-y-3">
+                                <li>
+                                  <Link href="/products/saburi-titanium-plus" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Titanium Plus
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/saburi-perennial" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Perennial
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/saburi-club-h-plus" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Club H+
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/marine-plywood-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Gold
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/fire-retardant-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi FR
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/saburi-scout-plywood" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Scout
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/flexi-plywood-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Gold Flexi
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/shuttering-plywood-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Shine Platinum
+                                  </Link>
+                                </li>
+                              </ul>
+                            </div>
+
+                            {/* Column 2: Block Board */}
+                            <div>
+                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
+                                Block Board
+                              </h3>
+                              <ul className="space-y-3">
+                                <li>
+                                  <Link href="/products/saburi-perennial-blockboard" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Perennial Block Board
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/saburi-fr-blockboard" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi FR Block Board
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/block-board-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Club H+ Block Board
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/saburi-gold-blockboard" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Gold Block Board
+                                  </Link>
+                                </li>
+                              </ul>
+                            </div>
+
+                            {/* Column 3: Flush Door */}
+                            <div>
+                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
+                                Flush Door
+                              </h3>
+                              <ul className="space-y-3">
+                                <li>
+                                  <Link href="/products/flush-door-india" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Flush Door Gold
+                                  </Link>
+                                </li>
+                              </ul>
+                            </div>
+
+                            {/* Column 4: WPC/PVC */}
+                            <div>
+                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
+                                WPC
+                              </h3>
+                              <ul className="space-y-3">
+                                <li>
+                                  <Link href="/products/saburi-smart-panel-wpc-board" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Smart Panel WPC Board
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/saburi-smart-wpc-door-frame" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Smart WPC Door Frame
+                                  </Link>
+                                </li>
+                              </ul>
+                            </div>
+
+                            {/* Column 5: ChipBoard */}
+                            <div>
+                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
+                                ChipBoard
+                              </h3>
+                              <ul className="space-y-3">
+                                <li>
+                                  <Link href="/products/saburi-modwud-pre-lam" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Modwud Pre-Lam
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/saburi-modwud-plain" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Modwud Plain
+                                  </Link>
+                                </li>
+                              </ul>
+                            </div>
+
+                            {/* Column 6: Liner */}
+                            <div>
+                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
+                                Liner
+                              </h3>
+                              <ul className="space-y-3">
+                                <li>
+                                  <Link href="/products/saburi-lam" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Lam
+                                  </Link>
+                                </li>
+                              </ul>
+                            </div>
+
+                            {/* Column 7: New Launch */}
+                            <div>
+                              <h3 className="text-base font-bold text-white mb-6 pb-3 border-b-2 border-white/30 uppercase tracking-wide">
+                                New Launch
+                              </h3>
+                              <ul className="space-y-3">
+                                <li>
+                                  <Link href="/products/saburi-hydramax-board" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Modwud Hydramax
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link href="/products/saburi-neowud" className="text-sm font-semibold text-white/90 hover:text-red-500 hover:translate-x-2 transition-all duration-300 block py-1">
+                                    Saburi Neowud
+                                  </Link>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Guides Mega Menu (data-driven from GUIDE_PAGES) */}
                 <div
@@ -422,9 +658,31 @@ export function Navbar() {
             <Link href="/" className={mobileLinkClass(isActive("/", true))} onClick={toggleMenu}>
               Home
             </Link>
-            <Link href="/products" className={mobileLinkClass(isProductsActive)} onClick={toggleMenu}>
+            <button
+              className="w-full text-left px-3 py-2 text-base font-semibold tracking-wide text-black flex items-center justify-between transition-colors hover:text-primary min-h-[48px]"
+              onClick={() => setMobileProductsOpen((open) => !open)}
+              aria-expanded={mobileProductsOpen}
+              aria-label={mobileProductsOpen ? "Collapse Products menu" : "Expand Products menu"}
+            >
               Products
-            </Link>
+              <span className="ml-2">
+                {mobileProductsOpen ? <MdKeyboardArrowDown size={20} aria-hidden="true" /> : <MdKeyboardArrowRight size={20} aria-hidden="true" />}
+              </span>
+            </button>
+            {mobileProductsOpen && (
+              <div className="pl-6 space-y-1">
+                {mobileProductLinks.map((to) => (
+                  <Link
+                    key={to}
+                    href={to}
+                    className="block py-2 text-sm text-black hover:text-primary"
+                    onClick={toggleMenu}
+                  >
+                    • {routeNameByPath[to] ?? formatLabel(to)}
+                  </Link>
+                ))}
+              </div>
+            )}
             <button
               className={cn("w-full text-left px-3 py-2 text-base font-semibold tracking-wide text-black flex items-center justify-between transition-colors hover:text-primary min-h-[48px]", mobileGuidesOpen ? "" : "")}
               onClick={() => setMobileGuidesOpen((open) => !open)}
@@ -547,13 +805,11 @@ export function Navbar() {
                       <Link href="/">Home</Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  {isProductsActive && pathname !== "/products" && (
+                  {isProductsActive && (
                     <>
                       <BreadcrumbSeparator className="text-white/80" />
                       <BreadcrumbItem>
-                        <BreadcrumbLink asChild className="hover:text-white">
-                          <Link href="/products">Products</Link>
-                        </BreadcrumbLink>
+                        <BreadcrumbLink href="#products" className="hover:text-white">Products</BreadcrumbLink>
                       </BreadcrumbItem>
                     </>
                   )}
