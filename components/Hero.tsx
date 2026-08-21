@@ -91,7 +91,7 @@ export function Hero() {
 
         {/* Rockwool-style bottom tab navigation — labels over a soft gradient, each with a grey
             track; the active tab's red bar fills over the slide's display time, then auto-advances. */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-white/85 via-white/85 to-transparent pt-2 pb-2">
+        <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-white/95 via-white/88 to-transparent pt-5 pb-2">
           <div className="mx-auto max-w-[800px] px-4 sm:px-6 lg:px-8">
             <div className="flex items-stretch justify-between">
               {slides.map((slide, index) => {
@@ -100,14 +100,14 @@ export function Hero() {
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`relative flex-1 px-2 pb-4 pt-3 text-center text-xs transition-colors sm:text-sm ${activeTab ? "font-semibold text-neutral-900" : "font-medium text-neutral-500 hover:text-neutral-800"
+                    className={`relative flex-1 px-2 pb-4 pt-3 text-center text-xs transition-colors sm:text-sm ${activeTab ? "font-semibold text-neutral-900" : "font-medium text-neutral-600 hover:text-neutral-900"
                       }`}
                     aria-current={activeTab ? "true" : "false"}
                   >
                     <span className="line-clamp-1">{slide.tab}</span>
                     {/* Grey track (every tab). */}
                     <span
-                      className="pointer-events-none absolute bottom-0 left-4 right-4 h-[3px] rounded-full bg-neutral-300"
+                      className="pointer-events-none absolute bottom-0 left-4 right-4 h-[3px] rounded-full bg-neutral-400/80"
                       aria-hidden="true"
                     />
                     {/* Red progress fill on the active tab; `key` restarts the animation each slide. */}
