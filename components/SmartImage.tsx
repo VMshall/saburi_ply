@@ -46,9 +46,17 @@ export function SmartImage({
 
   // Hydration-race guard: an image that finished loading before React attached `onLoad`
   // (common for cached / above-the-fold images) never fires the event, so it would stay stuck
-  // at opacity-0. When the ref attaches to an already-complete <img>, mark it loaded too.
+  // at opacity-0. When the ref attaches to an already-complete <img>, mark it loaded too — and
+  // if it is not complete yet, wire a native one-shot `load` listener as a backup, because the
+  // image can finish in the gap between this ref callback and React attaching `onLoad` (very
+  // common for cache-instant images), which would otherwise leave the skeleton stuck forever.
   const handleRef = useCallback((node: HTMLImageElement | null) => {
-    if (node && node.complete && node.naturalWidth > 0) setLoaded(true);
+    if (!node) return;
+    if (node.complete && node.naturalWidth > 0) {
+      setLoaded(true);
+      return;
+    }
+    node.addEventListener("load", () => setLoaded(true), { once: true });
   }, []);
 
   const imageClassName = cn(
