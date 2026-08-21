@@ -232,12 +232,15 @@ export function Navbar() {
 
   const isProductsActive = pathname.startsWith("/products/");
 
-  // "Guides" mega-menu, derived from the guide registry so it auto-syncs with the clusters.
+  // "Guides" panel, derived from the guide registry so it auto-syncs with the clusters.
   const isGuidesActive =
     pathname.startsWith("/plywood-guide") || pathname.startsWith("/plywood-buying-guide");
   const guideLabel = (path: string) => GUIDE_LABELS[path.split("/").filter(Boolean).pop() ?? ""] ?? path;
   const guideColumns = GUIDE_PAGES.filter((p) => p.kind === "pillar").map((pillar) => ({
     heading: guideLabel(pillar.path),
+    // The pillar's own hero subhead, reused verbatim — the orienting line the cards were missing,
+    // already authored in the registry rather than duplicated here.
+    blurb: pillar.heroSubhead,
     href: pillar.path,
     clusters: (pillar.clusters ?? []).flatMap((slug) => {
       const c = GUIDE_PAGES.find((p) => p.slug === slug);
@@ -769,30 +772,31 @@ export function Navbar() {
           <div className="grid grid-cols-2 items-start gap-6">
             {guideColumns.map((col, i) => (
               <div key={col.href} className="rounded-lg border border-neutral-200 p-5">
-                <h3 className="text-[17px] font-semibold text-neutral-900">
-                  <Link
-                    href={col.href}
-                    data-panel-first={i === 0 ? "" : undefined}
-                    className="rounded-sm transition-colors hover:text-[#D20014] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none"
-                  >
-                    {col.heading}
-                  </Link>
-                </h3>
+                {/* Heading is plain text, matching the About panel. It used to be a link with no
+                    visual affordance, duplicating the CTA's destination for no benefit. */}
+                <h3 className="text-[17px] font-semibold text-neutral-900">{col.heading}</h3>
+                <p className="mt-1 text-[13px] leading-snug text-neutral-500">{col.blurb}</p>
                 <ul className="mt-4 grid grid-cols-2 gap-x-8">
-                  {col.clusters.map((c) => (
+                  {col.clusters.map((c, ci) => (
                     <li key={c.href}>
-                      <Link href={c.href} className={panelLinkClass(true)}>
+                      <Link
+                        href={c.href}
+                        data-panel-first={i === 0 && ci === 0 ? "" : undefined}
+                        className={panelLinkClass(true)}
+                      >
                         {c.label}
                         {panelChevron}
                       </Link>
                     </li>
                   ))}
                 </ul>
+                {/* Names its destination. Both cards previously read "View the full guide", giving
+                    two links an identical accessible name but different targets. */}
                 <Link
                   href={col.href}
                   className="mt-4 inline-block rounded-sm text-sm font-semibold text-[#D20014] transition-colors hover:text-[#8C101E] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none"
                 >
-                  View the full guide →
+                  View the {col.heading} →
                 </Link>
               </div>
             ))}
@@ -810,11 +814,13 @@ export function Navbar() {
         {...panelHoverProps}
         className={panelSurfaceClass(openPanel === "about")}
       >
+        {/* Narrower than the other panels: five short links across a 7xl container left a huge dead
+            zone. Left-aligned to the same gutter so the eyebrow still lines up with the nav above. */}
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <p className={panelEyebrowClass}>About Saburi</p>
           {/* items-start so a card with fewer links hugs its content instead of stretching to
               match its neighbour and leaving a dead gap under the last row. */}
-          <div className="grid grid-cols-2 items-start gap-6">
+          <div className="grid max-w-3xl grid-cols-2 items-start gap-6">
             {ABOUT_NAV.map((group, gi) => (
               <div key={group.heading} className="rounded-lg border border-neutral-200 p-5">
                 <h3 className="text-[17px] font-semibold text-neutral-900">{group.heading}</h3>
