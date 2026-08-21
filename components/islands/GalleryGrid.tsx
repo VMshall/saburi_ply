@@ -269,9 +269,12 @@ export function GalleryGrid() {
 
   return (
     <>
-      {/* Category filters — the active tab is marked by a shared red pill that slides between
-          tabs (layoutId), so switching filters reads as one continuous control. */}
-      <div className="mb-8 flex flex-wrap justify-center gap-2">
+      {/* Category filters — one-line swipeable strip on phones (chips would otherwise wrap to two
+          rows), reverting to a centered wrap once they fit at sm+. The active tab is marked by a
+          shared red pill that slides between tabs (layoutId). py-1 keeps focus rings from being
+          clipped by overflow-x; -mx-4 px-4 bleeds the strip to the screen edges under the page's
+          px-4 (cancelled again at sm before that padding grows). */}
+      <div className="mb-6 sm:mb-8 -mx-4 flex snap-x gap-2 overflow-x-auto px-4 py-1 scrollbar-hide sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0">
         {categories.map((cat) => {
           const isActive = cat === activeCategory;
           return (
@@ -281,7 +284,7 @@ export function GalleryGrid() {
               onClick={() => setActiveCategory(cat)}
               aria-pressed={isActive}
               className={cn(
-                "relative rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                "relative inline-flex min-h-[44px] shrink-0 snap-start items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:min-h-0",
                 isActive ? "text-white" : "text-gray-600 hover:text-black",
               )}
             >
@@ -341,29 +344,34 @@ export function GalleryGrid() {
                   />
                 </motion.div>
 
-                {/* Scrim — always faintly present on touch (no hover), reveals on hover at lg+. */}
+                {/* Scrim — reveal is gated on pointer capability, not width: coarse pointers
+                    (touch, any size) keep the caption always-on; fine pointers (mouse) reveal it
+                    on hover. */}
                 <div
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-100 transition-opacity duration-300 lg:opacity-0 lg:group-hover:opacity-100"
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-100 transition-opacity duration-300 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                   aria-hidden="true"
                 />
 
-                {/* Expand affordance. */}
+                {/* Expand affordance (fine-pointer hover only). */}
                 <span
-                  className="pointer-events-none absolute right-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-full bg-white/15 text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 lg:group-hover:opacity-100"
+                  className="pointer-events-none absolute right-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-full bg-white/15 text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 [@media(hover:hover)]:group-hover:opacity-100"
                   aria-hidden="true"
                 >
                   <Maximize2 className="h-4 w-4" />
                 </span>
 
-                {/* Caption. */}
-                <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 p-3 text-white transition-all duration-300 lg:translate-y-2 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
+                {/* Caption — lighter on small tiles: single-line title so it never wraps on a
+                    ~140px thumbnail at 320px. */}
+                <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 p-2.5 text-white transition-all duration-300 sm:p-3 [@media(hover:hover)]:translate-y-2 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-y-0 [@media(hover:hover)]:group-hover:opacity-100">
                   <div className="mb-1 inline-flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                     <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/80">
                       {item.categories[0]}
                     </span>
                   </div>
-                  <div className="text-sm font-semibold leading-tight">{item.title}</div>
+                  <div className="line-clamp-1 text-xs font-semibold leading-tight sm:text-sm">
+                    {item.title}
+                  </div>
                 </figcaption>
               </button>
             </motion.figure>
