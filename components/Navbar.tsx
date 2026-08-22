@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Menu, X, Phone, Mail, ChevronDown, ChevronRight, ArrowLeft } from "lucide-react";
+import { Menu, X, Phone, Mail, ChevronDown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MdKeyboardArrowRight, MdKeyboardArrowDown } from "react-icons/md";
 import {
@@ -20,6 +20,22 @@ import { PRODUCT_NAV } from "@/data/product-nav";
 
 /** The three hover-opened nav panels. One is open at a time, or none. */
 type PanelId = "products" | "guides" | "about";
+
+/**
+ * How the seven product groups fill the panel's four columns. Plywood holds 8 of the 20 products,
+ * so it takes a column alone and the remaining six pair up — the columns balance without inventing
+ * groupings that don't exist in the catalogue.
+ */
+const PRODUCT_COLUMN_IDS: string[][] = [
+  ["plywood"],
+  ["block-board", "flush-door"],
+  ["wpc", "chipboard"],
+  ["liner", "new-launch"],
+];
+
+const PRODUCT_COLUMNS = PRODUCT_COLUMN_IDS.map((ids) =>
+  ids.flatMap((id) => PRODUCT_NAV.filter((c) => c.id === id))
+);
 
 /**
  * About Us is five static links in two groups — small enough that a `data/` module would be more
@@ -66,8 +82,6 @@ export function Navbar() {
   // (rather than three booleans) makes "only one panel at a time" fall out of the data model instead
   // of needing every trigger to explicitly close its siblings.
   const [openPanel, setOpenPanel] = useState<PanelId | null>(null);
-  /** Products-only: the drill-down level (null = tile grid). */
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const triggerRefs = useRef<Partial<Record<PanelId, HTMLButtonElement | null>>>({});
   const panelRefs = useRef<Partial<Record<PanelId, HTMLDivElement | null>>>({});
   const headerRef = useRef<HTMLDivElement | null>(null);
@@ -80,7 +94,6 @@ export function Navbar() {
 
   const closePanel = useCallback((returnFocusTo?: PanelId) => {
     setOpenPanel(null);
-    setActiveCategory(null);
     if (returnFocusTo) triggerRefs.current[returnFocusTo]?.focus();
   }, []);
 
@@ -100,7 +113,6 @@ export function Navbar() {
   const openPanelById = useCallback(
     (id: PanelId) => {
       cancelScheduledClose();
-      setActiveCategory(null);
       setOpenPanel(id);
     },
     [cancelScheduledClose]
@@ -146,27 +158,6 @@ export function Navbar() {
     },
   };
 
-  /** Which product the detail pane is previewing (defaults to the category's first). */
-  const [previewHref, setPreviewHref] = useState<string | null>(null);
-
-  /** Drill into a category: focus lands on its back button. */
-  const openCategory = useCallback((id: string) => {
-    pendingFocus.current = `[data-pane="${id}"] [data-pane-first]`;
-    const cat = PRODUCT_NAV.find((c) => c.id === id);
-    setPreviewHref(cat?.items[0]?.href ?? null);
-    // Warm the category's images so hovering a row swaps instantly instead of flashing. Only the
-    // opened category is preloaded — eagerly loading all 20 would tax every page for a nav.
-    cat?.items.forEach((item) => {
-      if (item.image) new Image().src = item.image;
-    });
-    setActiveCategory(id);
-  }, []);
-
-  /** Back out to the grid: focus returns to the tile you came from. */
-  const backToGrid = useCallback((id: string) => {
-    pendingFocus.current = `[data-tile="${id}"]`;
-    setActiveCategory(null);
-  }, []);
 
   const handleGetQuote = () => {
     if (pathname === "/") {
@@ -189,7 +180,6 @@ export function Navbar() {
   // Close whatever is open whenever the route changes (a nav link was followed).
   useEffect(() => {
     setOpenPanel(null);
-    setActiveCategory(null);
   }, [pathname]);
 
   // Escape: step back out of the Products drill-down first, then close.
@@ -198,14 +188,11 @@ export function Navbar() {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.preventDefault();
-      // Go through backToGrid so Escape restores focus to the originating tile rather than
-      // dropping it on <body>.
-      if (openPanel === "products" && activeCategory) backToGrid(activeCategory);
-      else closePanel(openPanel);
+      closePanel(openPanel);
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [openPanel, activeCategory, closePanel, backToGrid]);
+  }, [openPanel, closePanel]);
 
   // Click outside the header (panels + triggers all live inside it) closes.
   useEffect(() => {
@@ -228,7 +215,7 @@ export function Navbar() {
     if (!openPanel || !selector) return;
     pendingFocus.current = null;
     panelRefs.current[openPanel]?.querySelector<HTMLElement>(selector)?.focus();
-  }, [openPanel, activeCategory]);
+  }, [openPanel]);
 
   const isProductsActive = pathname.startsWith("/products/");
 
@@ -327,48 +314,53 @@ export function Navbar() {
    */
   const panelSurfaceClass = (open: boolean) =>
     cn(
-      "absolute inset-x-0 top-full hidden border-t-4 border-[#D20014] bg-white shadow-2xl",
+      "absolute inset-x-0 top-full hidden border-t border-black/10 bg-white shadow-2xl",
       "transition-[opacity,transform] duration-200 ease-out lg:block motion-reduce:transition-none",
       open ? "visible translate-y-0 opacity-100" : "pointer-events-none invisible -translate-y-2 opacity-0"
     );
 
-  /** A link row inside a panel: red on hover with a chevron that slides in. */
-  const panelLinkClass = (rule: boolean) =>
-    cn(
-      "group flex items-center justify-between gap-3 rounded-md py-2.5 pr-1 text-[15px] font-medium text-neutral-700",
-      "transition-colors hover:text-[#D20014] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] motion-reduce:transition-none",
-      rule && "border-b border-neutral-100"
-    );
-
-  const panelChevron = (
-    <ChevronRight
-      className="h-4 w-4 flex-none text-neutral-300 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[#D20014] group-hover:opacity-100 motion-reduce:transition-none"
-      aria-hidden="true"
-    />
-  );
-
-  /** Small-caps eyebrow at the top of each panel. */
-  const panelEyebrowClass = "mb-5 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500";
+  /** The big section title at the top-left of every panel. */
+  const panelTitleClass = "mb-10 text-[34px] font-extrabold leading-none tracking-[-0.7px] text-neutral-900";
+  const panelTitleLinkClass =
+    "inline-flex items-center gap-3 rounded-sm transition-colors hover:text-[#D20014] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none";
 
   /**
-   * Stacks the Products panel's levels. The visible pane is in normal flow (so it sizes the panel);
-   * the rest are absolutely positioned and `invisible` — removed from the tab order and a11y tree,
-   * but still present in the HTML so their product links stay crawlable.
-   *
-   * `level` (0 = category grid, 1 = category detail) makes the motion directional without tracking
-   * which way the user travelled: a hidden pane always rests on the side it belongs on, so drilling
-   * in slides content leftward and going back slides it rightward, automatically.
+   * A destination row. Deliberately borderless — in this pattern the column structure carries the
+   * grouping, and rules between every item would fight the whitespace doing that job.
    */
-  const panePosition = (visible: boolean, level: 0 | 1) =>
+  const panelItemClass = (current: boolean) =>
     cn(
-      "transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none motion-reduce:transform-none",
-      visible
-        ? "relative translate-x-0 opacity-100"
-        : cn(
-            "pointer-events-none invisible absolute inset-0 opacity-0",
-            level === 0 ? "-translate-x-4" : "translate-x-4"
-          )
+      "inline-flex items-baseline gap-2 rounded-sm text-[16px] leading-snug transition-colors",
+      "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none",
+      current ? "font-semibold text-[#D20014]" : "text-neutral-600 hover:text-[#D20014]"
     );
+
+  const panelChipClass =
+    "flex-none rounded-sm bg-neutral-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold leading-none tracking-tight text-neutral-500";
+
+  /**
+   * Column heading. Gets the red arrow only when it actually links somewhere — six of the seven
+   * product categories still have no hub page, and an arrow that goes nowhere is a broken promise.
+   */
+  const PanelGroupHeading = ({ label, href }: { label: string; href?: string }) => {
+    const inner = (
+      <>
+        {label}
+        {href && <ArrowRight className="h-4 w-4 text-[#D20014]" aria-hidden="true" />}
+      </>
+    );
+    return (
+      <h3 className="flex items-center gap-2 text-[19px] font-bold leading-tight tracking-[-0.2px] text-neutral-900">
+        {href ? (
+          <Link href={href} className={panelTitleLinkClass}>
+            {inner}
+          </Link>
+        ) : (
+          inner
+        )}
+      </h3>
+    );
+  };
 
   const mobileLinkClass = (active: boolean) =>
     cn(
@@ -592,9 +584,11 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* ===== Products panel =====
-          Products is the only panel with two levels: 20 items across 7 categories earns a
-          drill-down. Guides (13) and About (5) are flat — see below. */}
+      {/* ===== Nav panels =====
+          Flat multi-column mega-menus (the Rockwool pattern the founder picked): every destination
+          visible at once, no cards, no drill-down, no images — the hierarchy is carried by type
+          weight and whitespace alone. Always rendered and toggled with visibility, so every link
+          stays in the static HTML rather than appearing only after a hover. */}
       <div
         id="products-panel"
         ref={(el) => {
@@ -604,158 +598,45 @@ export function Navbar() {
         {...panelHoverProps}
         className={panelSurfaceClass(openPanel === "products")}
       >
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          {/* Panes are stacked: the active one is in flow, the rest are absolute + invisible (which
-              keeps them out of the tab order and a11y tree while leaving their links in the HTML).
-              No fixed min-height — a one-product category should not open a 400px void. */}
-          <div className="relative">
-            {/* ---- Level 0: category grid ---- */}
-            <div className={panePosition(activeCategory === null, 0)}>
-              <p className={panelEyebrowClass}>Our Products</p>
-              <div className="grid grid-cols-3 gap-4">
-                {PRODUCT_NAV.map((cat, i) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    data-tile={cat.id}
-                    data-panel-first={i === 0 ? "" : undefined}
-                    onClick={() => openCategory(cat.id)}
-                    className={cn(
-                      // items-start so every tile title sits on the same baseline regardless of how
-                      // many lines its blurb wraps to.
-                      "group flex items-start gap-4 rounded-lg border border-neutral-200 bg-white p-5 text-left",
-                      "transition-colors duration-200 hover:border-[#D20014] hover:bg-[#D20014]/[0.03]",
-                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2",
-                      "motion-reduce:transition-none",
-                      cat.featured && "col-span-3"
-                    )}
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[17px] font-semibold leading-none text-neutral-900 transition-colors group-hover:text-[#D20014] motion-reduce:transition-none">
-                        {cat.label}
-                      </span>
-                      <span className="mt-2 block text-[13px] leading-snug text-neutral-500">
-                        {cat.featured ? cat.items.map((p) => p.label).join("   ·   ") : cat.blurb}
-                      </span>
-                    </span>
-                    <ChevronRight
-                      className="mt-0.5 h-5 w-5 flex-none text-neutral-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[#D20014] motion-reduce:transition-none"
-                      aria-hidden="true"
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* ---- Level 1: one pane per category ---- */}
-            {PRODUCT_NAV.map((cat) => (
-              <div key={cat.id} data-pane={cat.id} className={panePosition(activeCategory === cat.id, 1)}>
-                <div className="flex items-center justify-between gap-4 border-b border-neutral-200 pb-4">
-                  <button
-                    type="button"
-                    data-pane-first=""
-                    onClick={() => backToGrid(cat.id)}
-                    className="inline-flex items-center gap-1.5 rounded-sm text-sm font-semibold text-neutral-600 transition-colors hover:text-[#D20014] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none"
-                  >
-                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                    All categories
-                  </button>
-                  {cat.href && (
-                    <Link
-                      href={cat.href}
-                      className="rounded-sm text-sm font-semibold text-[#D20014] transition-colors hover:text-[#8C101E] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none"
-                    >
-                      View the {cat.label} range →
-                    </Link>
-                  )}
-                </div>
-
-                <div className="flex gap-10 pt-6">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-xl font-bold text-neutral-900">{cat.label}</h3>
-                    <p className="mt-1 text-sm text-neutral-500">{cat.blurb}</p>
-                    {/* Two columns beside the preview; a lone product doesn't need a grid at all. */}
-                    <ul className={cn("mt-5 grid gap-x-10", cat.items.length > 1 ? "grid-cols-2" : "grid-cols-1")}>
-                      {cat.items.map((item, i) => {
-                        const current = pathname === item.href;
-                        return (
-                          <li key={item.href}>
-                            <Link
-                              href={item.href}
-                              aria-current={current ? "page" : undefined}
-                              onPointerEnter={() => item.image && setPreviewHref(item.href)}
-                              onFocus={() => item.image && setPreviewHref(item.href)}
-                              style={
-                                activeCategory === cat.id ? { animationDelay: `${i * 25}ms` } : undefined
-                              }
-                              className={cn(
-                                panelLinkClass(cat.items.length > 1),
-                                // Red rule wipes in left→right under the row on hover.
-                                "relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-full",
-                                "after:origin-left after:scale-x-0 after:bg-[#D20014] after:transition-transform",
-                                "after:duration-200 hover:after:scale-x-100 motion-reduce:after:transition-none",
-                                activeCategory === cat.id &&
-                                  "animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards duration-300",
-                                current && "text-[#D20014]"
-                              )}
-                            >
-                              <span className="flex min-w-0 items-center gap-2">
-                                <span className="truncate">{item.label}</span>
-                                {item.certification && (
-                                  <span className="flex-none rounded-sm bg-neutral-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold leading-none tracking-tight text-neutral-500">
-                                    {/* Catalogue stores "IS: 710"; the colon is noise in a chip. */}
-                                    {item.certification.replace(":", "").replace(/\s+/g, " ")}
-                                  </span>
-                                )}
+        <div className="mx-auto max-w-7xl px-4 pb-14 pt-9 sm:px-6 lg:px-8">
+          <h2 className={panelTitleClass}>Products</h2>
+          {/* Plywood carries 8 of the 20 products, so it holds a column alone and the remaining six
+              groups pair up. Balances the columns without inventing groupings. */}
+          <div className="grid grid-cols-4 gap-x-10">
+            {PRODUCT_COLUMNS.map((column, ci) => (
+              <div key={ci}>
+                {column.map((cat, gi) => (
+                  <div key={cat.id} className={gi > 0 ? "mt-9" : undefined}>
+                    <PanelGroupHeading label={cat.label} href={cat.href} />
+                    <ul className="mt-4 space-y-3">
+                      {cat.items.map((item, ii) => (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            aria-current={pathname === item.href ? "page" : undefined}
+                            data-panel-first={ci === 0 && gi === 0 && ii === 0 ? "" : undefined}
+                            className={panelItemClass(pathname === item.href)}
+                          >
+                            <span>{item.label}</span>
+                            {item.certification && (
+                              <span className={panelChipClass}>
+                                {item.certification.replace(":", "").replace(/\s+/g, " ")}
                               </span>
-                              {panelChevron}
-                            </Link>
-                          </li>
-                        );
-                      })}
+                            )}
+                          </Link>
+                        </li>
+                      ))}
                     </ul>
                   </div>
-
-                  {/* Preview: every product has an image, so this never falls back to a placeholder.
-                      One <img> with a swapping src (keyed to re-trigger the fade) rather than a stack
-                      of 8 — openCategory preloads the set, so the swap is instant. */}
-                  {cat.items.some((it) => it.image) && (
-                    <div className="hidden w-[260px] flex-none xl:block" aria-hidden="true">
-                      {(() => {
-                        const shown =
-                          cat.items.find((it) => it.href === previewHref && it.image) ??
-                          cat.items.find((it) => it.image)!;
-                        return (
-                          <figure className="overflow-hidden rounded-lg bg-neutral-50">
-                            {/* object-contain in a portrait frame: 19 of the 20 catalogue images are
-                                portrait or square, and cover was cropping the tallest three (aspect
-                                ~0.5) down to a third of the board. These are product shots — showing
-                                the whole panel matters more than filling the frame edge to edge. */}
-                            <img
-                              key={shown.image}
-                              src={shown.image}
-                              alt=""
-                              loading="lazy"
-                              className="h-[280px] w-full animate-in fade-in object-contain p-3 duration-300 motion-reduce:animate-none"
-                            />
-                            <figcaption className="px-3 py-2 text-[13px] font-medium text-neutral-600">
-                              {shown.label}
-                            </figcaption>
-                          </figure>
-                        );
-                      })()}
-                    </div>
-                  )}
-                </div>
+                ))}
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ===== Guides panel =====
-          13 links across 2 pillars. Flat rather than drilled: a 2-tile grid would look half-empty
-          and a drill-down would add a click to reach pages that are all one click away today. */}
+      {/* Guides — 2 pillars. Same language, fewer columns: 13 links spread over four columns would
+          leave half the panel empty. */}
       <div
         id="guides-panel"
         ref={(el) => {
@@ -765,46 +646,39 @@ export function Navbar() {
         {...panelHoverProps}
         className={panelSurfaceClass(openPanel === "guides")}
       >
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className={panelEyebrowClass}>Plywood Guides</p>
-          {/* items-start so a card with fewer links hugs its content instead of stretching to
-              match its neighbour and leaving a dead gap under the last row. */}
-          <div className="grid grid-cols-2 items-start gap-6">
-            {guideColumns.map((col, i) => (
-              <div key={col.href} className="rounded-lg border border-neutral-200 p-5">
-                {/* Heading is plain text, matching the About panel. It used to be a link with no
-                    visual affordance, duplicating the CTA's destination for no benefit. */}
-                <h3 className="text-[17px] font-semibold text-neutral-900">{col.heading}</h3>
-                <p className="mt-1 text-[13px] leading-snug text-neutral-500">{col.blurb}</p>
-                <ul className="mt-4 grid grid-cols-2 gap-x-8">
-                  {col.clusters.map((c, ci) => (
+        <div className="mx-auto max-w-7xl px-4 pb-14 pt-9 sm:px-6 lg:px-8">
+          <h2 className={panelTitleClass}>Plywood Guides</h2>
+          {/* Same four-track grid as Products, so column positions don't shift as you move between
+              panels — but each pillar spans two tracks and splits its clusters, which fills the
+              width and halves the height instead of leaving the right half of the panel empty. */}
+          <div className="grid grid-cols-4 gap-x-10">
+            {guideColumns.map((col, ci) => (
+              <div key={col.href} className="col-span-2">
+                <PanelGroupHeading label={col.heading} href={col.href} />
+                <p className="mt-2 max-w-[420px] text-[13px] leading-snug text-neutral-500">
+                  {col.blurb}
+                </p>
+                <ul className="mt-4 grid grid-cols-2 gap-x-10 gap-y-3">
+                  {col.clusters.map((c, ii) => (
                     <li key={c.href}>
                       <Link
                         href={c.href}
-                        data-panel-first={i === 0 && ci === 0 ? "" : undefined}
-                        className={panelLinkClass(true)}
+                        aria-current={pathname === c.href ? "page" : undefined}
+                        data-panel-first={ci === 0 && ii === 0 ? "" : undefined}
+                        className={panelItemClass(pathname === c.href)}
                       >
-                        {c.label}
-                        {panelChevron}
+                        <span>{c.label}</span>
                       </Link>
                     </li>
                   ))}
                 </ul>
-                {/* Names its destination. Both cards previously read "View the full guide", giving
-                    two links an identical accessible name but different targets. */}
-                <Link
-                  href={col.href}
-                  className="mt-4 inline-block rounded-sm text-sm font-semibold text-[#D20014] transition-colors hover:text-[#8C101E] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none"
-                >
-                  View the {col.heading} →
-                </Link>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ===== About Us panel ===== 5 links in 2 groups — flat, same card language. */}
+      {/* About Us — 5 links in 2 groups. */}
       <div
         id="about-panel"
         ref={(el) => {
@@ -814,26 +688,27 @@ export function Navbar() {
         {...panelHoverProps}
         className={panelSurfaceClass(openPanel === "about")}
       >
-        {/* Narrower than the other panels: five short links across a 7xl container left a huge dead
-            zone. Left-aligned to the same gutter so the eyebrow still lines up with the nav above. */}
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <p className={panelEyebrowClass}>About Saburi</p>
-          {/* items-start so a card with fewer links hugs its content instead of stretching to
-              match its neighbour and leaving a dead gap under the last row. */}
-          <div className="grid max-w-3xl grid-cols-2 items-start gap-6">
+        <div className="mx-auto max-w-7xl px-4 pb-14 pt-9 sm:px-6 lg:px-8">
+          <h2 className={panelTitleClass}>
+            <Link href="/about" className={panelTitleLinkClass}>
+              About Saburi
+              <ArrowRight className="h-5 w-5 text-[#D20014]" aria-hidden="true" />
+            </Link>
+          </h2>
+          <div className="grid grid-cols-4 gap-x-10">
             {ABOUT_NAV.map((group, gi) => (
-              <div key={group.heading} className="rounded-lg border border-neutral-200 p-5">
-                <h3 className="text-[17px] font-semibold text-neutral-900">{group.heading}</h3>
-                <ul className="mt-4">
-                  {group.items.map((item, i) => (
+              <div key={group.heading}>
+                <PanelGroupHeading label={group.heading} />
+                <ul className="mt-4 space-y-3">
+                  {group.items.map((item, ii) => (
                     <li key={item.href}>
                       <Link
                         href={item.href}
-                        data-panel-first={gi === 0 && i === 0 ? "" : undefined}
-                        className={panelLinkClass(i < group.items.length - 1)}
+                        aria-current={pathname === item.href ? "page" : undefined}
+                        data-panel-first={gi === 0 && ii === 0 ? "" : undefined}
+                        className={panelItemClass(pathname === item.href)}
                       >
-                        {item.label}
-                        {panelChevron}
+                        <span>{item.label}</span>
                       </Link>
                     </li>
                   ))}
