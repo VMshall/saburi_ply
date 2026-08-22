@@ -37,6 +37,10 @@ import { GUIDE_LABELS } from "@/data/faq-placement";
 
 const SCROLL_MT = "scroll-mt-[146px] lg:scroll-mt-[178px]";
 
+// Section headings are full questions and run long — fluid from 21px on a 320px phone to 26px on
+// desktop, so a three-line heading on mobile doesn't swallow the screen.
+const H2 = "text-[clamp(1.3rem,1.1rem+0.9vw,1.625rem)]";
+
 function Eyebrow({ children }: { children: ReactNode }) {
   return (
     <span className="inline-flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
@@ -82,11 +86,16 @@ function AtAGlanceCard({ facts }: { facts: GuideFact[] }) {
         <span aria-hidden className="h-px w-5 bg-primary" />
         At a glance
       </div>
+      {/* Label/value share a row from 400px up; below that both would wrap into a ragged 2×2
+          block, so the value stacks under its label instead. */}
       <dl className="mt-5 divide-y divide-gray-200/80 text-[14.5px]">
         {facts.map((f) => (
-          <div key={f.label} className="flex items-baseline justify-between gap-4 py-3 first:pt-0 last:pb-0">
+          <div
+            key={f.label}
+            className="flex flex-col gap-0.5 py-3 first:pt-0 last:pb-0 min-[400px]:flex-row min-[400px]:items-baseline min-[400px]:justify-between min-[400px]:gap-4"
+          >
             <dt className="text-gray-500">{f.label}</dt>
-            <dd className="text-right font-semibold text-gray-900">{f.value}</dd>
+            <dd className="font-semibold text-gray-900 min-[400px]:text-right">{f.value}</dd>
           </div>
         ))}
       </dl>
@@ -115,7 +124,9 @@ function GuideHero({
         <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-14">
           <div className={aside ? "lg:col-span-7" : "lg:col-span-9"}>
             {eyebrow}
-            <h1 className="font-display mt-5 text-[2.25rem] font-extrabold leading-[1.05] tracking-[-0.025em] text-gray-900 sm:text-5xl lg:text-[3.375rem]">
+            {/* Fluid rather than stepped: the old 36→48px jump landed exactly on the sm
+                breakpoint and read as a glitch when resizing. 32px at 320 → 54px at 1280+. */}
+            <h1 className="font-display mt-5 text-[clamp(2rem,1.35rem+2.6vw,3.375rem)] font-extrabold leading-[1.05] tracking-[-0.025em] text-gray-900">
               {h1}
             </h1>
             {subhead && (
@@ -123,7 +134,9 @@ function GuideHero({
             )}
             {meta && meta.length > 0 && <ArticleMeta items={meta} />}
           </div>
-          {aside && <div className="lg:col-span-5 lg:pl-4">{aside}</div>}
+          {/* Capped between sm and lg — full-bleed across a 720px tablet leaves the fact rows
+              stranded either side of a huge gap. */}
+          {aside && <div className="sm:max-w-md lg:col-span-5 lg:max-w-none lg:pl-4">{aside}</div>}
         </div>
       </div>
     </section>
@@ -131,44 +144,64 @@ function GuideHero({
 }
 
 function CompareTable({ table }: { table: GuideCompareTable }) {
+  // A two-column table fits a 320px phone, so don't force it to scroll; three and four columns
+  // need a floor or the cells crush into unreadable slivers.
+  const cols = table.columns.length;
+  const minWidth = cols <= 2 ? "" : cols === 3 ? "min-w-[30rem]" : "min-w-[34rem]";
+  const scrolls = cols > 2;
+
   return (
     <section id="at-a-glance" className={`mt-10 ${SCROLL_MT}`}>
-      <h2 className="font-display text-[1.625rem] font-bold tracking-tight text-gray-900">
+      <h2 className={`font-display ${H2} font-bold tracking-tight text-gray-900`}>
         {table.heading ?? "At a glance"}
       </h2>
-      <div className="mt-5 overflow-x-auto rounded-2xl ring-1 ring-gray-200/80">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-[#faf8f3] text-[11px] uppercase tracking-[0.12em] text-gray-500">
-            <tr>
-              {table.columns.map((c) => (
-                <th key={c} scope="col" className="whitespace-nowrap px-5 py-3 font-bold">
-                  {c}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200/80">
-            {table.rows.map((row, r) => (
-              <tr key={row[0]} className={r === table.highlightRow ? "bg-primary/[0.03]" : undefined}>
-                {row.map((cell, c) =>
-                  c === 0 ? (
-                    <th key={c} scope="row" className="px-5 py-4 text-left align-top font-normal">
-                      <span className="font-semibold text-gray-900">{cell}</span>
-                      {table.rowNotes?.[r] && (
-                        <span className="block text-xs font-normal text-gray-500">{table.rowNotes[r]}</span>
-                      )}
-                    </th>
-                  ) : (
-                    <td key={c} className="px-5 py-4 align-top text-gray-600">
-                      {cell}
-                    </td>
-                  ),
-                )}
+      {/* The scroller needs `min-w-0` to actually scroll: as a descendant of a grid item it would
+          otherwise push its intrinsic width up the tree instead of clipping (that's what made the
+          whole page scroll sideways on phones). The right-edge fade signals there's more to see. */}
+      <div className="relative mt-5">
+        <div className="min-w-0 overflow-x-auto rounded-2xl ring-1 ring-gray-200/80">
+          <table className={`w-full ${minWidth} text-left text-sm`}>
+            <thead className="bg-[#faf8f3] text-[11px] uppercase tracking-[0.12em] text-gray-500">
+              <tr>
+                {table.columns.map((c) => (
+                  <th key={c} scope="col" className="px-5 py-3 font-bold">
+                    {c}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200/80">
+              {table.rows.map((row, r) => (
+                <tr key={row[0]} className={r === table.highlightRow ? "bg-primary/[0.03]" : undefined}>
+                  {row.map((cell, c) =>
+                    c === 0 ? (
+                      <th key={c} scope="row" className="px-5 py-4 text-left align-top font-normal">
+                        <span className="font-semibold text-gray-900">{cell}</span>
+                        {table.rowNotes?.[r] && (
+                          <span className="block text-xs font-normal text-gray-500">{table.rowNotes[r]}</span>
+                        )}
+                      </th>
+                    ) : (
+                      <td key={c} className="px-5 py-4 align-top text-gray-600">
+                        {cell}
+                      </td>
+                    ),
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {scrolls && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 w-10 rounded-r-2xl bg-gradient-to-l from-white to-transparent sm:hidden"
+          />
+        )}
       </div>
+      {scrolls && (
+        <p className="mt-2 text-xs text-gray-400 sm:hidden">Scroll the table sideways for every column.</p>
+      )}
     </section>
   );
 }
@@ -177,7 +210,7 @@ function CompareTable({ table }: { table: GuideCompareTable }) {
 function QaSection({ section }: { section: GuideSection }) {
   return (
     <section id={section.id} className={`mt-12 ${SCROLL_MT}`}>
-      <h2 className="font-display text-[1.625rem] font-bold leading-tight tracking-tight text-gray-900">
+      <h2 className={`font-display ${H2} font-bold leading-tight tracking-tight text-gray-900`}>
         {section.question}
       </h2>
 
@@ -396,14 +429,16 @@ function ClusterPage({ page, sections }: { page: GuidePage; sections: GuideSecti
         {/* Mobile contents — plain <details>, no JS, collapsed by default */}
         {tocItems.length > 1 && (
           <details className="group mb-10 rounded-2xl bg-[#faf8f3] px-5 py-4 ring-1 ring-gray-200/80 lg:hidden">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
-              <span>
-                Contents <span className="font-normal text-gray-400">({tocItems.length})</span>
-              </span>
+            {/* Chevron leads rather than trails: on the right it lands under the fixed WhatsApp
+                button on every viewport below lg, which hides the only open/close affordance. */}
+            <summary className="flex cursor-pointer list-none items-center gap-2.5 text-sm font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
               <ChevronDown
                 aria-hidden
                 className="h-4 w-4 flex-shrink-0 text-primary transition-transform group-open:rotate-180"
               />
+              <span>
+                Contents <span className="font-normal text-gray-400">({tocItems.length})</span>
+              </span>
             </summary>
             <ul className="mt-3 space-y-2 border-t border-gray-200/80 pt-3 text-sm">
               {tocItems.map((t) => (
@@ -427,7 +462,11 @@ function ClusterPage({ page, sections }: { page: GuidePage; sections: GuideSecti
             </div>
           </aside>
 
-          <article>
+          {/* `min-w-0` is load-bearing: a grid item's automatic minimum size is its min-content,
+              so without it the compare table's intrinsic width sets the track and the page
+              scrolls sideways. The max-width holds the body at ~65ch from md through lg, where
+              there's no right rail to do it; at xl the grid track already lands at ~59ch. */}
+          <article className="min-w-0 md:max-w-[42rem] xl:max-w-none">
             <div
               className="font-display text-[18px] font-medium leading-[1.5] sm:text-[21px] text-gray-900 [&>p]:mb-4 [&>p:last-child]:mb-0 [&_strong]:text-primary"
               dangerouslySetInnerHTML={{ __html: page.introHtml }}
@@ -567,8 +606,10 @@ function PillarPage({ page }: { page: GuidePage }) {
 
       <section className="bg-white pb-4 pt-14 lg:pt-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* max-w-2xl, not 3xl: centred text loses the reader past ~55ch, and a narrower block
+              also keeps the line ends clear of the fixed floating buttons on tablet. */}
           <div
-            className="font-display mx-auto max-w-3xl text-center text-[21px] font-medium leading-[1.5] text-gray-900 [&>p]:mb-4 [&>p:last-child]:mb-0 [&_strong]:text-primary"
+            className="font-display mx-auto max-w-2xl text-center text-[18px] font-medium leading-[1.5] text-gray-900 sm:text-[21px] [&>p]:mb-4 [&>p:last-child]:mb-0 [&_strong]:text-primary"
             dangerouslySetInnerHTML={{ __html: page.introHtml }}
           />
 
