@@ -51,10 +51,34 @@ export interface FaqLibraryEntry {
   seoAnswer: string;
 }
 
+/** One label/value row in a guide hero's "At a glance" fact card. */
+export interface GuideFact {
+  label: string;
+  value: string;
+}
+
+/**
+ * Comparison table rendered at the top of a cluster article — the module that answers a
+ * "X vs Y vs Z" query at a glance (and the shape search engines lift into a snippet).
+ * `rows[i][0]` is the row header; `highlightRow` tints the recommended/highest row.
+ */
+export interface GuideCompareTable {
+  columns: string[];
+  rows: string[][];
+  /** Optional sub-label under a row header, keyed by row index (e.g. "IS:710 marine"). */
+  rowNotes?: Record<number, string>;
+  highlightRow?: number;
+  /** Rendered as the section H2 — defaults to "At a glance". */
+  heading?: string;
+}
+
 /**
  * A knowledge-hub page — either the `/plywood-guide` pillar or a topic `cluster` under it.
  * `faqNumbers` are the library FAQs homed on this page (one canonical home per FAQ, enforced by
  * `assertPlacementIntegrity`). `relatedProducts` are product slugs → `/products/{slug}` links.
+ *
+ * The optional presentation fields below drive the cluster article layout; each module is skipped
+ * when its data is absent, so a page with only the required fields still renders correctly.
  */
 export interface GuidePage {
   slug: string; // "" for the pillar, e.g. "is-standards" for a cluster
@@ -69,6 +93,16 @@ export interface GuidePage {
   relatedProducts: string[];
   /** Pillar only: child cluster slugs, for the cluster-nav cards. */
   clusters?: string[];
+  /** Hero fact card — the answer most visitors arrived for, above the fold. */
+  atAGlance?: GuideFact[];
+  /** Comparison table module, rendered before the first Q&A section. */
+  compareTable?: GuideCompareTable;
+  /** Closing "key takeaways" card — 2–4 short, plain-language points. */
+  takeaways?: string[];
+  /** ISO date (YYYY-MM-DD) shown in the article meta row. Omitted until sign-off supplies one. */
+  updatedOn?: string;
+  /** Byline for the meta row, e.g. "the Saburi technical team". Omitted until sign-off. */
+  reviewedBy?: string;
 }
 
 /** A feature badge in the product rail (icon + title + sub-label). */

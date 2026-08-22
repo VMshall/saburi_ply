@@ -50,6 +50,93 @@ export function getClusterPages(): GuidePage[] {
   return GUIDE_PAGES.filter((p) => p.kind === "cluster");
 }
 
+/**
+ * A library FAQ resolved into a linkable article section: the AEO answer becomes the visible
+ * "quick answer" lead, the SEO answer the body prose, and `id` the `<h2>` anchor target that
+ * the on-page table of contents scroll-spies against.
+ */
+export interface GuideSection {
+  id: string;
+  number: number;
+  question: string;
+  aeoAnswer: string;
+  seoAnswer: string;
+}
+
+// Whole words only, cut at the first word that would push the slug past 56 chars.
+const slugifyQuestion = (q: string) => {
+  let slug = "";
+  for (const word of q.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ")) {
+    if (!word) continue;
+    const next = slug ? `${slug}-${word}` : word;
+    if (slug && next.length > 56) break;
+    slug = next;
+  }
+  return slug;
+};
+
+/**
+ * The article sections for a guide page, in placement order. Anchor ids are derived from the
+ * question text (stable across content edits that don't reword the question) and de-duplicated
+ * within the page, so `#what-does-bwp-grade-mean-in-plywood` survives a re-order of the list.
+ */
+export function getGuideSections(page: GuidePage): GuideSection[] {
+  const used = new Set<string>();
+  return page.faqNumbers.map((n) => {
+    const e = getFaqByNumber(n);
+    const base = slugifyQuestion(e.question) || `question-${n}`;
+    let id = base;
+    for (let i = 2; used.has(id); i++) id = `${base}-${i}`;
+    used.add(id);
+    return { id, number: n, question: e.question, aeoAnswer: e.aeoAnswer, seoAnswer: e.seoAnswer };
+  });
+}
+
+/** Where a cluster sits in its pillar's reading order — powers the chapter number and prev/next. */
+export interface GuideNav {
+  pillar: GuidePage;
+  /** 1-based position in the pillar's `clusters` list. */
+  chapter: number;
+  total: number;
+  prev?: GuidePage;
+  next?: GuidePage;
+  /** The other clusters of the same pillar, in order. */
+  siblings: GuidePage[];
+}
+
+export function getGuideNav(page: GuidePage): GuideNav | undefined {
+  if (page.kind !== "cluster") return undefined;
+  const pillar = GUIDE_PAGES.find(
+    (p) => p.kind === "pillar" && (p.clusters ?? []).includes(page.slug),
+  );
+  if (!pillar) return undefined;
+
+  const slugs = pillar.clusters ?? [];
+  const i = slugs.indexOf(page.slug);
+  const at = (n: number) => (n >= 0 && n < slugs.length ? getGuidePage(slugs[n]) : undefined);
+
+  return {
+    pillar,
+    chapter: i + 1,
+    total: slugs.length,
+    prev: at(i - 1),
+    next: at(i + 1),
+    siblings: slugs
+      .filter((s) => s !== page.slug)
+      .map((s) => getGuidePage(s))
+      .filter((p): p is GuidePage => p !== undefined),
+  };
+}
+
+/** Rough read time for the article meta row, at 220 wpm over the intro + every answer. */
+export function getGuideReadMinutes(page: GuidePage, sections: GuideSection[]): number {
+  const words = [page.introHtml.replace(/<[^>]+>/g, " "), ...sections.map((s) => `${s.aeoAnswer} ${s.seoAnswer}`)]
+    .join(" ")
+    .split(/\s+/)
+    .filter(Boolean).length;
+  return Math.max(1, Math.round(words / 220));
+}
+
 // Sections that have a published home: Technical → /plywood-guide, Purchase → /plywood-buying-guide,
 // Company → /about pages, Product → existing product pages (partial — reconciled subset only).
 const HUB_SECTIONS = new Set(["Technical", "Purchase", "Company", "Product"]);
