@@ -46,6 +46,8 @@ export function CertificateLightbox({
   // Active pointers, so one finger pans and two pinch.
   const pointers = useRef(new Map<number, Point>());
   const pinchStart = useRef<{ dist: number; scale: number } | null>(null);
+  // Origin of a single-finger gesture, so an un-zoomed drag can be read as a swipe.
+  const swipeStart = useRef<{ id: number; x: number; y: number } | null>(null);
 
   const reset = useCallback(() => {
     setScale(1);
@@ -109,6 +111,12 @@ export function CertificateLightbox({
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size === 1) {
+      swipeStart.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    } else {
+      // A second finger means pinch, not swipe.
+      swipeStart.current = null;
+    }
     if (pointers.current.size === 2) {
       const [a, b] = [...pointers.current.values()];
       pinchStart.current = { dist: Math.hypot(a.x - b.x, a.y - b.y), scale };
@@ -136,6 +144,17 @@ export function CertificateLightbox({
   };
 
   const endPointer = (e: ReactPointerEvent<HTMLDivElement>) => {
+    // Swipe to move between certificates — only at 1x, where a drag isn't panning, and only when
+    // the gesture is clearly horizontal. Touch has no arrow keys and the on-screen arrows have to
+    // sit over the scan on a phone, so this is the primary way to navigate there.
+    const start = swipeStart.current;
+    if (start?.id === e.pointerId && scale === MIN_SCALE && e.type === "pointerup") {
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
+    }
+    if (start?.id === e.pointerId) swipeStart.current = null;
+
     pointers.current.delete(e.pointerId);
     if (pointers.current.size < 2) pinchStart.current = null;
   };
@@ -155,14 +174,22 @@ export function CertificateLightbox({
             go(1);
           }
         }}
-        className="flex max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-3xl flex-col gap-0 overflow-hidden rounded-2xl border-stone-200 p-0"
+        // An explicit height (clamped to the viewport) rather than letting content drive it: the
+        // scan is a flex child, so without a resolved height to distribute it kept its own
+        // intrinsic size and pushed out under the footer on short viewports — a landscape phone at
+        // 390px tall was the worst case.
+        className="flex h-[780px] max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-3xl flex-col gap-0 overflow-hidden rounded-2xl border-stone-200 p-0"
       >
-        {/* Header — the built-in close button sits here, on white, where it stays visible. */}
-        <div className="shrink-0 border-b border-stone-200 bg-white px-5 py-4 pr-14">
+        {/* Header — the built-in close button sits here, on white, where it stays visible.
+            On a short viewport (landscape phone) the chrome is trimmed and the issuer line is
+            dropped: at 390px tall, header + footer were taking 40% of the dialog and squeezing the
+            certificate — the one thing the dialog exists to show. The issuer stays available to
+            screen readers via sr-only, since Radix needs the description for aria-describedby. */}
+        <div className="shrink-0 border-b border-stone-200 bg-white px-4 py-3.5 pr-12 sm:px-5 sm:py-4 sm:pr-14 [@media(max-height:460px)]:py-2">
           <DialogTitle className="font-display text-base font-bold text-stone-900 sm:text-lg">
             {cert.title}
           </DialogTitle>
-          <DialogDescription className="mt-0.5 text-sm text-stone-500">
+          <DialogDescription className="mt-0.5 text-sm text-stone-500 [@media(max-height:460px)]:sr-only">
             {cert.description}
           </DialogDescription>
         </div>
@@ -176,7 +203,7 @@ export function CertificateLightbox({
             onPointerUp={endPointer}
             onPointerCancel={endPointer}
             onDoubleClick={(e) => zoomAt(scale > 1 ? 1 : 2, { x: e.clientX, y: e.clientY })}
-            className="h-full min-h-[45vh] touch-none select-none overflow-hidden p-4 sm:p-6"
+            className="h-full touch-none select-none overflow-hidden p-3 sm:p-6"
             style={{ cursor: scale > 1 ? "grab" : "zoom-in" }}
           >
             {/* Plain <img>, not next/image: the lightbox wants the original file at full
@@ -187,7 +214,7 @@ export function CertificateLightbox({
               src={cert.image}
               alt={`${cert.title} — ${cert.description}`}
               draggable={false}
-              className="mx-auto h-full max-h-[62vh] w-auto max-w-full rounded-lg bg-white object-contain shadow-md"
+              className="mx-auto h-full w-auto max-w-full rounded-lg bg-white object-contain shadow-md"
               style={{
                 transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
                 transition: pointers.current.size ? "none" : "transform 0.15s ease-out",
@@ -200,7 +227,7 @@ export function CertificateLightbox({
             type="button"
             onClick={() => go(-1)}
             aria-label="Previous certificate"
-            className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-stone-700 shadow-md ring-1 ring-stone-200 transition hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:left-3"
+            className="absolute left-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-stone-700 shadow-md ring-1 ring-stone-200 transition hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:left-3 sm:h-10 sm:w-10"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -208,7 +235,7 @@ export function CertificateLightbox({
             type="button"
             onClick={() => go(1)}
             aria-label="Next certificate"
-            className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-stone-700 shadow-md ring-1 ring-stone-200 transition hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:right-3"
+            className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-stone-700 shadow-md ring-1 ring-stone-200 transition hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:right-3 sm:h-10 sm:w-10"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -219,7 +246,7 @@ export function CertificateLightbox({
             certificates, and a control bar parked across the bottom of every one of them covers
             exactly the fine print people open the dialog to read. The signed PDF is the point of
             the page, so it is the primary action. */}
-        <div className="flex shrink-0 items-center justify-between gap-2 border-t border-stone-200 bg-white px-4 py-3 sm:px-5 sm:py-3.5">
+        <div className="flex shrink-0 items-center justify-between gap-1 border-t border-stone-200 bg-white px-3 py-2.5 sm:gap-2 sm:px-5 sm:py-3.5 [@media(max-height:460px)]:py-1.5">
           <span className="hidden text-xs font-semibold tabular-nums text-stone-400 sm:block">
             {index + 1} / {CERTIFICATIONS.length}
           </span>
@@ -234,7 +261,8 @@ export function CertificateLightbox({
             >
               <Minus className="h-4 w-4" />
             </button>
-            <span className="w-11 text-center text-xs font-semibold tabular-nums text-stone-500">
+            {/* Dropped on the narrowest phones so the download button keeps its full label. */}
+            <span className="hidden w-11 text-center text-xs font-semibold tabular-nums text-stone-500 min-[380px]:block">
               {Math.round(scale * 100)}%
             </span>
             <button
@@ -262,18 +290,22 @@ export function CertificateLightbox({
               href={cert.pdf.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="tap-target inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              className="tap-target inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:gap-2 sm:px-4"
             >
-              <Download className="h-4 w-4" strokeWidth={2.25} />
+              <Download className="h-4 w-4 shrink-0" strokeWidth={2.25} />
               Download PDF
-              <span className="font-normal opacity-75">{cert.pdf.sizeMb} MB</span>
+              {/* The size warns before a 28 MB tap on mobile data, but the label matters more —
+                  below 420px it is dropped rather than letting the button wrap to "Dow PDF". */}
+              <span className="hidden font-normal opacity-75 min-[420px]:inline">
+                {cert.pdf.sizeMb} MB
+              </span>
             </a>
           ) : (
             <a
               href={cert.image}
               target="_blank"
               rel="noopener noreferrer"
-              className="tap-target inline-flex items-center gap-2 rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700 transition hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              className="tap-target inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-stone-300 px-3 py-2 text-sm font-semibold text-stone-700 transition hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:px-4"
             >
               Open full image
             </a>

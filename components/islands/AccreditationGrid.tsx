@@ -39,7 +39,10 @@ export function AccreditationGrid() {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
+      {/* 2-up from 640 and 3-up only from 1024. Going straight to 3 columns at md (768) left each
+          card 219px wide — narrower than the certificate needs to stay legible. Nine cards means
+          the 2-up band ends on an orphan row, which is a far smaller price than illegible scans. */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
         {CERTIFICATIONS.map((cert, index) => {
           const Icon = cert.icon;
           return (
@@ -62,17 +65,20 @@ export function AccreditationGrid() {
                   <Icon className="h-5 w-5" strokeWidth={2} />
                 </span>
 
-                {/* Paper sheet on a warm mat — object-contain keeps the whole certificate visible. */}
-                <div className="cert-sheet relative overflow-hidden rounded-xl bg-[#faf8f3] p-3">
-                  {/* Fixed height rather than an aspect ratio: the scans vary between portrait and
-                      landscape, and object-contain inside a shared box keeps every card the same
-                      height whatever the source proportions. */}
+                {/* Paper sheet on a warm mat — object-contain keeps the whole certificate visible.
+                    The mat tracks the card width (so the sheet scales with the column instead of
+                    stranding a postage-stamp scan in a fixed 480px box) but is capped, so a
+                    full-width single-column card doesn't balloon into a giant sheet. */}
+                <div className="cert-sheet relative mx-auto w-full max-w-[364px] overflow-hidden rounded-xl bg-[#faf8f3] p-3">
+                  {/* 3:4 ≈ the A4-ish proportion of the scans, so portrait certificates nearly fill
+                      the sheet while every card in a row still resolves to the same height. */}
                   <SmartImage
                     src={cert.image}
                     alt={`${cert.title} — ${cert.description}`}
+                    aspectRatio="3/4"
                     objectFit="contain"
-                    sizes="(max-width: 768px) 92vw, (max-width: 1280px) 30vw, 380px"
-                    className="h-[420px] rounded-md bg-white md:h-[480px]"
+                    sizes="(max-width: 640px) 90vw, 340px"
+                    className="rounded-md bg-white"
                   />
 
                   {/* Visible at rest, not only on hover — an affordance that appears after you have
