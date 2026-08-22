@@ -319,8 +319,13 @@ export function Navbar() {
       open ? "visible translate-y-0 opacity-100" : "pointer-events-none invisible -translate-y-2 opacity-0"
     );
 
-  /** The big section title at the top-left of every panel. */
-  const panelTitleClass = "mb-10 text-[34px] font-extrabold leading-none tracking-[-0.7px] text-neutral-900";
+  /**
+   * The big section title at the top-left of every panel. Uses the display face (Bricolage
+   * Grotesque) that the rest of the site's headings use — its heavier bold is what gives the
+   * reference its weight, which the body sans could not reach at any numeric weight.
+   */
+  const panelTitleClass =
+    "font-display mb-10 text-[34px] font-extrabold leading-none tracking-[-0.7px] text-neutral-900";
   const panelTitleLinkClass =
     "inline-flex items-center gap-3 rounded-sm transition-colors hover:text-[#D20014] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D20014] focus-visible:ring-offset-2 motion-reduce:transition-none";
 
@@ -350,7 +355,7 @@ export function Navbar() {
       </>
     );
     return (
-      <h3 className="flex items-center gap-2 text-[19px] font-bold leading-tight tracking-[-0.2px] text-neutral-900">
+      <h3 className="font-display flex items-center gap-2 text-[20px] font-extrabold leading-tight tracking-[-0.3px] text-neutral-900">
         {href ? (
           <Link href={href} className={panelTitleLinkClass}>
             {inner}
