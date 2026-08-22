@@ -194,6 +194,28 @@
   overflow-x: auto;
 }
 
+/* Touch tap-target floor (iOS HIG 44px). Gated on `pointer: coarse` rather than a width
+   breakpoint — target size follows the input device, not the viewport, so a 768px-wide tablet
+   needs it just as much as a phone while a narrow desktop window does not. Mirrors the
+   `(hover: hover) and (pointer: fine)` gating used by the spotlight primitive below. */
+@media (pointer: coarse) {
+  .tap-target {
+    min-height: 44px;
+  }
+}
+
+/* Edge fade for the /blog category rail while it still scrolls horizontally (below md, where the
+   pills don't yet wrap). Applied as a mask on the scroller itself: an absolutely-positioned
+   overlay would be laid out against the scrollable content — so it would scroll out of view — and
+   would also paint over the last pill's focus ring. `data-fade` is set only while there is more
+   to scroll to, so the fade disappears at the end of the rail. */
+@media (max-width: 767px) {
+  .pill-scroller[data-fade="right"] {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+  }
+}
+
 /* Cursor spotlight primitive — shared by "Why Choose Saburiply?" (.why-card) and the
    "What Our Clients Say" cards (.spotlight-card). A red radial glow tracks --spot-x/--spot-y.
    Progressive enhancement: cards are fully visible without JS, fine-pointer only, and every
