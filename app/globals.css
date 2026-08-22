@@ -220,8 +220,15 @@
    "What Our Clients Say" cards (.spotlight-card). A red radial glow tracks --spot-x/--spot-y.
    Progressive enhancement: cards are fully visible without JS, fine-pointer only, and every
    motion is disabled under prefers-reduced-motion. */
-.why-card > *,
-.spotlight-card > * {
+/* Lift content above the ::before glow.
+   `:not(.absolute)` matters: Tailwind's `.absolute` has the same specificity as `.why-card > *`
+   and loses on source order (utilities are emitted at the top of this file), so without the
+   exclusion this rule silently overrides `position: absolute` on positioned children and drops
+   them back into normal flow. That is what pushed the accreditation card's seal into the layout
+   and collapsed its trigger button to 0×0, and it still applies to the Testimonials quote mark.
+   Positioned children need no z-index here — they already paint above the z-0 ::before. */
+.why-card > *:not(.absolute),
+.spotlight-card > *:not(.absolute) {
   position: relative;
   z-index: 1;
 }

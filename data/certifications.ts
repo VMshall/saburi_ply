@@ -7,16 +7,27 @@ import { Award, CheckCircle2, FileCheck, Shield, type LucideIcon } from "lucide-
  * to a specific certificate (`/about/accreditation#iso-9001-2015`) without re-typing the list —
  * this module is the single source of truth for the anchor ids.
  *
- * `id` is the anchor slug. `issuer` is the existing card sub-line (unchanged copy), shown under the
- * title on the card rather than only inside the hover preview.
+ * `image` is the scan shown on the card and in the lightbox (previously — and misleadingly —
+ * called `pdfUrl`; it has always been a .webp). `pdf` is the actual signed certificate where one
+ * exists in public/certificates: higher resolution than the scan and what a procurement buyer
+ * actually wants. Size is declared so the download link can warn before a 28 MB tap on mobile data.
  */
 export type Certification = {
   id: string;
   icon: LucideIcon;
   title: string;
   description: string;
-  pdfUrl: string;
+  image: string;
+  pdf?: { href: string; sizeMb: number };
 };
+
+/**
+ * The three ISO certificates ship as one 3-page PDF (verified: p1 ISO 9001:2015 / p2 ISO
+ * 14001:2015 / p3 ISO 45001:2018, certificate numbers matching the scans). `#page=N` lands the
+ * viewer on the right page.
+ */
+const ISO_PDF = "/certificates/NEW ISO CERTIFICATE 2023-2026.pdf";
+const ISO_PDF_MB = 28.5;
 
 export const CERTIFICATIONS: Certification[] = [
   {
@@ -24,63 +35,70 @@ export const CERTIFICATIONS: Certification[] = [
     icon: Award,
     title: "Certificate of Conformance (CARB)",
     description: "Forest Wood Industries, Inc.",
-    pdfUrl: "/certificates/certificate_of_conformance.webp",
+    image: "/certificates/certificate_of_conformance.webp",
+    pdf: { href: "/certificates/CARB CERTIFICATE NEW 01.pdf", sizeMb: 4 },
   },
   {
     id: "fsc",
     icon: Shield,
     title: "FSC Certificate",
     description: "Bureau Veritas Certification",
-    pdfUrl: "/certificates/bureau_veritas_certificate.webp",
+    image: "/certificates/bureau_veritas_certificate.webp",
+    pdf: { href: "/certificates/FSC CERTIFICATE1.pdf", sizeMb: 1.3 },
   },
   {
     id: "iso-9001-2015",
     icon: FileCheck,
     title: "ISO 9001:2015",
     description: "Quality Management System 2015",
-    pdfUrl: "/certificates/iso_9001_2015.webp",
+    image: "/certificates/iso_9001_2015.webp",
+    pdf: { href: `${ISO_PDF}#page=1`, sizeMb: ISO_PDF_MB },
   },
   {
     id: "iso-14001-2015",
     icon: FileCheck,
     title: "ISO 14001:2015",
     description: "Environment Management System 2015",
-    pdfUrl: "/certificates/iso_14001_2015.webp",
+    image: "/certificates/iso_14001_2015.webp",
+    pdf: { href: `${ISO_PDF}#page=2`, sizeMb: ISO_PDF_MB },
   },
   {
     id: "iso-45001-2018",
     icon: FileCheck,
     title: "ISO 45001:2018",
     description: "Health and Safety Management System",
-    pdfUrl: "/certificates/iso_45001_2018.webp",
+    image: "/certificates/iso_45001_2018.webp",
+    pdf: { href: `${ISO_PDF}#page=3`, sizeMb: ISO_PDF_MB },
   },
   {
     id: "igbc",
     icon: CheckCircle2,
     title: "IGBC",
     description: "Indian Green Building Council",
-    pdfUrl: "/certificates/igbc.webp",
+    image: "/certificates/igbc.webp",
   },
   {
     id: "astm-d7032-17",
     icon: CheckCircle2,
     title: "ASTM D7032 - 17",
     description: "Manufacturer of Super Quality Plywood Panel Boards, WPC & PVC - 2017",
-    pdfUrl: "/certificates/astm_d7032_17.webp",
+    image: "/certificates/astm_d7032_17.webp",
+    pdf: { href: "/certificates/Saburi - ASTM New.pdf", sizeMb: 1.3 },
   },
   {
     id: "iso-20819-1-2020",
     icon: CheckCircle2,
     title: "ISO 20819-1:2020",
     description: "Manufacturer of Super Quality Plywood Panel Boards, WPC & PVC - 2020",
-    pdfUrl: "/certificates/iso_20819-1_2020.webp",
+    image: "/certificates/iso_20819-1_2020.webp",
+    pdf: { href: "/certificates/Saburi - ISO 20819 -1-2020 new.pdf", sizeMb: 1.2 },
   },
   {
     id: "ce",
     icon: CheckCircle2,
     title: "Certificate of Conformity (CE)",
     description: "Certificate of Conformity",
-    pdfUrl: "/certificates/certificate_of_conformity.webp",
+    image: "/certificates/certificate_of_conformity.webp",
   },
 ];
 
