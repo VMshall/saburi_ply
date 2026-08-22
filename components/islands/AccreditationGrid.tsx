@@ -1,167 +1,198 @@
 "use client";
 
-import { useState } from "react";
-import { CheckCircle2, Award, Shield, FileCheck, FileText } from "lucide-react";
+import { useEffect, useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+import { Maximize2 } from "lucide-react";
+import { SmartImage } from "@/components/SmartImage";
+import { CERTIFICATIONS } from "@/data/certifications";
 
 /**
  * Certifications grid with hover image-preview tooltip (client). Ported from
- * client/pages/Accreditation.jsx — needs `useState` + onMouseEnter/onMouseLeave + onError, so it
+ * client/pages/Accreditation.jsx — needs `useState` + onMouseEnter/onMouseLeave, so it
  * lives as an island while the route's app/about/accreditation/page.tsx stays a server component.
+ *
+ * Each certificate reads as a sheet of paper on a warm mat rather than a cropped thumbnail, and
+ * reuses the site-wide card primitives: `.spotlight-card` (cursor-tracked red glow, fine-pointer
+ * only) and `.why-reveal` (staggered scroll reveal). Both are progressive enhancement — cards are
+ * fully visible server-rendered and stay visible if JS never runs — and every motion is disabled
+ * under prefers-reduced-motion.
  */
 export function AccreditationGrid() {
   const [hoveredCert, setHoveredCert] = useState<number | null>(null);
-  const certifications = [
-    {
-      icon: Award,
-      title: "Certificate of Conformance (CARB)",
-      description: "Forest Wood Industries, Inc.",
-      pdfUrl: "/certificates/certificate_of_conformance.webp"
-    },
-    {
-      icon: Shield,
-      title: "FSC Certificate",
-      description: "Bureau Veritas Certification",
-      pdfUrl: "/certificates/bureau_veritas_certificate.webp"
-    },
-    {
-      icon: FileCheck,
-      title: "ISO 9001:2015",
-      description: "Quality Management System 2015",
-      pdfUrl: "/certificates/iso_9001_2015.webp"
-    },
-    {
-      icon: FileCheck,
-      title: "ISO 14001:2015",
-      description: "Environment Management System 2015",
-      pdfUrl: "/certificates/iso_14001_2015.webp"
-    },
-    {
-      icon: FileCheck,
-      title: "ISO 45001:2018",
-      description: "Health and Safety Management System",
-      pdfUrl: "/certificates/iso_45001_2018.webp"
-    },
-    {
-      icon: CheckCircle2,
-      title: "IGBC",
-      description: "Indian Green Building Council",
-      pdfUrl: "/certificates/igbc.webp"
-    },
-    {
-      icon: CheckCircle2,
-      title: "ASTM D7032 - 17",
-      description: "Manufacturer of Super Quality Plywood Panel Boards, WPC & PVC - 2017",
-      pdfUrl: "/certificates/astm_d7032_17.webp"
-    },
-    {
-      icon: CheckCircle2,
-      title: "ISO 20819-1:2020",
-      description: "Manufacturer of Super Quality Plywood Panel Boards, WPC & PVC - 2020",
-      pdfUrl: "/certificates/iso_20819-1_2020.webp"
-    },
-    {
-      icon: CheckCircle2,
-      title: "Certificate of Conformity (CE)",
-      description: "Certificate of Conformity",
-      pdfUrl: "/certificates/certificate_of_conformity.webp"
-    }
-  ];
+
+  const reduce = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Cursor-tracked spotlight. CSS vars are written straight to the node so pointer moves never
+  // trigger a React re-render; non-mouse pointers (touch/pen) get no glow.
+  const handleSpotlight = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--spot-x", `${e.clientX - r.left}px`);
+    el.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
+  }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-16">
-      {certifications.map((cert, index) => (
-        <div
-          key={index}
-          className="group relative"
-          onMouseEnter={() => setHoveredCert(index)}
-          onMouseLeave={() => setHoveredCert(null)}
-        >
-          {/* Certificate Card with Image */}
-          <div className="cursor-pointer rounded-lg overflow-hidden border-4 border-gray-200 hover:border-primary transition-all duration-300 hover:shadow-xl hover:scale-105">
-            {/* Certificate Image */}
-            <div className="aspect-[3/4] bg-gray-100 relative overflow-hidden">
-              <img
-                src={cert.pdfUrl}
-                alt={cert.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  // Fallback to icon if image fails to load
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
-                  ((e.currentTarget as HTMLImageElement).nextElementSibling as HTMLElement).style.display = 'flex';
-                }}
-              />
-              {/* Fallback icon (hidden by default) */}
-              <div className="hidden absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 flex-col items-center justify-center p-6 text-center">
-                <div className="mb-4 p-4 rounded-full bg-primary/10">
-                  <FileText className="h-12 w-12 text-primary" />
-                </div>
-                <div className="text-xs font-semibold text-gray-700 line-clamp-2">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
+      {CERTIFICATIONS.map((cert, index) => {
+        const Icon = cert.icon;
+        return (
+          <Reveal
+            key={cert.id}
+            id={cert.id}
+            index={index}
+            enhanced={mounted && !reduce}
+            onMouseEnter={() => setHoveredCert(index)}
+            onMouseLeave={() => setHoveredCert(null)}
+          >
+            {/* Certificate card — the card lifts, the scan never scales. */}
+            <motion.div
+              onPointerMove={handleSpotlight}
+              whileHover={reduce ? undefined : { y: -6 }}
+              transition={{ type: "spring", stiffness: 300, damping: 22, mass: 0.6 }}
+              className="spotlight-card relative h-full cursor-pointer rounded-2xl border border-stone-200 bg-white p-3 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10"
+            >
+              {/* Issuer seal — stamps down on reveal, and carries the certificate's mark. The
+                  press animation is driven by the wrapper's `.why-reveal-in` class (see
+                  globals.css), so it only ever runs on a card that actually revealed. */}
+              <span
+                className="cert-seal absolute -left-3 -top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white shadow-lg ring-4 ring-white"
+                style={mounted && !reduce ? { animationDelay: `${(index % 3) * 90 + 260}ms` } : undefined}
+                aria-hidden="true"
+              >
+                <Icon className="h-5 w-5" strokeWidth={2} />
+              </span>
+
+              {/* Paper sheet on a warm mat — object-contain keeps the whole certificate visible. */}
+              <div className="cert-sheet relative overflow-hidden rounded-xl bg-[#faf8f3] p-3">
+                {/* Fixed height rather than an aspect ratio: the scans vary between portrait and
+                    landscape, and object-contain inside a shared box keeps every card the same
+                    height whatever the source proportions. */}
+                <SmartImage
+                  src={cert.pdfUrl}
+                  alt={`${cert.title} — ${cert.description}`}
+                  objectFit="contain"
+                  sizes="(max-width: 768px) 92vw, (max-width: 1280px) 30vw, 380px"
+                  className="h-[420px] rounded-md bg-white md:h-[480px]"
+                />
+
+                {/* Enlarge affordance — visible at rest (a hover-only hint tells you to hover
+                    after you already have), strengthening on hover. */}
+                <span className="pointer-events-none absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-stone-900/60 px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 md:opacity-70 md:group-hover:opacity-100">
+                  <Maximize2 className="h-3 w-3" strokeWidth={2.5} />
+                  Enlarge
+                </span>
+              </div>
+
+              {/* Title + issuer */}
+              <div className="px-1.5 pb-1 pt-4">
+                <h3 className="font-display text-sm font-bold leading-snug text-stone-900 transition-colors duration-200 group-hover:text-primary">
                   {cert.title}
-                </div>
+                </h3>
+                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-stone-500">
+                  {cert.description}
+                </p>
+                {/* Red hairline wiping in left→right on hover. */}
+                <span aria-hidden="true" className="mt-3 block h-px w-full bg-stone-200">
+                  <span className="block h-px w-0 bg-primary transition-[width] duration-500 ease-out group-hover:w-full motion-reduce:transition-none" />
+                </span>
               </div>
+            </motion.div>
 
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
-                <div className="text-center text-white px-4">
-                  <p className="text-sm font-semibold">Hover to Enlarge</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Certificate Title Below */}
-            <div className="p-3 bg-white text-center">
-              <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
-                {cert.title}
-              </h3>
-            </div>
-          </div>
-
-          {/* Beautiful Tooltip with Image Preview */}
-          {hoveredCert === index && (
-            <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9999] pointer-events-auto animate-in fade-in zoom-in-95 duration-200">
-              <div className="relative bg-white rounded-2xl shadow-2xl border-4 border-primary/20 overflow-hidden w-[80vw] sm:w-[75vw] md:w-[300px] lg:w-[350px]">
-                {/* Tooltip Header */}
-                <div className="bg-gradient-to-r from-primary to-primary/80 px-3 py-3 md:px-6 md:py-4">
-                  <h3 className="text-base md:text-xl font-bold text-white text-center drop-shadow-lg">
-                    {cert.title}
-                  </h3>
-                </div>
-                {/* Image Preview */}
-                <div className="relative bg-gray-50 p-3 md:p-6">
-                  <div className="bg-white rounded-lg shadow-inner p-1 md:p-2">
-                    <img
-                      src={cert.pdfUrl}
-                      alt={cert.title}
-                      className="w-full h-auto max-h-[700px] object-contain rounded"
-                    />
+            {/* Image preview on hover */}
+            {hoveredCert === index && (
+              <div className="animate-in fade-in zoom-in-95 pointer-events-auto fixed left-1/2 top-1/2 z-[9999] -translate-x-1/2 -translate-y-1/2 duration-200">
+                <div className="relative w-[80vw] overflow-hidden rounded-2xl border-4 border-primary/20 bg-white shadow-2xl sm:w-[75vw] md:w-[300px] lg:w-[350px]">
+                  {/* Tooltip Header */}
+                  <div className="bg-gradient-to-r from-primary to-primary/80 px-3 py-3 md:px-6 md:py-4">
+                    <h3 className="text-center text-base font-bold text-white drop-shadow-lg md:text-xl">
+                      {cert.title}
+                    </h3>
                   </div>
-                  {/* View PDF/Certificate Button */}
-                  <div className="mt-4 flex justify-center">
-                    <a
-                      href={cert.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block px-3 py-2 md:px-5 md:py-2 bg-primary text-white font-semibold rounded shadow hover:bg-primary/90 transition-colors duration-200 border border-primary"
-                    >
-                      View Certificate
-                    </a>
+                  {/* Image Preview */}
+                  <div className="relative bg-gray-50 p-3 md:p-6">
+                    <div className="rounded-lg bg-white p-1 shadow-inner md:p-2">
+                      <img
+                        src={cert.pdfUrl}
+                        alt={cert.title}
+                        className="h-auto max-h-[700px] w-full rounded object-contain"
+                      />
+                    </div>
+                    {/* View PDF/Certificate Button */}
+                    <div className="mt-4 flex justify-center">
+                      <a
+                        href={cert.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block rounded border border-primary bg-primary px-3 py-2 font-semibold text-white shadow transition-colors duration-200 hover:bg-primary/90 md:px-5 md:py-2"
+                      >
+                        View Certificate
+                      </a>
+                    </div>
                   </div>
-                </div>
-                {/* Tooltip Footer */}
-                <div className="bg-gradient-to-b from-gray-50 to-gray-100 px-3 py-3 md:px-6 md:py-4 text-center border-t border-gray-200">
-                  <p className="text-sm text-gray-700 font-medium">
-                    {cert.description}
-                  </p>
-                </div>
+                  {/* Tooltip Footer */}
+                  <div className="border-t border-gray-200 bg-gradient-to-b from-gray-50 to-gray-100 px-3 py-3 text-center md:px-6 md:py-4">
+                    <p className="text-sm font-medium text-gray-700">{cert.description}</p>
+                  </div>
 
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-bl-full"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-tr-full"></div>
+                  {/* Decorative Elements */}
+                  <div className="absolute right-0 top-0 h-32 w-32 rounded-bl-full bg-primary/10"></div>
+                  <div className="absolute bottom-0 left-0 h-24 w-24 rounded-tr-full bg-primary/5"></div>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      ))}
+            )}
+          </Reveal>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * Per-card scroll reveal. One observer per card rather than one for the whole grid: the grid is
+ * nine cards tall, so a single grid-level threshold either fires long before the lower cards are
+ * anywhere near the viewport (desktop) or never reliably fires at all (mobile, where the grid is
+ * several screens deep). `once: true` also means a revealed card never hides again on scroll-back.
+ *
+ * Progressive enhancement: with no `enhanced` class the card renders fully visible, so crawlers
+ * and no-JS users always see it.
+ */
+function Reveal({
+  id,
+  index,
+  enhanced,
+  onMouseEnter,
+  onMouseLeave,
+  children,
+}: {
+  id: string;
+  index: number;
+  enhanced: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { amount: 0.2, once: true });
+  const revealClass = !enhanced ? "" : inView ? "why-reveal why-reveal-in" : "why-reveal";
+  // Stagger across the 3-up row so each row cascades left→right instead of the whole grid
+  // counting up to a half-second delay.
+  const delay = (index % 3) * 90;
+
+  // scroll-mt clears the sticky header when a card is reached via its #anchor from the About Us
+  // certification chips.
+  return (
+    <div
+      ref={ref}
+      id={id}
+      className={`group relative scroll-mt-36 ${revealClass}`}
+      style={enhanced ? { transitionDelay: `${delay}ms` } : undefined}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {children}
     </div>
   );
 }

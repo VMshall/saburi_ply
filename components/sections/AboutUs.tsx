@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { Check, ShieldCheck, BadgeCheck } from "lucide-react";
 import { SmartImage } from "@/components/SmartImage";
 import { ProofBar } from "@/components/sections/ProofBar";
+import { certChipHref } from "@/data/certifications";
 
 export function AboutUs() {
   const achievements = [
@@ -196,14 +198,18 @@ export function AboutUs() {
                         {group.label}
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2">
+                        {/* Each chip deep-links to its certificate on /about/accreditation (chips
+                            with no scanned certificate land on the page itself) — the proof was
+                            already published, it just wasn't reachable from here. */}
                         {group.items.map((chip) => (
-                          <span
+                          <Link
                             key={chip}
-                            className="inline-flex items-center gap-1.5 rounded-full border-2 border-stone-300 bg-white px-3.5 py-1.5 text-sm font-semibold text-stone-800 transition-colors hover:border-primary/50 hover:text-stone-900"
+                            href={certChipHref(chip)}
+                            className="tap-target inline-flex items-center gap-1.5 rounded-full border-2 border-stone-300 bg-white px-3.5 py-1.5 text-sm font-semibold text-stone-800 transition-colors hover:border-primary/50 hover:text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                           >
                             <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2.25} />
                             {chip}
-                          </span>
+                          </Link>
                         ))}
                       </div>
                     </div>

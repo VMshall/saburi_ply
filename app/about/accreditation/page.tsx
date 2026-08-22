@@ -5,6 +5,7 @@ import { buildPageMetadata } from "@/lib/seo";
 import { FaqSection } from "@/components/FaqSection";
 import { getAboutFaqs } from "@/lib/faqs";
 import { AccreditationGrid } from "@/components/islands/AccreditationGrid";
+import { CERT_ISSUERS } from "@/data/certifications";
 
 export const dynamic = "force-static";
 export const metadata: Metadata = buildPageMetadata({
@@ -20,15 +21,36 @@ export default function Accreditation() {
       <PageHeader bannerImage={STATIC_BANNERS["/about/accreditation"]} />
 
       {/* Introduction Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-left lg:text-center max-w-6xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+      <section className="bg-white py-16 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-12 max-w-3xl text-left lg:mb-16 lg:text-center">
+            <span className="inline-flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              <span className="h-px w-7 bg-primary" />
+              Certifications &amp; Compliance
+            </span>
+            <h2 className="font-display mt-4 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
               Certifications
             </h2>
-            <p className="text-md lg:text-lg text-gray-600">
+            <p className="mt-4 text-base leading-relaxed text-stone-600 lg:text-lg">
               Our manufacturing excellence is backed by nationally recognized standards and certifications. Strict quality controls, advanced testing processes, and compliance with industry benchmarks ensure our plywood consistently delivers durability, safety, and performance across residential, commercial, and industrial applications.
             </p>
+          </div>
+
+          {/* Standards / issuing bodies — the authority marks buyers scan for before reading prose. */}
+          <div className="mb-12 border-y border-stone-200 py-6 lg:mb-16">
+            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-stone-400">
+              Standards &amp; Issuing Bodies
+            </p>
+            <ul className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 sm:gap-x-10">
+              {CERT_ISSUERS.map((issuer) => (
+                <li
+                  key={issuer}
+                  className="font-display text-base font-bold uppercase tracking-[0.12em] text-stone-400 transition-colors duration-200 hover:text-stone-700 sm:text-lg"
+                >
+                  {issuer}
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Certifications Grid with Image Tooltip on Hover */}

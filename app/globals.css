@@ -310,3 +310,48 @@
     display: none;
   }
 }
+
+/* Certificate cards (/about/accreditation). The scan is presented as a sheet of paper resting on a
+   warm mat — object-contain, never cropped, so the seal and certificate number stay readable. Only
+   the CARD lifts on hover; the raster itself is never scaled, which would make scanned type
+   shimmer. Glow + scroll reveal are the shared .spotlight-card / .why-reveal primitives above. */
+.cert-sheet {
+  box-shadow:
+    0 1px 2px hsl(20 14% 11% / 0.07),
+    0 10px 24px -14px hsl(20 14% 11% / 0.3);
+}
+
+/* Wax-seal press — the issuer mark stamps down onto the card as it reveals, overshooting past its
+   resting size and settling. Keyed off the card's reveal wrapper (.why-reveal / .why-reveal-in),
+   which AccreditationGrid only applies after mount: with no wrapper class the seal renders fully
+   visible, so crawlers and no-JS users never lose it. */
+@keyframes seal-press {
+  0% {
+    opacity: 0;
+    transform: scale(1.5) rotate(-14deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.93) rotate(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+.why-reveal .cert-seal {
+  opacity: 0;
+  transform: scale(1.5) rotate(-14deg);
+}
+.why-reveal-in .cert-seal {
+  animation: seal-press 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-reveal .cert-seal,
+  .why-reveal-in .cert-seal {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
