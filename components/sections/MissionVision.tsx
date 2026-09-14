@@ -41,7 +41,7 @@ export function Mission({
               ))}
             </ul>
           </div>
-          <div className="relative rounded-2xl overflow-hidden shadow-lg max-w-lg">
+          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg max-w-lg">
             <SmartImage src={imageSrc} alt={imageAlt} fill objectFit="cover" sizes="(max-width: 1024px) 100vw, 50vw" className="h-full w-full" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
@@ -68,7 +68,7 @@ export function Vision({
     <section className="py-12 sm:py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 items-center gap-10">
-          <div className="relative rounded-2xl overflow-hidden shadow-lg max-w-lg">
+          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg max-w-lg">
             <SmartImage src={imageSrc} alt={imageAlt} fill objectFit="cover" sizes="(max-width: 1024px) 100vw, 50vw" className="h-full w-full" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>

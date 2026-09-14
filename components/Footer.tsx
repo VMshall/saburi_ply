@@ -218,6 +218,44 @@ export function Footer() {
     };
   }, [isWhatsAppOpen]);
 
+  /**
+   * The floating buttons are viewport-fixed, so on a narrow screen they sit on top of whatever
+   * occupies the bottom-right corner — body copy, a card value, the odd control. No layout can
+   * reserve a permanent gutter for them, so instead they retract while the reader is scrolling
+   * DOWN and return the moment they scroll up, settle near the top, or open one of the panels.
+   * (Material's FAB behaviour.) They render visible on the server, so with JS off nothing is lost.
+   */
+  const [fabRetracted, setFabRetracted] = useState(false);
+
+  useEffect(() => {
+    let last = window.scrollY;
+    let frame = 0;
+    const sync = () => {
+      frame = 0;
+      const y = window.scrollY;
+      const delta = y - last;
+      // Ignore jitter and iOS rubber-banding; only a deliberate move flips the state.
+      if (Math.abs(delta) < 6) return;
+      setFabRetracted(y > 160 && delta > 0);
+      last = y;
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(sync);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  // An open panel must never slide away under the reader's finger.
+  const fabHidden = fabRetracted && !isWhatsAppOpen && !isMobileQuoteOpen;
+  // 13rem clears the taller of the two stacks (quote button sits at bottom-24 on sm).
+  const fabMotion = `transition-[transform,opacity] duration-300 motion-reduce:transition-none ${
+    fabHidden ? "pointer-events-none translate-y-[13rem] opacity-0" : "translate-y-0 opacity-100"
+  }`;
+
   const quickLinks: FooterLink[] = [
     { name: "Home", href: "/" },
     { name: "About Us", href: "/about" },
@@ -475,19 +513,25 @@ export function Footer() {
             </div>
             <div>
               <div className="flex space-x-3">
-                <form onSubmit={handleNewsletterSubscribe} className="flex space-x-3 flex-1">
+                <form onSubmit={handleNewsletterSubscribe} className="flex flex-1 flex-col gap-3 sm:flex-row">
+                  {/* min-w-0: a flex item defaults to `min-width: auto`, and an <input> resolves
+                      that to its intrinsic ~20-character width, so this row could not shrink and
+                      pushed the page 42px wider than a 320px viewport (masked sitewide by
+                      `body { overflow-x: hidden }`). Below sm the field and button stack, which
+                      keeps the field usable rather than squeezing it to ~150px. */}
                   <input
                     type="email"
+                    aria-label="Email address"
                     placeholder="Enter your email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+                    className="w-full min-w-0 flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
                     disabled={isSubscribing}
                   />
                   <button
                     type="submit"
                     disabled={isSubscribing}
-                    className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
+                    className="shrink-0 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
                   >
                     {isSubscribing ? "Subscribing..." : "Subscribe"}
                   </button>
@@ -534,7 +578,7 @@ export function Footer() {
       </div>
 
       {/* Floating Quote Button - Mobile Only → MobileQuoteForm (restored P5) */}
-      <div className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-[60] lg:hidden">
+      <div className={`fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-[60] lg:hidden ${fabMotion}`}>
         <button
           type="button"
           onClick={() => setIsMobileQuoteOpen(true)}
@@ -545,7 +589,10 @@ export function Footer() {
         </button>
       </div>
 
-      <div ref={whatsAppWrapperRef} className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60]">
+      <div
+        ref={whatsAppWrapperRef}
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60] ${fabMotion}`}
+      >
         {isWhatsAppOpen && (
           <div className="absolute bottom-16 right-0 sm:bottom-[72px] w-[280px] sm:w-[320px] rounded-2xl border border-gray-200 bg-white shadow-2xl overflow-hidden">
             <div className="p-4">

@@ -10,31 +10,31 @@
   */
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --foreground: 20 14% 11%; /* warm charcoal, not pure black */
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 20 14% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover-foreground: 20 14% 11%;
 
-    --primary: 0 84% 55%;
+    --primary: 0 84% 55%; /* Saburi brand red — unchanged */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 34 20% 94%; /* warm neutral */
+    --secondary-foreground: 20 14% 11%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 34 20% 94%;
+    --muted-foreground: 25 8% 40%; /* warm grey for secondary text */
 
     --accent: 0 84% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 10 76% 47%; /* distinct error hue — brand red no longer == error */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 95%;
+    --border: 30 15% 88%; /* warm hairline */
+    --input: 30 15% 90%;
     --ring: 0 84% 50%;
 
     --radius: 0.5rem;
@@ -131,11 +131,30 @@
   .animate-press { animation: press-pulse 3.5s ease-in-out infinite; }
   .doodle-grid { background-image: radial-gradient(hsl(var(--primary) / 0.15) 1px, transparent 1.5px); background-size: 18px 18px; }
 
+  /* Red underline-wipe for product links (Our Plywood Range). Grows left→right on card hover/focus.
+     Pure CSS (no JS) and never hides the link text — the wipe is a background layer only. */
+  .link-underline {
+    background-image: linear-gradient(hsl(var(--primary)), hsl(var(--primary)));
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 2px;
+    transition: background-size 0.3s ease;
+  }
+  .group:hover .link-underline,
+  .link-underline:focus-visible { background-size: 100% 2px; }
+  @media (prefers-reduced-motion: reduce) { .link-underline { transition: none; } }
+
   /* Single orchestrated page-load reveal (used by the category hero). CSS-only so content is never
      hidden from crawlers or no-JS users — the animation just plays once and settles visible. */
   @keyframes fade-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
   .animate-fade-up { animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
   @media (prefers-reduced-motion: reduce) { .animate-fade-up { animation: none; } }
+
+  /* Hero slide-tab progress bar — the active tab's red fill grows left→right over the slide's
+     display duration (matches the 5s auto-advance timer), then the carousel advances. */
+  @keyframes hero-tab-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  .animate-hero-tab-progress { transform-origin: left center; animation: hero-tab-progress 5000ms linear both; }
+  @media (prefers-reduced-motion: reduce) { .animate-hero-tab-progress { animation: none; transform: scaleX(1); } }
 
   /* Custom Scrollbar Styles for Timeline */
   .scrollbar-hide::-webkit-scrollbar {
@@ -173,4 +192,173 @@
   display: block;
   max-width: 100%;
   overflow-x: auto;
+}
+
+/* Touch tap-target floor (iOS HIG 44px). Gated on `pointer: coarse` rather than a width
+   breakpoint — target size follows the input device, not the viewport, so a 768px-wide tablet
+   needs it just as much as a phone while a narrow desktop window does not. Mirrors the
+   `(hover: hover) and (pointer: fine)` gating used by the spotlight primitive below. */
+@media (pointer: coarse) {
+  .tap-target {
+    min-height: 44px;
+  }
+}
+
+/* Edge fade for the /blog category rail while it still scrolls horizontally (below md, where the
+   pills don't yet wrap). Applied as a mask on the scroller itself: an absolutely-positioned
+   overlay would be laid out against the scrollable content — so it would scroll out of view — and
+   would also paint over the last pill's focus ring. `data-fade` is set only while there is more
+   to scroll to, so the fade disappears at the end of the rail. */
+@media (max-width: 767px) {
+  .pill-scroller[data-fade="right"] {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+  }
+}
+
+/* Cursor spotlight primitive — shared by "Why Choose Saburiply?" (.why-card) and the
+   "What Our Clients Say" cards (.spotlight-card). A red radial glow tracks --spot-x/--spot-y.
+   Progressive enhancement: cards are fully visible without JS, fine-pointer only, and every
+   motion is disabled under prefers-reduced-motion. */
+/* Lift content above the ::before glow.
+   `:not(.absolute)` matters: Tailwind's `.absolute` has the same specificity as `.why-card > *`
+   and loses on source order (utilities are emitted at the top of this file), so without the
+   exclusion this rule silently overrides `position: absolute` on positioned children and drops
+   them back into normal flow. That is what pushed the accreditation card's seal into the layout
+   and collapsed its trigger button to 0×0, and it still applies to the Testimonials quote mark.
+   Positioned children need no z-index here — they already paint above the z-0 ::before. */
+.why-card > *:not(.absolute),
+.spotlight-card > *:not(.absolute) {
+  position: relative;
+  z-index: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .why-card::before,
+  .spotlight-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background: radial-gradient(300px circle at var(--spot-x, 50%) var(--spot-y, 50%), hsl(var(--primary) / 0.1), transparent 45%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .why-card:hover::before,
+  .spotlight-card:hover::before {
+    opacity: 1;
+  }
+}
+
+.why-reveal {
+  opacity: 0;
+  transform: translateY(44px) scale(0.94);
+}
+.why-reveal-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  /* ease-out-back overshoot → the cards "pop" past their resting spot and settle: far more
+     noticeable than a plain fade-up. */
+  transition: opacity 0.5s ease-out, transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Softer sibling of .why-reveal for dense stacked rows (the FAQ accordion): a gentle rise + fade,
+   no scale and no overshoot — the 44px "pop" tuned for feature cards is too heavy on a long list. */
+.faq-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.faq-reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease-out, transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-card::before,
+  .spotlight-card::before {
+    display: none;
+  }
+  .why-reveal,
+  .why-reveal-in,
+  .faq-reveal,
+  .faq-reveal-in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* "Our Product Gallery" expanding panels — cursor gloss sheen (evokes a polished panel surface).
+   A white highlight (not the red used on .why-card) reads as a finish on photographic tiles.
+   Progressive enhancement: only with a fine pointer, and disabled under prefers-reduced-motion. */
+@media (hover: hover) and (pointer: fine) {
+  .gallery-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    border-radius: inherit;
+    background: radial-gradient(240px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(255, 255, 255, 0.28), transparent 55%);
+    mix-blend-mode: soft-light;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  .gallery-panel:hover::after {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-panel::after {
+    display: none;
+  }
+}
+
+/* Certificate cards (/about/accreditation). The scan is presented as a sheet of paper resting on a
+   warm mat — object-contain, never cropped, so the seal and certificate number stay readable. Only
+   the CARD lifts on hover; the raster itself is never scaled, which would make scanned type
+   shimmer. Glow + scroll reveal are the shared .spotlight-card / .why-reveal primitives above. */
+.cert-sheet {
+  box-shadow:
+    0 1px 2px hsl(20 14% 11% / 0.07),
+    0 10px 24px -14px hsl(20 14% 11% / 0.3);
+}
+
+/* Wax-seal press — the issuer mark stamps down onto the card as it reveals, overshooting past its
+   resting size and settling. Keyed off the card's reveal wrapper (.why-reveal / .why-reveal-in),
+   which AccreditationGrid only applies after mount: with no wrapper class the seal renders fully
+   visible, so crawlers and no-JS users never lose it. */
+@keyframes seal-press {
+  0% {
+    opacity: 0;
+    transform: scale(1.5) rotate(-14deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.93) rotate(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+.why-reveal .cert-seal {
+  opacity: 0;
+  transform: scale(1.5) rotate(-14deg);
+}
+.why-reveal-in .cert-seal {
+  animation: seal-press 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-reveal .cert-seal,
+  .why-reveal-in .cert-seal {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
 }

@@ -1,13 +1,64 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, type PointerEvent as ReactPointerEvent } from "react";
 import { ChevronLeft, ChevronRight, Star, Quote, Building, Users, Play } from "lucide-react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useReducedMotion, animate } from "framer-motion";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { RateOnGoogle } from "@/components/RateOnGoogle";
 
 export function Testimonials() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const reduce = useReducedMotion();
+
+  // Featured-quote 3D tilt — pointer position (normalised 0..1) → capped rotation, spring-smoothed.
+  const px = useMotionValue(0.5);
+  const py = useMotionValue(0.5);
+  const rotateX = useSpring(useTransform(py, [0, 1], [6, -6]), { stiffness: 200, damping: 20 });
+  const rotateY = useSpring(useTransform(px, [0, 1], [-6, 6]), { stiffness: 200, damping: 20 });
+
+  // Story-style auto-advance: a linear 0→1 progress drives both the ring fill and the slide change.
+  const progress = useMotionValue(0);
+  const advanceRef = useRef<ReturnType<typeof animate> | null>(null);
+  const hoveredRef = useRef(false);
+
+  // Spotlight only (metric tiles) — writes the CSS vars consumed by .spotlight-card::before.
+  const handleSpotlight = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--spot-x", `${e.clientX - r.left}px`);
+    el.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
+  }, []);
+
+  // Spotlight + tilt (featured quote card).
+  const handleCardPointer = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (e.pointerType !== "mouse") return;
+      const el = e.currentTarget;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--spot-x", `${e.clientX - r.left}px`);
+      el.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
+      px.set((e.clientX - r.left) / r.width);
+      py.set((e.clientY - r.top) / r.height);
+    },
+    [px, py]
+  );
+
+  const resetTilt = useCallback(() => {
+    px.set(0.5);
+    py.set(0.5);
+  }, [px, py]);
+
+  const pauseAdvance = useCallback(() => {
+    hoveredRef.current = true;
+    advanceRef.current?.pause();
+  }, []);
+  const resumeAdvance = useCallback(() => {
+    hoveredRef.current = false;
+    advanceRef.current?.play();
+  }, []);
 
   // Video carousel setup with autoplay
   const [emblaRef, emblaApi] = useEmblaCarousel(
@@ -73,106 +124,164 @@ export function Testimonials() {
     { id: 7, title: "Customer Success Story with SABURI", videoId: "V2yCwNMzCu0", name: "Valued Customer", location: "Karnataka" },
   ];
 
+  // Auto-advance the written testimonial. Reduced motion → plain timer, no ring; otherwise a 15s
+  // linear tween fills the progress ring and advances on complete. Re-runs (and resets) per slide,
+  // so manual navigation restarts the countdown; pauses while the card is hovered.
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 15000);
-    return () => clearInterval(timer);
-  }, []);
+    if (reduce) {
+      const t = setInterval(() => {
+        setDirection(1);
+        setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+      }, 15000);
+      return () => clearInterval(t);
+    }
+    progress.set(0);
+    const controls = animate(progress, 1, {
+      duration: 15,
+      ease: "linear",
+      onComplete: () => {
+        setDirection(1);
+        setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+      },
+    });
+    if (hoveredRef.current) controls.pause();
+    advanceRef.current = controls;
+    return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTestimonial, reduce]);
 
-  const nextTestimonial = () => setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-  const prevTestimonial = () => setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  const nextTestimonial = () => {
+    setDirection(1);
+    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+  };
+  const prevTestimonial = () => {
+    setDirection(-1);
+    setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+  const goToTestimonial = (index: number) => {
+    setDirection(index >= currentTestimonial ? 1 : -1);
+    setCurrentTestimonial(index);
+  };
 
   const current = testimonials[currentTestimonial];
 
   return (
-    <section id="testimonials" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+    <section id="testimonials" className="py-12 sm:py-16 lg:py-20 bg-muted/40">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="text-left lg:text-center mb-8 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-3 lg:mb-4">What Our <span className="text-primary">Clients Say</span></h2>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto ps-0 lg:px-4">Our clients trust Saburi Ply for unmatched quality, timely delivery, and enduring performance.</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-3 lg:mb-4">What Our <span className="text-primary">Clients Say</span></h2>
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto ps-0 lg:px-4">Our clients trust Saburi Ply for unmatched quality, timely delivery, and enduring performance.</p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 lg:gap-12 items-start">
-          <div className="space-y-4 lg:space-y-8 order-3 lg:order-1">
-            <div className="text-center bg-white rounded-lg p-4 lg:p-6 shadow-sm">
-              <Building className="h-6 w-6 lg:h-8 lg:w-8 text-primary mx-auto mb-1 lg:mb-2" />
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-black">1 Lakh+</div>
-              <div className="text-xs sm:text-sm text-gray-600">Satisfied Customers</div>
-            </div>
-            <div className="text-center bg-white rounded-lg p-4 lg:p-6 shadow-sm">
-              <Users className="h-6 w-6 lg:h-8 lg:w-8 text-primary mx-auto mb-1 lg:mb-2" />
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-black">500+</div>
-              <div className="text-xs sm:text-sm text-gray-600">Business Partners</div>
-            </div>
-            <div className="text-center bg-white rounded-lg p-4 lg:p-6 shadow-sm">
-              <Star className="h-6 w-6 lg:h-8 lg:w-8 text-primary mx-auto mb-1 lg:mb-2" />
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-black">4.7/5</div>
-              <div className="text-xs sm:text-sm text-gray-600">Google Rating</div>
-            </div>
+        {/* Metrics strip — uniform row of three tiles */}
+        <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-10">
+          <div onPointerMove={handleSpotlight} className="spotlight-card bg-white rounded-lg px-3 py-4 lg:px-6 lg:py-5 shadow-sm flex flex-col items-center text-center">
+            <Building className="h-6 w-6 lg:h-8 lg:w-8 text-primary mb-1 lg:mb-2" />
+            <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-foreground">1 Lakh+</div>
+            <div className="text-[11px] leading-tight sm:text-sm text-muted-foreground">Satisfied Customers</div>
           </div>
+          <div onPointerMove={handleSpotlight} className="spotlight-card bg-white rounded-lg px-3 py-4 lg:px-6 lg:py-5 shadow-sm flex flex-col items-center text-center">
+            <Users className="h-6 w-6 lg:h-8 lg:w-8 text-primary mb-1 lg:mb-2" />
+            <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-foreground">500+</div>
+            <div className="text-[11px] leading-tight sm:text-sm text-muted-foreground">Business Partners</div>
+          </div>
+          <div onPointerMove={handleSpotlight} className="spotlight-card bg-white rounded-lg px-3 py-4 lg:px-6 lg:py-5 shadow-sm flex flex-col items-center text-center">
+            <Star className="h-6 w-6 lg:h-8 lg:w-8 text-primary mb-1 lg:mb-2" />
+            <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-foreground">4.7/5</div>
+            <div className="text-[11px] leading-tight sm:text-sm text-muted-foreground">Google Rating</div>
+          </div>
+        </div>
 
-          <div className="relative order-1 lg:order-2">
-            <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 relative">
-              <Quote className="h-8 w-8 lg:h-12 lg:w-12 text-primary/20 absolute top-3 right-3 lg:top-4 lg:right-4" />
-              <div className="flex items-center space-x-1 mb-4">
-                {[...Array(current.rating)].map((_, index) => (
-                  <Star key={index} className="h-5 w-5 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-700 leading-relaxed mb-4 lg:mb-6">"{current.content}"</p>
-              <div className="border-t pt-3 lg:pt-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <div className="flex-1">
-                    <h4 className="text-sm lg:text-base font-semibold text-black">{current.name}</h4>
-                    {/* <p className="text-xs lg:text-sm text-gray-600">{current.position}</p> */}
-                    {/* <p className="text-xs lg:text-sm text-primary font-medium">{current.company}</p> */}
-                    <p className="text-xs text-gray-500">{current.location}</p>
+        {/* Featured hero quote + height-matched list, bottom-aligned */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+          <motion.div
+            className="spotlight-card bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 relative flex h-full flex-col lg:min-h-[360px]"
+            style={reduce ? undefined : { rotateX, rotateY, transformPerspective: 900 }}
+            onPointerMove={reduce ? undefined : handleCardPointer}
+            onPointerEnter={pauseAdvance}
+            onPointerLeave={() => {
+              resetTilt();
+              resumeAdvance();
+            }}
+          >
+            <Quote className="h-8 w-8 lg:h-12 lg:w-12 text-primary/20 absolute top-3 right-3 lg:top-4 lg:right-4 z-10" />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={currentTestimonial}
+                className="flex flex-1 flex-col"
+                initial={reduce ? false : { opacity: 0, x: direction * 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={reduce ? { opacity: 0 } : { opacity: 0, x: direction * -40 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="flex flex-1 flex-col justify-center">
+                  <div className="flex items-center space-x-1 mb-4">
+                    {[...Array(current.rating)].map((_, index) => (
+                      <Star key={index} className="h-5 w-5 text-yellow-400 fill-current" />
+                    ))}
                   </div>
-                  {/* <div className="text-left sm:text-right">
-                    <div className="text-xs lg:text-sm font-medium text-primary">{current.projectValue}</div>
-                    <div className="text-xs text-gray-500">Project Value</div>
-                    <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full mt-1 inline-block">{current.category}</div>
-                  </div> */}
+                  <p className="text-base sm:text-lg lg:text-xl text-foreground/80 leading-relaxed">"{current.content}"</p>
                 </div>
-              </div>
-            </div>
-            <div className="flex items-center justify-center space-x-3 lg:space-x-4 mt-4 lg:mt-6">
-              <button onClick={prevTestimonial} className="w-10 h-10 bg-white shadow-md rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors">
-                <ChevronLeft className="h-5 w-5 text-gray-600" />
-              </button>
-              <div className="flex space-x-2">
-                {testimonials.map((_, index) => (
-                  <button key={index} onClick={() => setCurrentTestimonial(index)} className={`w-3 h-3 rounded-full transition-colors ${index === currentTestimonial ? "bg-primary" : "bg-gray-300"}`} />
-                ))}
-              </div>
-              <button onClick={nextTestimonial} className="w-10 h-10 bg-white shadow-md rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors">
-                <ChevronRight className="h-5 w-5 text-gray-600" />
-              </button>
-            </div>
-          </div>
+                <div className="border-t pt-3 lg:pt-4 mt-4 lg:mt-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="flex-1">
+                      <h4 className="text-sm lg:text-base font-semibold text-foreground">{current.name}</h4>
+                      <p className="text-xs text-muted-foreground">{current.location}</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
 
-          <div className="space-y-3 lg:space-y-4 order-2 lg:order-3 hidden lg:block">
+          {/* Height-matched list — three equal cards spanning the featured card's height */}
+          <div className="hidden lg:grid grid-rows-3 gap-4 h-full">
             {testimonials.filter((_, index) => index !== currentTestimonial).slice(0, 3).map((testimonial) => (
-              <div key={testimonial.id} onClick={() => setCurrentTestimonial(testimonials.findIndex((t) => t.id === testimonial.id))} className="bg-white rounded-lg p-3 lg:p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow touch-manipulation">
+              <div key={testimonial.id} onClick={() => goToTestimonial(testimonials.findIndex((t) => t.id === testimonial.id))} className="bg-white rounded-lg p-4 lg:p-5 shadow-sm cursor-pointer hover:shadow-md transition-shadow flex flex-col justify-center">
                 <div className="flex items-center space-x-1 mb-2">
                   {[...Array(testimonial.rating)].map((_, starIndex) => (
-                    <Star key={starIndex} className="h-3 w-3 text-yellow-400 fill-current" />
+                    <Star key={starIndex} className="h-4 w-4 text-yellow-400 fill-current" />
                   ))}
                 </div>
-                <p className="text-sm text-gray-700 line-clamp-2 mb-2">"{testimonial.content.substring(0, 100)}..."</p>
-                <div className="text-xs"><span className="font-medium text-black">{testimonial.name}</span><span className="text-gray-500"> - {testimonial.company}</span></div>
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">"{testimonial.content.substring(0, 120)}..."</p>
+                <div className="text-xs"><span className="font-medium text-foreground">{testimonial.name}</span><span className="text-muted-foreground"> - {testimonial.company}</span></div>
               </div>
             ))}
           </div>
         </div>
 
-
+        {/* Carousel controls — centered under the block, drives the featured quote */}
+        <div className="flex items-center justify-center space-x-3 lg:space-x-4 mt-6 lg:mt-8">
+          <button onClick={prevTestimonial} aria-label="Previous testimonial" className="w-10 h-10 bg-white shadow-md rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors">
+            <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+          </button>
+          <div className="flex items-center space-x-2">
+            {testimonials.map((_, index) => {
+              const isActive = index === currentTestimonial;
+              if (isActive && !reduce) {
+                return (
+                  <button key={index} onClick={() => goToTestimonial(index)} aria-label={`Go to testimonial ${index + 1}`} className="relative w-5 h-5 flex items-center justify-center">
+                    <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+                    <svg className="absolute inset-0 h-5 w-5 -rotate-90" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <motion.circle cx="10" cy="10" r="8" stroke="hsl(var(--primary))" strokeWidth="1.5" strokeLinecap="round" style={{ pathLength: progress }} />
+                    </svg>
+                  </button>
+                );
+              }
+              return (
+                <button key={index} onClick={() => goToTestimonial(index)} aria-label={`Go to testimonial ${index + 1}`} className={`w-2.5 h-2.5 rounded-full transition-colors ${isActive ? "bg-primary" : "bg-gray-300 hover:bg-gray-400"}`} />
+              );
+            })}
+          </div>
+          <button onClick={nextTestimonial} aria-label="Next testimonial" className="w-10 h-10 bg-white shadow-md rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors">
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </button>
+        </div>
 
         <div className="mt-8 lg:mt-16 text-center">
           <div className="bg-white rounded-lg p-6 lg:p-8 shadow-sm">
-            <h6 className="text-xl lg:text-2xl font-bold text-black mb-3 lg:mb-4">Join Our Satisfied Customers</h6>
-            <p className="text-sm lg:text-base text-gray-600 mb-4 lg:mb-6 max-w-2xl mx-auto px-4">Experience the same quality and service that our customers rave about. Get your personalized quote today and see the difference.</p>
+            <h6 className="text-xl lg:text-2xl font-bold text-foreground mb-3 lg:mb-4">Join Our Satisfied Customers</h6>
+            <p className="text-sm lg:text-base text-muted-foreground mb-4 lg:mb-6 max-w-2xl mx-auto px-4">Experience the same quality and service that our customers rave about. Get your personalized quote today and see the difference.</p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <button className="bg-primary hover:bg-primary/90 text-white px-6 lg:px-8 py-3 rounded-lg font-medium transition-colors touch-manipulation w-full sm:w-auto" onClick={() => document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" })}>Get Your Quote Now</button>
@@ -248,15 +357,15 @@ export function Testimonials() {
 
                               {/* Text Content - Left Aligned */}
                               <div className="flex-1 min-w-0 text-left">
-                                <h4 className="text-base lg:text-lg font-bold text-primary mb-2 leading-snug line-clamp-2 group-hover:text-primary/95 transition-colors text-left">
+                                <h4 className="text-base lg:text-lg font-bold text-foreground mb-2 leading-snug line-clamp-2 group-hover:text-primary transition-colors text-left">
                                   {video.title}
                                 </h4>
                                 <div className="space-y-1 text-left">
-                                  <p className="text-sm font-semibold text-primary/95 flex items-center gap-1.5">
+                                  <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
                                     <span className="w-1.5 h-1.5 bg-primary/70 rounded-full" />
                                     {video.name}
                                   </p>
-                                  <p className="text-xs text-primary/80 pl-3">{video.location}</p>
+                                  <p className="text-xs text-muted-foreground pl-3">{video.location}</p>
                                 </div>
                               </div>
                             </div>
@@ -276,7 +385,7 @@ export function Testimonials() {
                     onClick={scrollPrevVideo}
                     className="w-10 h-10 lg:w-12 lg:h-12 bg-white shadow-md rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors"
                   >
-                    <ChevronLeft className="h-5 w-5 lg:h-6 lg:w-6 text-gray-600" />
+                    <ChevronLeft className="h-5 w-5 lg:h-6 lg:w-6 text-muted-foreground" />
                   </button>
                   <div className="flex space-x-2">
                     {videoTestimonials.map((_, index) => (
@@ -293,7 +402,7 @@ export function Testimonials() {
                     onClick={scrollNextVideo}
                     className="w-10 h-10 lg:w-12 lg:h-12 bg-white shadow-md rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors"
                   >
-                    <ChevronRight className="h-5 w-5 lg:h-6 lg:w-6 text-gray-600" />
+                    <ChevronRight className="h-5 w-5 lg:h-6 lg:w-6 text-muted-foreground" />
                   </button>
                 </div>
               </div>

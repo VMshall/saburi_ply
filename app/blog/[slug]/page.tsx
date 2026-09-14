@@ -82,7 +82,13 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           {post.title}
         </h1>
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500">
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-gray-500">
+          <Link
+            href={`/blog?category=${post.category}`}
+            className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary hover:bg-primary/15"
+          >
+            {post.categoryLabel}
+          </Link>
           <span>{post.author}</span>
           {dateLabel && (
             <>
@@ -90,6 +96,8 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               <time dateTime={post.date}>{dateLabel}</time>
             </>
           )}
+          <span aria-hidden="true">·</span>
+          <span>{post.readingTime} min read</span>
         </div>
 
         {post.image &&

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, type PointerEvent as ReactPointerEvent } from "react";
 import { Sprout, Shield, Flame, Award, Truck, Clock, Microchip, Network, Bot, Target, Globe } from "lucide-react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import useEmblaCarousel from "embla-carousel-react";
 
 export function WhyChooseUs() {
@@ -42,6 +43,30 @@ export function WhyChooseUs() {
       emblaApi.off("init", onInit);
     };
   }, [emblaApi]);
+
+  // --- Desktop-grid enhancements: spotlight (1), spring hover (2), scroll reveal (6) ---
+  const reduce = useReducedMotion();
+  const gridRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(gridRef, { amount: 0.2 });
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Effect 1 — cursor-tracked spotlight. Write CSS vars directly so pointer moves never
+  // trigger a React re-render; skip non-mouse pointers (touch/pen get no glow).
+  const handleSpotlight = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--spot-x", `${e.clientX - r.left}px`);
+    el.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
+  }, []);
+
+  // Effect 6 — JS-gated scroll reveal. Cards render fully visible on the server and stay
+  // visible if JS never runs (SSG/crawler-safe); the hidden→visible transition only kicks
+  // in after mount, staggered per card, and replays each time the grid re-enters the viewport.
+  const revealClass = !mounted || reduce ? "" : inView ? "why-reveal why-reveal-in" : "why-reveal";
+  const revealStyle = (i: number) =>
+    !mounted || reduce ? undefined : { transitionDelay: `${i * 90}ms` };
 
   const benefits = [
     { icon: Shield, title: "Assured Quality", description: "Precision-controlled manufacturing ensures every sheet meets global quality standards for strength and stability.", highlight: "100% Quality Assured" },
@@ -106,23 +131,30 @@ export function WhyChooseUs() {
         </div>
 
         {/* Desktop Grid (hidden on mobile/tablet, visible on lg+) */}
-        <div className="hidden lg:grid grid-cols-4 gap-8">
+        <div ref={gridRef} className="hidden lg:grid grid-cols-4 gap-8">
           {benefits.map((benefit, index) => {
             const IconComponent = benefit.icon;
             return (
-              <div key={index} className="group bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center transition-colors">
-                      <IconComponent className="h-6 w-6 text-primary" />
+              <div key={index} className={`h-full ${revealClass}`} style={revealStyle(index)}>
+                <motion.div
+                  onPointerMove={handleSpotlight}
+                  whileHover={reduce ? undefined : { y: -6 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 22, mass: 0.6 }}
+                  className="group why-card relative overflow-hidden h-full bg-white border border-gray-200 rounded-lg p-6 transition-[border-color,box-shadow] duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center transition-colors duration-300 group-hover:bg-primary">
+                        <IconComponent className="h-6 w-6 text-primary transition-colors duration-300 group-hover:text-white" />
+                      </div>
+                      <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">{benefit.highlight}</span>
                     </div>
-                    <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">{benefit.highlight}</span>
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold text-black transition-colors duration-300 group-hover:text-primary">{benefit.title}</h3>
+                      <p className="text-gray-700 text-sm leading-relaxed">{benefit.description}</p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-black transition-colors">{benefit.title}</h3>
-                    <p className="text-gray-700 text-sm leading-relaxed">{benefit.description}</p>
-                  </div>
-                </div>
+                </motion.div>
               </div>
             );
           })}

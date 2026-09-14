@@ -44,7 +44,7 @@ export default function SaburiClubHPlus() {
   const images = [
     {
       id: 1,
-      src: "/images/plywood-product/Club H+.webp",
+      src: "/images/plywood-product/Club H Plus.webp",
       alt: "Saburi Club H+ product board",
     },
   ];

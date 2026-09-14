@@ -50,7 +50,7 @@ export default function SaburiPerennialBlockboard() {
         },
         {
             id: 3,
-            src: "/images/wpcpvc-product/pvc/SABURI-HD+-SMART-PANELS-SABURI-HD+-SMART-PANELS-Saburi-hd-+-Smart-Panels.webp",
+            src: "/images/wpcpvc-product/pvc/SABURI-HD-PLUS-SMART-PANELS.webp",
             alt: "Saburi Perennial – details and markings",
         },
     ];

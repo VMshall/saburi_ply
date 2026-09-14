@@ -7,6 +7,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/jsonld";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { Bricolage_Grotesque } from "next/font/google";
 
 /**
@@ -53,7 +54,7 @@ export const metadata: Metadata = {
     url: "/",
     images: [
       {
-        url: "/images/saburi.jpg",
+        url: DEFAULT_OG_IMAGE,
         width: 1200,
         height: 630,
         alt: "Saburi Ply - Leading Plywood Manufacturer",
@@ -67,15 +68,18 @@ export const metadata: Metadata = {
       "Best Plywood Manufacturer and Supplier in India | Saburi Ply",
     description:
       "Saburi Ply is the best plywood manufacturer and supplier in India, offering premium plywood, block boards, and decorative panels for homes and commercial use.",
-    images: ["/images/saburi.jpg"],
+    images: [DEFAULT_OG_IMAGE],
   },
+  // Icons stay on the square logo — the OG banner is 1.9:1 and would be cropped to nothing.
+  // The mark is transparent so it reads on light and dark tab strips alike; Apple is the
+  // one exception (iOS flattens alpha onto black) and keeps its white plate.
   icons: {
     icon: [
-      { url: "/favicon.ico" },
-      { url: "/images/saburi.jpg", sizes: "32x32", type: "image/png" },
-      { url: "/images/saburi.jpg", sizes: "16x16", type: "image/png" },
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48 64x64" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/images/saburi.jpg", sizes: "180x180" }],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   verification: {
     google: "RG3h7TIZcIqePcuNQWtPHtRhy0WULgbbduENvwOVmTY",
