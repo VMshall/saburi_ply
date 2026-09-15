@@ -1,58 +1,145 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getSupabase } from "@/lib/supabase";
+import { sendNotification, type FormType } from "@/lib/email";
 
 /**
- * Same-origin form proxy (§8). The browser POSTs to /api/forms/<endpoint>; this handler
- * forwards verbatim to the external apiv2 backend and passes the upstream status + body
- * straight back, so client success/error handling (response.ok, result.success,
- * data.error.message) is unchanged. The backend (apiv2.saburiply.com) is OUT OF SCOPE and
- * untouched — its origin is never shipped to the client and there is no CORS to widen.
+ * Form handler (§8, reworked): the browser POSTs to /api/forms/<endpoint>; this handler
+ * writes the submission to Supabase and sends the admin + user email notifications
+ * (replacing the old apiv2 backend). Response shape is unchanged for the client:
+ * { success, message, data } on 2xx, { error: { message } } on failure.
  *
- * Node runtime (not edge) so a plain fetch to the external origin works without extra config.
+ * Node runtime (nodemailer + pg driver need Node APIs). Never statically optimised.
  */
 export const runtime = "nodejs";
-// Body is forwarded as-is; no static optimization of this route.
 export const dynamic = "force-dynamic";
 
-// Server-only env (no NEXT_PUBLIC_). Fallback to the known apiv2 URLs so local/preview works
-// out of the box; override per environment in Vercel.
-const API_BASE = process.env.API_BASE_URL ?? "https://apiv2.saburiply.com/api/web/v1";
-const API_ADMIN_BASE = process.env.API_ADMIN_BASE_URL ?? "https://apiv2.saburiply.com/api/admin";
-
-// Allow-list: endpoint → upstream base. (subscribers lives under the admin API; the rest under web/v1.)
-const UPSTREAM: Record<string, string> = {
-  "contact-us": API_BASE,
-  quote: API_BASE,
-  enquiry: API_BASE,
-  "become-partner": API_BASE,
-  "save-data": API_BASE,
-  subscribers: API_ADMIN_BASE,
+type EndpointConfig = {
+  table: string;
+  fields: string[]; // allow-listed columns copied from the payload
+  required: string[]; // must be present & non-empty
+  notify?: FormType; // send admin+user emails (omit = store only)
+  upsertOn?: string; // upsert conflict target (subscribers)
+  defaults?: Record<string, unknown>;
 };
 
+const CONFIG: Record<string, EndpointConfig> = {
+  "contact-us": {
+    table: "contact_us",
+    fields: ["name", "email", "phone_number", "state", "message"],
+    required: ["name", "email", "phone_number", "state", "message"],
+    notify: "contact",
+  },
+  quote: {
+    table: "quotes",
+    fields: [
+      "name",
+      "email",
+      "phone_number",
+      "company_name",
+      "inquiry_type",
+      "product_type",
+      "estimated_qty",
+      "additional_requirements",
+    ],
+    required: ["name", "phone_number", "inquiry_type"],
+    notify: "quote",
+  },
+  enquiry: {
+    table: "enquiries",
+    fields: ["name", "email", "phone_number", "state", "city", "product", "message"],
+    required: ["name", "phone_number", "state", "product"],
+    notify: "enquiry",
+  },
+  "become-partner": {
+    table: "become_partner",
+    fields: [
+      "name",
+      "firm_name",
+      "city",
+      "contact_number",
+      "email",
+      "project_type",
+      "message",
+      "partner_type",
+    ],
+    required: ["name", "firm_name", "city", "contact_number", "project_type", "message", "partner_type"],
+    notify: "partner",
+  },
+  "save-data": {
+    table: "save_data",
+    fields: ["name", "email", "phone_number"],
+    required: ["name"],
+  },
+  subscribers: {
+    table: "subscribers",
+    fields: ["email"],
+    required: ["email"],
+    upsertOn: "email",
+    defaults: { status: "active" },
+  },
+};
+
+function pick(body: Record<string, unknown>, fields: string[]): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const f of fields) {
+    const v = body[f];
+    if (v !== undefined && v !== null && String(v).trim() !== "") out[f] = v;
+  }
+  return out;
+}
+
 export async function POST(req: NextRequest, { params }: { params: { endpoint: string } }) {
-  const base = UPSTREAM[params.endpoint];
-  if (!base) {
+  const cfg = CONFIG[params.endpoint];
+  if (!cfg) {
     return NextResponse.json({ error: { message: "Unknown form endpoint" } }, { status: 404 });
   }
 
-  const body = await req.text(); // forward the raw payload unchanged
+  let body: Record<string, unknown>;
   try {
-    const upstream = await fetch(`${base}/${params.endpoint}`, {
-      method: "POST",
-      headers: { "Content-Type": req.headers.get("content-type") ?? "application/json" },
-      body,
-    });
-    const text = await upstream.text();
-    return new NextResponse(text, {
-      status: upstream.status,
-      headers: {
-        "Content-Type": upstream.headers.get("content-type") ?? "application/json",
-      },
-    });
+    body = (await req.json()) as Record<string, unknown>;
   } catch {
+    return NextResponse.json({ error: { message: "Invalid request body" } }, { status: 400 });
+  }
+
+  const row = { ...cfg.defaults, ...pick(body, cfg.fields) };
+
+  const missing = cfg.required.filter((f) => !(f in row));
+  if (missing.length) {
     return NextResponse.json(
-      { error: { message: "Upstream request failed. Please try again." } },
-      { status: 502 },
+      { error: { message: `Missing required field(s): ${missing.join(", ")}` } },
+      { status: 400 },
     );
   }
+
+  // Persist to Supabase
+  try {
+    const supabase = getSupabase();
+
+    if (cfg.upsertOn) {
+      const { error } = await supabase
+        .from(cfg.table)
+        .upsert(row, { onConflict: cfg.upsertOn, ignoreDuplicates: true });
+      if (error) throw error;
+    } else {
+      const { error } = await supabase.from(cfg.table).insert(row);
+      if (error) throw error;
+    }
+  } catch (err) {
+    console.error(`[forms] DB write failed for ${params.endpoint}:`, err);
+    return NextResponse.json(
+      { error: { message: "Could not save your submission. Please try again." } },
+      { status: 500 },
+    );
+  }
+
+  // Email notifications (awaited so they run before the serverless fn freezes; never throws)
+  if (cfg.notify) {
+    await sendNotification(cfg.notify, row);
+  }
+
+  return NextResponse.json(
+    { success: true, message: "Submitted successfully", data: row },
+    { status: 201 },
+  );
 }
