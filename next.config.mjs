@@ -190,8 +190,11 @@ const nextConfig = {
       // URL instead of its own subdomain. It's already behind its own login, and already
       // excluded from crawling by robots.ts's "/admin/" disallow above.
       // Exact-path rule must come first, or bare /admin (no trailing path) won't match.
-      { source: "/admin", destination: "https://saburi-dashboard.vercel.app" },
-      { source: "/admin/:path*", destination: "https://saburi-dashboard.vercel.app/:path*" },
+      // The dashboard app itself has basePath: "/admin" set (so ITS OWN links/redirects, e.g.
+      // signing in, come out correctly prefixed) - meaning its bare root now 404s, so the
+      // destination below has to carry /admin too, not just the source.
+      { source: "/admin", destination: "https://saburi-dashboard.vercel.app/admin" },
+      { source: "/admin/:path*", destination: "https://saburi-dashboard.vercel.app/admin/:path*" },
     ];
   },
 };
