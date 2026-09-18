@@ -5,8 +5,9 @@
  * - redirects(): full legacy 301 map — in-app <Navigate> (App.jsx) + nginx .php/slug
  *   (root `saburiply.com`). §5. All emit statusCode 301 to byte-match the historical
  *   301s for crawlers/SEO tools (Next's `permanent:true` would emit 308).
- * - NO rewrites(): the blog is now in-app (P8 — WordPress retired); /blog and /blog/<slug>
- *   are SSG App Router routes, not a passthrough.
+ * - NO rewrites() for the blog: it's now in-app (P8 — WordPress retired); /blog and /blog/<slug>
+ *   are SSG App Router routes, not a passthrough. rewrites() below is unrelated — it's a proxy
+ *   to a separate internal admin app (see that function's own comment) — /blog is untouched.
  * - skipTrailingSlashRedirect: Next's automatic slash redirect stays DISABLED; middleware.ts
  *   owns the slash policy for ALL app routes (now including /blog — its matcher no longer
  *   excludes it), strip-redirecting any trailing slash to the canonical slash-less form. The
@@ -177,8 +178,22 @@ const nextConfig = {
     ];
   },
 
-  // No rewrites(): /blog and /blog/* are now in-app SSG routes (P8 — WordPress retired). The former
-  // WP passthrough (and WP_ORIGIN_HOST) is gone.
+  // Still true for the blog specifically: /blog and /blog/* are in-app SSG routes (P8 —
+  // WordPress retired), and the former WP passthrough (WP_ORIGIN_HOST) is gone. The
+  // rewrites() below is a different, narrow case — see its own comment.
+  async rewrites() {
+    return [
+      // /admin proxies to the internal ops dashboard — a separate, independently deployed
+      // Next.js app (own repo, own secrets, own Vercel project) that reads the website's
+      // Supabase form-submission tables read-only. This keeps that app fully isolated (a
+      // build or bug here can't affect it, and vice versa) while giving it a saburiply.com
+      // URL instead of its own subdomain. It's already behind its own login, and already
+      // excluded from crawling by robots.ts's "/admin/" disallow above.
+      // Exact-path rule must come first, or bare /admin (no trailing path) won't match.
+      { source: "/admin", destination: "https://saburi-dashboard.vercel.app" },
+      { source: "/admin/:path*", destination: "https://saburi-dashboard.vercel.app/:path*" },
+    ];
+  },
 };
 
 export default nextConfig;
